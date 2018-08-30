@@ -1,0 +1,4 @@
+spring:
+  profiles.include: h2
+  main:
+    web-environment: false

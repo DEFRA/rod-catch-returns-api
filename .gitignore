@@ -1,0 +1,9 @@
+**/application.pid
+**/target/*
+**/.idea
+**/*.iml
+**/.apt_generated/
+/.settings/
+.project
+.classpath
+**/log/*.log

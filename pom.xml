@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.github.DEFRA.data-returns-api-platform</groupId>
+        <artifactId>api-parent</artifactId>
+        <version>6e4dae31c4653991ac74d774ae9e698e8df3794c</version>
+    </parent>
+
+    <groupId>uk.gov.defra.datareturns</groupId>
+    <artifactId>rcr_api</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Defra RCR API</name>
+    <description>Defra RCR API</description>
+
+    <properties>
+        <spring-boot-plugin.jmx.port>9003</spring-boot-plugin.jmx.port>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.DEFRA.data-returns-api-platform</groupId>
+            <artifactId>api-common</artifactId>
+            <version>6e4dae31c4653991ac74d774ae9e698e8df3794c</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.DEFRA.data-returns-api-platform</groupId>
+            <artifactId>api-common</artifactId>
+            <version>6e4dae31c4653991ac74d774ae9e698e8df3794c</version>
+            <type>test-jar</type>
+            <classifier>testcommons</classifier>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sql-maven-plugin</artifactId>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>${postgresql.version}</version>
+                    </dependency>
+                </dependencies>
+
+                <!-- common configuration shared by all executions -->
+                <configuration>
+                    <driver>${db.rcr_api.driver}</driver>
+                    <url>${db.rcr_api.url}</url>
+                    <username>${db.rcr_api.username}</username>
+                    <password>${db.rcr_api.password}</password>
+                    <autocommit>true</autocommit>
+                    <enableFiltering>true</enableFiltering>
+                </configuration>
+
+                <executions>
+                    <!-- This command can be executed using mvn sql:execute@drop-connections -->
+                    <execution>
+                        <id>drop-connections</id>
+                        <configuration>
+                            <url>${db.rcr_api.mgt.url}</url>
+                            <srcFiles>
+                                <srcFile>${project.build.outputDirectory}/db/sql/1-drop-connections.sql</srcFile>
+                            </srcFiles>
+                        </configuration>
+                    </execution>
+                    <!-- This command can be executed using mvn sql:execute@drop-database -->
+                    <execution>
+                        <id>drop-database</id>
+                        <configuration>
+                            <url>${db.rcr_api.mgt.url}</url>
+                            <srcFiles>
+                                <srcFile>${project.build.outputDirectory}/db/sql/2-drop-database.sql</srcFile>
+                            </srcFiles>
+                        </configuration>
+                    </execution>
+                    <!-- This command can be executed using mvn sql:execute@create-database -->
+                    <execution>
+                        <id>create-database</id>
+                        <configuration>
+                            <url>${db.rcr_api.mgt.url}</url>
+                            <srcFiles>
+                                <srcFile>${project.build.outputDirectory}/db/sql/3-create-database.sql</srcFile>
+                            </srcFiles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <configuration>
+                    <url>${db.rcr_api.url}</url>
+                    <driver>${db.rcr_api.driver}</driver>
+                    <url>${db.rcr_api.url}</url>
+                    <defaultSchemaName>${db.rcr_api.schema}</defaultSchemaName>
+                    <username>${db.rcr_api.username}</username>
+                    <password>${db.rcr_api.password}</password>
+                    <referenceUrl>hibernate:spring:uk.gov.defra.datareturns.data.model?dialect=${db.rcr_api.dialect}&amp;hibernate.implicit_naming_strategy=uk.gov.defra.datareturns.persistence.DataReturnsImplicitNamingStrategy&amp;hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy</referenceUrl>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.github.DEFRA.data-returns-api-platform</groupId>
+                        <artifactId>api-common</artifactId>
+                        <version>6e4dae31c4653991ac74d774ae9e698e8df3794c</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+
+    </build>
+</project>

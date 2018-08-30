@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+    <property name="now" value="now()"/>
+
+    <!--
+    ****************************************************************
+    Envers audit revision info
+    ****************************************************************
+    -->
+
+    <changeSet id="create-table: revinfo" author="Defra">
+        <createSequence sequenceName="revision_generator" startValue="1"/>
+        <createTable tableName="revinfo">
+            <column name="rev" type="integer" defaultValueSequenceNext="revision_generator">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="revtstmp" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="revinfo"/>
+            <dropSequence sequenceName="revision_generator"/>
+        </rollback>
+    </changeSet>
+
+    <!--
+    ****************************************************************
+    Reference Data - Rivers
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_river" author="Defra">
+        <createSequence sequenceName="rcr_river_id_seq" startValue="1"/>
+
+        <createTable tableName="rcr_river">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_river_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="name" constraintName="uniq_river_name" tableName="rcr_river"/>
+
+        <rollback>
+            <dropTable tableName="rcr_river"/>
+            <dropSequence sequenceName="rcr_river_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_river_aud" author="Defra">
+        <createTable tableName="rcr_river_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_river_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_river_aud"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="load-table: rcr_river" author="Defra">
+        <loadData file="db/data/rivers.csv"
+                  tableName="rcr_river">
+            <column name="name" type="string" header="name"/>
+            <column name="created" type="date" header="created"/>
+            <column name="last_modified" type="date" header="last_modified"/>
+            <column name="version" type="numeric" header="version"/>
+        </loadData>
+    </changeSet>
+
+
+
+    <!--
+    ****************************************************************
+    Reference Data - Methods (Fly, Spinner, Bait)
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_method" author="Defra">
+        <createSequence sequenceName="rcr_method_id_seq" startValue="1"/>
+
+        <createTable tableName="rcr_method">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_method_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="name" constraintName="uniq_method_name" tableName="rcr_method"/>
+
+        <rollback>
+            <dropTable tableName="rcr_method"/>
+            <dropSequence sequenceName="rcr_method_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_method_aud" author="Defra">
+        <createTable tableName="rcr_method_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_method_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_method_aud"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="load-table: rcr_method" author="Defra">
+        <loadData file="db/data/methods.csv"
+                  tableName="rcr_method">
+            <column name="name" type="string" header="name"/>
+            <column name="created" type="date" header="created"/>
+            <column name="last_modified" type="date" header="last_modified"/>
+            <column name="version" type="numeric" header="version"/>
+        </loadData>
+    </changeSet>
+
+
+    <!--
+    ****************************************************************
+    Reference Data - Species (Salmon, Sea Trout)
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_species" author="Defra">
+        <createSequence sequenceName="rcr_species_id_seq" startValue="1"/>
+
+        <createTable tableName="rcr_species">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_species_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="name" constraintName="uniq_species_name" tableName="rcr_species"/>
+
+        <rollback>
+            <dropTable tableName="rcr_species"/>
+            <dropSequence sequenceName="rcr_species_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_species_aud" author="Defra">
+        <createTable tableName="rcr_species_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_species_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_species_aud"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="load-table: rcr_species" author="Defra">
+        <loadData file="db/data/species.csv"
+                  tableName="rcr_species">
+            <column name="name" type="string" header="name"/>
+            <column name="created" type="date" header="created"/>
+            <column name="last_modified" type="date" header="last_modified"/>
+            <column name="version" type="numeric" header="version"/>
+        </loadData>
+    </changeSet>
+
+    <!--
+    ****************************************************************
+    Submissions
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_submission" author="Defra">
+        <createSequence sequenceName="rcr_submission_id_seq" startValue="1"/>
+
+        <createTable tableName="rcr_submission">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_submission_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="contact_id" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="season_ending" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="contact_id, season_ending" constraintName="uniq_contact_id_and_year" tableName="rcr_submission"/>
+
+        <rollback>
+            <dropTable tableName="rcr_submission"/>
+            <dropSequence sequenceName="rcr_submission_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_submission_aud" author="Defra">
+        <createTable tableName="rcr_submission_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_id" type="varchar"/>
+            <column name="season_ending" type="smallint"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_submission_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_submission_aud"/>
+        </rollback>
+    </changeSet>
+
+    <!--
+    ****************************************************************
+    Catches
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_activity" author="Defra">
+        <createSequence sequenceName="rcr_activity_id_seq" startValue="1"/>
+
+        <createTable tableName="rcr_activity">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_activity_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="submission_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_activity__submission"
+                             references="rcr_submission(id)"/>
+            </column>
+            <column name="river_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_activity__river"
+                             references="rcr_river(id)"/>
+            </column>
+            <column name="days" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="rcr_activity"/>
+            <dropSequence sequenceName="rcr_activity_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_activity_aud" author="Defra">
+        <createTable tableName="rcr_activity_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submission_id" type="bigint"/>
+            <column name="river_id" type="bigint"/>
+            <column name="days" type="smallint"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_activity_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_activity_aud"/>
+        </rollback>
+    </changeSet>
+
+    <!--
+    ****************************************************************
+    Catches
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_catch" author="Defra">
+        <createSequence sequenceName="rcr_catch_id_seq" startValue="1"/>
+
+        <createTable tableName="rcr_catch">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_catch_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="submission_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_catch__submission"
+                             references="rcr_submission(id)"/>
+            </column>
+            <column name="river_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_catch__river"
+                             references="rcr_river(id)"/>
+            </column>
+            <column name="date_caught" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="species_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_catch__species"
+                             references="rcr_species(id)"/>
+            </column>
+            <column name="mass_type" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mass_kg" type="numeric(30, 15)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="mass_oz" type="numeric(30, 15)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="method_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_catch__method"
+                             references="rcr_method(id)"/>
+            </column>
+            <column name="released" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="rcr_catch"/>
+            <dropSequence sequenceName="rcr_catch_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_catch_aud" author="Defra">
+        <createTable tableName="rcr_catch_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submission_id" type="bigint"/>
+            <column name="river_id" type="bigint"/>
+            <column name="date_caught" type="date"/>
+            <column name="species_id" type="bigint"/>
+            <column name="mass_type" type="varchar(10)"/>
+            <column name="mass_kg" type="numeric(30, 15)"/>
+            <column name="mass_oz" type="numeric(30, 15)"/>
+            <column name="method_id" type="bigint"/>
+            <column name="released" type="boolean"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_catch_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_catch_aud"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

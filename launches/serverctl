@@ -1,0 +1,97 @@
+#!/bin/bash
+###############################################################################
+#
+#   API server control script, for use in development environment only.
+#
+###############################################################################
+#######################################################################
+
+# Args, error message, exit code
+function die_on() {
+    MSG="${1:-Unknown error}"
+    CODE="${2:-1}"
+    echo ${MSG}
+    print_usage
+    exit ${CODE}
+}
+
+# Usage helper
+function print_usage() {
+    echo "Usage:"
+    echo "serverctl [--quiet|-q] [--port=1234|-p=4567] [*run|start|stop] <spring run arguments>"
+    echo "e.g.:"
+    echo "  serverctl -q -p=9020 start --spring.profiles.active=h2"
+}
+
+# Parse command line arguments
+NON_FLAGS=()
+for i in "$@"
+do
+    if [ ${#NON_FLAGS[@]} != 0 ] ; then
+        # We've already found something that wasn't a flag (such as the api name, or the run|start|stop action), count everything as a non-flag
+        NON_FLAGS+=("$1")
+        shift
+    else
+        # We haven't hit a non-flag yet, parse command line arguments to this script
+        case ${i} in
+            -q|--quiet)
+                QUIET=" > /dev/null 2>&1"
+                shift
+            ;;
+            -p=*|--port=*)
+                PORT="${i#*=}"
+                shift # past port=value
+            ;;
+            -D*)
+                MVN_ARGS+=("$1")
+                shift
+            ;;
+            -*|--*)
+                echo "Unrecognised option $i"
+                print_usage
+                exit 666
+            ;;
+            *)
+                # Something that wasn't a flag, store for later and stop parsing arguments
+                NON_FLAGS+=("$1")
+                shift
+            ;;
+        esac
+    fi
+done
+
+# Restore any arguments that weren't flags
+set -- "${NON_FLAGS[@]}"
+
+# Location of this script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Action to take - start/stop/run - second non-flag argument
+ACTION="${1:-run}"
+# Spring boot run arguments (3rd non-flag argument onwards)
+RUN_ARGS="${@:2}"
+
+KNOWN_ACTIONS=('start','stop','run')
+
+# Project root folder (relative to script location)
+PROJECT_ROOT="$( cd "${SCRIPT_DIR}/../" ; pwd -P )"
+cd ${PROJECT_ROOT}
+
+
+if [[ ! " ${KNOWN_ACTIONS[*]} " == *"$ACTION"* ]] ; then
+    echo "Unrecognised action "${ACTION}", must be one of: ${KNOWN_ACTIONS}"
+    print_usage
+    exit 2
+fi
+
+if [ -n "${PORT}" ] && [ "${ACTION}" == "stop" ] ; then
+    echo "Port option (--port|-p) given but action was 'stop'.  Ignoring port argument."
+    unset PORT
+fi
+
+# If port option is not specified, or nothing is listening on the specified port, execute the command
+if [ ! -n "${PORT}" ] || ! nc -z localhost ${PORT} ; then
+    eval "${PROJECT_ROOT}/mvnw -Dcheckstyle.skip=true -Ddependency-check.skip=true -DskipTests=true -Drun.arguments="${RUN_ARGS}" ${MVN_ARGS} spring-boot:${ACTION} ${QUIET}"
+else
+    echo "Port ${PORT} already in use, skipping service startup."
+fi
