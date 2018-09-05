@@ -239,7 +239,7 @@
             <column name="contact_id" type="varchar">
                 <constraints nullable="false"/>
             </column>
-            <column name="season_ending" type="smallint">
+            <column name="season" type="smallint">
                 <constraints nullable="false"/>
             </column>
             <column name="created" type="timestamp">
@@ -253,7 +253,7 @@
             </column>
         </createTable>
 
-        <addUniqueConstraint columnNames="contact_id, season_ending" constraintName="uniq_contact_id_and_year" tableName="rcr_submission"/>
+        <addUniqueConstraint columnNames="contact_id, season" constraintName="uniq_contact_id_and_year" tableName="rcr_submission"/>
 
         <rollback>
             <dropTable tableName="rcr_submission"/>
@@ -273,7 +273,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="contact_id" type="varchar"/>
-            <column name="season_ending" type="smallint"/>
+            <column name="season" type="smallint"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_submission_aud" columnNames="id, rev"/>

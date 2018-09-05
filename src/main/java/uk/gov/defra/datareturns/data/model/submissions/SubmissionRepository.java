@@ -19,14 +19,14 @@ public interface SubmissionRepository extends BaseRepository<Submission, Long> {
     /**
      * Retrieve a submission by a given reporting reference and the year that it is applicable to
      *
-     * @param contactId    the reporting reference of the submission to lookup
-     * @param seasonEnding the year that the submission relates to
+     * @param contactId the reporting reference of the submission to lookup
+     * @param season    the year that the submission relates to
      * @return the {@link Submission} for the given reporting reference and year or null if not found.
      */
 
     @SuppressWarnings("unused")
-    List<Submission> getByContactIdAndSeasonEnding(@Param("contact_id") Long contactId,
-                                                   @Param("season_ending") Short seasonEnding);
+    List<Submission> getByContactIdAndSeason(@Param("contact_id") Long contactId,
+                                                   @Param("season") Short season);
 
     /**
      * Retrieve a list of {@link Submission}s for the given reporting reference
@@ -39,14 +39,16 @@ public interface SubmissionRepository extends BaseRepository<Submission, Long> {
     List<Submission> findByContactId(@Param("contact_id") Long contactId);
 
     /**
-     * Retrieve a list of {@link Submission}s for a set of reporting references for a given year
+     * Retrieve a list of {@link Submission}s for a set of contact ids for a given year
      *
-     * @return
+     * @param contactIds the contact ids of the submissions to lookup
+     * @param season     the year that the submission relates to
+     * @return list of {@link Submission}s for a set of contact ids for a given year
      */
     @SuppressWarnings("unused")
-    List<Submission> findByContactIdInAndSeasonEnding(@Param("contact_ids") Set<Long> contactIds,
-                                                        @Param("season_ending") Short seasonEnding);
+    List<Submission> findByContactIdInAndSeason(@Param("contact_ids") Set<Long> contactIds,
+                                                @Param("season") Short season);
 
     @SuppressWarnings("unused")
-    List<Submission> findBySeasonEnding(@Param("season_ending") Short seasonEnding);
+    List<Submission> findBySeason(@Param("season") Short season);
 }

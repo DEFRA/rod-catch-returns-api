@@ -28,7 +28,7 @@ public class SubmissionTests {
     public static Submission createValidSubmission() {
         final Submission sub = new Submission();
         sub.setContactId("123");
-        sub.setSeasonEnding(getYear(0));
+        sub.setSeason(getYear(0));
         return sub;
     }
 
@@ -45,7 +45,7 @@ public class SubmissionTests {
     @Test
     public void testSubmissionYear() {
         final Submission sub = createValidSubmission();
-        sub.setSeasonEnding(getYear(-1));
+        sub.setSeason(getYear(-1));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
         Assertions.assertThat(violations).isEmpty();
     }
@@ -53,7 +53,7 @@ public class SubmissionTests {
     @Test
     public void testSubmissionYearTwoYearsPriorFails() {
         final Submission sub = createValidSubmission();
-        sub.setSeasonEnding(getYear(-2));
+        sub.setSeason(getYear(-2));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
         Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SUBMISSION_YEAR_INVALID"));
     }
@@ -61,7 +61,7 @@ public class SubmissionTests {
     @Test
     public void testSubmissionYearInFutureFails() {
         final Submission sub = createValidSubmission();
-        sub.setSeasonEnding(getYear(1));
+        sub.setSeason(getYear(1));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
         Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SUBMISSION_YEAR_INVALID"));
     }

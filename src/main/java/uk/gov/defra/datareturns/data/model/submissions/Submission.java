@@ -29,7 +29,7 @@ import java.util.Set;
  */
 @Entity(name = "rcr_submission")
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "uniq_contact_id_and_year", columnNames = {"contactId", "seasonEnding"})
+        @UniqueConstraint(name = "uniq_contact_id_and_year", columnNames = {"contactId", "season"})
 })
 @GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
                   strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
@@ -52,7 +52,7 @@ public class Submission extends AbstractBaseEntity {
      * The season (year) pertaining to the submission
      */
     @Column(nullable = false)
-    private Short seasonEnding;
+    private Short season;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
     @RestResource(path = "activities", rel = "activities")

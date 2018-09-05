@@ -70,7 +70,7 @@ public class CatchValidator implements ConstraintValidator<ValidCatch, Catch> {
             return handleError(context, "CATCH_DATE_REQUIRED", b -> b.addPropertyNode("dateCaught"));
         }
         final int yearCaught = DateUtils.toCalendar(catchEntry.getDateCaught()).get(Calendar.YEAR);
-        if (yearCaught != catchEntry.getSubmission().getSeasonEnding().intValue()) {
+        if (yearCaught != catchEntry.getSubmission().getSeason().intValue()) {
             return handleError(context, "CATCH_YEAR_MISMATCH", b -> b.addPropertyNode("dateCaught"));
         }
         return true;

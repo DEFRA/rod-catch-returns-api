@@ -62,7 +62,7 @@ public class CatchTests {
     @Test
     public void testCatchWithDateMismatchToSubmissionFails() {
         final Catch cat = createValidCatch();
-        cat.getDateCaught().setYear(cat.getSubmission().getSeasonEnding() - 1);
+        cat.getDateCaught().setYear(cat.getSubmission().getSeason() - 1);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_YEAR_MISMATCH"));
     }

@@ -36,7 +36,7 @@ public class ActivityValidator implements ConstraintValidator<ValidActivity, Act
     }
 
     private boolean checkDays(final Activity activity, final ConstraintValidatorContext context) {
-        final int maxDays = activity.getSubmission().getSeasonEnding() % 4 == 0 ? 366 : 365;
+        final int maxDays = activity.getSubmission().getSeason() % 4 == 0 ? 366 : 365;
 
         if (activity.getDays() < 1) {
             return handleError(context, "ACTIVITY_DAYS_NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("days"));

@@ -39,10 +39,10 @@ public class SubmissionValidator implements ConstraintValidator<ValidSubmission,
     private boolean checkSubmissionYear(final Submission submission, final ConstraintValidatorContext context) {
         final int currentSubmissionYear = Calendar.getInstance().get(Calendar.YEAR);
         final int oldestAllowed = currentSubmissionYear - 1;
-        if (submission.getSeasonEnding() == null
-                || submission.getSeasonEnding() > currentSubmissionYear
-                || submission.getSeasonEnding() < oldestAllowed) {
-            return handleError(context, "SUBMISSION_YEAR_INVALID", b -> b.addPropertyNode("seasonEnding"));
+        if (submission.getSeason() == null
+                || submission.getSeason() > currentSubmissionYear
+                || submission.getSeason() < oldestAllowed) {
+            return handleError(context, "SUBMISSION_YEAR_INVALID", b -> b.addPropertyNode("season"));
         }
         return true;
     }
