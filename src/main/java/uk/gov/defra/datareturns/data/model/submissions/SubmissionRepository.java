@@ -5,6 +5,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import uk.gov.defra.datareturns.data.BaseRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -25,8 +26,8 @@ public interface SubmissionRepository extends BaseRepository<Submission, Long> {
      */
 
     @SuppressWarnings("unused")
-    List<Submission> getByContactIdAndSeason(@Param("contact_id") String contactId,
-                                             @Param("season") Short season);
+    Optional<Submission> getByContactIdAndSeason(@Param("contact_id") String contactId,
+                                                 @Param("season") Short season);
 
     /**
      * Retrieve a list of {@link Submission}s for the given reporting reference
