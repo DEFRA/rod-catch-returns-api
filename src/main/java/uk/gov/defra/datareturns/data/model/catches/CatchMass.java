@@ -3,6 +3,7 @@ package uk.gov.defra.datareturns.data.model.catches;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -19,6 +20,9 @@ import java.math.RoundingMode;
 @Getter
 @Setter
 public class CatchMass {
+    public static final int PRECISION = 12;
+    public static final int SCALE = 6;
+
     /**
      * Conversion factor to convert between kg/oz
      */
@@ -33,11 +37,13 @@ public class CatchMass {
     /**
      * The mass of the catch in metric kg
      */
+    @Column(precision = PRECISION, scale = SCALE)
     private BigDecimal kg;
 
     /**
      * The mass of the catch in imperial ounces
      */
+    @Column(precision = PRECISION, scale = SCALE)
     private BigDecimal oz;
 
     /**
@@ -48,9 +54,9 @@ public class CatchMass {
      */
     public void set(final MeasurementType measurementType, final BigDecimal mass) {
         this.type = measurementType;
-        if (MeasurementType.Imperial.equals(this.type)) {
+        if (MeasurementType.IMPERIAL.equals(this.type)) {
             this.oz = mass;
-        } else if (MeasurementType.Metric.equals(this.type)) {
+        } else if (MeasurementType.METRIC.equals(this.type)) {
             this.kg = mass;
         }
     }
@@ -60,11 +66,11 @@ public class CatchMass {
      */
     @PrePersist
     public void conciliateMass() {
-        if (MeasurementType.Imperial.equals(this.type)) {
+        if (MeasurementType.IMPERIAL.equals(this.type)) {
             // Populate the mass in kg from the imperial value
             this.kg = this.oz.multiply(CONVERSION);
-        } else if (MeasurementType.Metric.equals(this.type)) {
-            this.oz = this.kg.divide(CONVERSION, RoundingMode.HALF_UP);
+        } else if (MeasurementType.METRIC.equals(this.type)) {
+            this.oz = this.kg.divide(CONVERSION, SCALE, RoundingMode.HALF_UP);
         }
     }
 
@@ -73,12 +79,12 @@ public class CatchMass {
      */
     public enum MeasurementType {
         /**
-         * Metric measurement in kg
+         * METRIC measurement in kg
          */
-        Metric,
+        METRIC,
         /**
-         * Imperial measuremtn in oz
+         * IMPERIAL measuremtn in oz
          */
-        Imperial
+        IMPERIAL
     }
 }

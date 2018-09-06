@@ -78,7 +78,7 @@ public class CatchTests {
     @Test
     public void testCatchWithoutRiverDefinedInActivityFails() {
         final Catch cat = createValidCatch();
-        cat.getSubmission().setSubmissionActivities(new HashSet<>());
+        cat.getSubmission().setActivities(new HashSet<>());
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(1)
                 .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_RIVER_NOT_DEFINED_IN_ACTIVITIES"));
@@ -103,7 +103,7 @@ public class CatchTests {
     @Test
     public void testCatchBelowMinWeightFails() {
         final Catch cat = createValidCatch();
-        cat.getMass().set(CatchMass.MeasurementType.Metric, BigDecimal.valueOf(0.453591));
+        cat.getMass().set(CatchMass.MeasurementType.METRIC, BigDecimal.valueOf(0.453591));
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_BELOW_MINIMUM"));
     }
@@ -124,7 +124,7 @@ public class CatchTests {
 
     private Catch createValidCatch(final Submission submission, final River river, final int days) {
         final Activity activity = ActivityTests.createValidActivity(submission, river, days);
-        submission.setSubmissionActivities(Collections.singleton(activity));
+        submission.setActivities(Collections.singleton(activity));
 
         final Catch cat = new Catch();
         cat.setSubmission(submission);
@@ -132,7 +132,7 @@ public class CatchTests {
         cat.setDateCaught(new Date());
         cat.setSpecies(speciesRepository.getOne(RandomUtils.nextLong(1, speciesRepository.count())));
         cat.setMethod(methodRepository.getOne(RandomUtils.nextLong(1, methodRepository.count())));
-        cat.getMass().set(CatchMass.MeasurementType.Metric, BigDecimal.valueOf(0.98765432112));
+        cat.getMass().set(CatchMass.MeasurementType.METRIC, BigDecimal.valueOf(0.98765432112));
         cat.setReleased(false);
         return cat;
     }

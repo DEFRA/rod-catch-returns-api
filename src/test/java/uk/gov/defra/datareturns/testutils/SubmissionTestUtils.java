@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import javax.validation.ConstraintViolation;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static io.restassured.RestAssured.given;
@@ -30,6 +31,14 @@ public final class SubmissionTestUtils {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String fromJson(final String path, final Map<String, Object> templateValues) {
+        String json = fromJson(path);
+        for (Map.Entry<String, Object> entry : templateValues.entrySet()) {
+            json = json.replaceAll("%" + entry.getKey() + "%", String.valueOf(entry.getValue()));
+        }
+        return json;
     }
 
     public static void runSubmissionTest(final String submissionJson, final Consumer<ValidatableResponse> responseAssertions) {

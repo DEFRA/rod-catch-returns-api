@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.activities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -36,7 +35,6 @@ public class Activity extends AbstractBaseEntity {
      * The parent submission
      */
     @ManyToOne(optional = false)
-    @JsonBackReference
     private Submission submission;
 
     /**

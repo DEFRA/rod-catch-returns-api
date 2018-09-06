@@ -1,0 +1,7 @@
+{
+  "submission": "%SUBMISSION%",
+  "river": "%RIVER%",
+  "month": "%MONTH%",
+  "counts": [ %COUNTS_JSON% ],
+  "released": %RELEASED%
+}

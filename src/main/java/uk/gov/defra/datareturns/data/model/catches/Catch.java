@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.catches;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,7 +43,6 @@ public class Catch extends AbstractBaseEntity {
      * The parent submission
      */
     @ManyToOne(optional = false)
-    @JsonBackReference
     private Submission submission;
 
     /**

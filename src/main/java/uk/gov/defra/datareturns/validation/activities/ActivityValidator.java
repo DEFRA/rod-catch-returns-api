@@ -23,9 +23,17 @@ public class ActivityValidator implements ConstraintValidator<ValidActivity, Act
 
     @Override
     public boolean isValid(final Activity activity, final ConstraintValidatorContext context) {
-        boolean valid = checkRiver(activity, context);
+        boolean valid = checkSubmission(activity, context);
+        valid = checkRiver(activity, context) && valid;
         valid = checkDays(activity, context) && valid;
         return valid;
+    }
+
+    private boolean checkSubmission(final Activity activity, final ConstraintValidatorContext context) {
+        if (activity.getSubmission() == null) {
+            return handleError(context, "ACTIVITY_SUBMISSION_REQUIRED", b -> b.addPropertyNode("submission"));
+        }
+        return true;
     }
 
     private boolean checkRiver(final Activity activity, final ConstraintValidatorContext context) {
@@ -36,7 +44,7 @@ public class ActivityValidator implements ConstraintValidator<ValidActivity, Act
     }
 
     private boolean checkDays(final Activity activity, final ConstraintValidatorContext context) {
-        final int maxDays = activity.getSubmission().getSeason() % 4 == 0 ? 366 : 365;
+        final int maxDays = activity.getSubmission() != null && activity.getSubmission().getSeason() % 4 == 0 ? 366 : 365;
 
         if (activity.getDays() < 1) {
             return handleError(context, "ACTIVITY_DAYS_NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("days"));

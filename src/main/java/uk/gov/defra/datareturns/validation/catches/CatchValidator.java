@@ -3,16 +3,13 @@ package uk.gov.defra.datareturns.validation.catches;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
-import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.catches.Catch;
-import uk.gov.defra.datareturns.data.model.rivers.River;
+import uk.gov.defra.datareturns.validation.ValidationChecks;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.math.BigDecimal;
 import java.util.Calendar;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static uk.gov.defra.datareturns.validation.util.ValidationUtil.handleError;
 
@@ -35,7 +32,6 @@ public class CatchValidator implements ConstraintValidator<ValidCatch, Catch> {
     private static final BigDecimal MIN_FISH_MASS_KG = BigDecimal.valueOf(0.453592);
 
 
-
     @Override
     public void initialize(final ValidCatch constraintAnnotation) {
     }
@@ -54,13 +50,8 @@ public class CatchValidator implements ConstraintValidator<ValidCatch, Catch> {
         if (catchEntry.getRiver() == null) {
             return handleError(context, "CATCH_RIVER_REQUIRED", b -> b.addPropertyNode("river"));
         }
-        if (catchEntry.getSubmission() != null && catchEntry.getSubmission().getSubmissionActivities() != null) {
-            final Set<River> allowedRivers = catchEntry.getSubmission().getSubmissionActivities().stream()
-                    .map(Activity::getRiver).collect(Collectors.toSet());
-
-            if (!allowedRivers.contains(catchEntry.getRiver())) {
-                return handleError(context, "CATCH_RIVER_NOT_DEFINED_IN_ACTIVITIES", b -> b.addPropertyNode("river"));
-            }
+        if (!ValidationChecks.checkRiverDefinedInActivities(catchEntry.getSubmission(), catchEntry.getRiver())) {
+            return handleError(context, "CATCH_RIVER_NOT_DEFINED_IN_ACTIVITIES", b -> b.addPropertyNode("river"));
         }
         return true;
     }
@@ -84,6 +75,10 @@ public class CatchValidator implements ConstraintValidator<ValidCatch, Catch> {
     }
 
     private boolean checkMass(final Catch catchEntry, final ConstraintValidatorContext context) {
+        if (catchEntry.getMass().getType() == null) {
+            return handleError(context, "CATCH_MASS_TYPE_REQUIRED", b -> b.addPropertyNode("mass"));
+        }
+
         // Ensure that the mass has been conciliated before attempting to validate based on the metric value
         catchEntry.getMass().conciliateMass();
 

@@ -94,7 +94,6 @@
     </changeSet>
 
 
-
     <!--
     ****************************************************************
     Reference Data - Methods (Fly, Spinner, Bait)
@@ -379,10 +378,10 @@
             <column name="mass_type" type="varchar(10)">
                 <constraints nullable="false"/>
             </column>
-            <column name="mass_kg" type="numeric(30, 15)">
+            <column name="mass_kg" type="numeric(12, 6)">
                 <constraints nullable="true"/>
             </column>
-            <column name="mass_oz" type="numeric(30, 15)">
+            <column name="mass_oz" type="numeric(12, 6)">
                 <constraints nullable="true"/>
             </column>
             <column name="method_id" type="bigint">
@@ -426,8 +425,8 @@
             <column name="date_caught" type="date"/>
             <column name="species_id" type="bigint"/>
             <column name="mass_type" type="varchar(10)"/>
-            <column name="mass_kg" type="numeric(30, 15)"/>
-            <column name="mass_oz" type="numeric(30, 15)"/>
+            <column name="mass_kg" type="numeric(12, 6)"/>
+            <column name="mass_oz" type="numeric(12, 6)"/>
             <column name="method_id" type="bigint"/>
             <column name="released" type="boolean"/>
         </createTable>
@@ -437,4 +436,118 @@
             <dropTable tableName="rcr_catch_aud"/>
         </rollback>
     </changeSet>
+
+
+    <!--
+    ****************************************************************
+    Small catches
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_small_catch" author="Defra">
+        <createSequence sequenceName="rcr_small_catch_id_seq" startValue="1"/>
+
+        <createTable tableName="rcr_small_catch">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_small_catch_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="submission_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_small_catch__submission"
+                             references="rcr_submission(id)"/>
+            </column>
+            <column name="river_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_small_catch__river"
+                             references="rcr_river(id)"/>
+            </column>
+            <column name="month" type="varchar(9)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="released" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="rcr_small_catch"/>
+            <dropSequence sequenceName="rcr_small_catch_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_small_catch_aud" author="Defra">
+        <createTable tableName="rcr_small_catch_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submission_id" type="bigint"/>
+            <column name="river_id" type="bigint"/>
+            <column name="month" type="varchar(9)"/>
+            <column name="released" type="int"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_small_catch_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_small_catch_aud"/>
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="create-table: rcr_small_catch_counts" author="Defra">
+        <createTable tableName="rcr_small_catch_counts">
+            <column name="small_catch_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_small_catch_by_method__parent"
+                             references="rcr_small_catch(id)"/>
+            </column>
+            <column name="method_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_small_catch__method"
+                             references="rcr_method(id)"/>
+            </column>
+            <column name="setordinal" type="int"/>
+            <column name="count" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="rcr_small_catch_counts"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_small_catch_counts_aud" author="Defra">
+        <createTable tableName="rcr_small_catch_counts_aud">
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="original_id_revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="setordinal" type="int"/>
+            <column name="small_catch_id" type="bigint"/>
+            <column name="method_id" type="bigint"/>
+            <column name="count" type="int"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="rcr_small_catch_counts_aud"/>
+        </rollback>
+    </changeSet>
+
+
 </databaseChangeLog>

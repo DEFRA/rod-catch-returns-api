@@ -1,16 +1,14 @@
 package uk.gov.defra.datareturns.data.model.submissions;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
-import org.springframework.data.rest.core.annotation.RestResource;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.catches.Catch;
+import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatch;
 import uk.gov.defra.datareturns.validation.submission.ValidSubmission;
 
 import javax.persistence.CascadeType;
@@ -54,18 +52,24 @@ public class Submission extends AbstractBaseEntity {
     @Column(nullable = false)
     private Short season;
 
+    /**
+     * The activities recorded by the angler for the season (the time in days spent on each river)
+     */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
-    @RestResource(path = "activities", rel = "activities")
-    @JsonProperty(value = "activities")
-    @JsonManagedReference
     @Valid
-    private Set<Activity> submissionActivities;
+    private Set<Activity> activities;
 
+    /**
+     * The significant catches recorded by the angler for the season (fish species, rivers, mass, etc)
+     */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
-    @RestResource(path = "catches", rel = "catches")
-    @JsonProperty(value = "catches")
-    @JsonManagedReference
     @Valid
-    private Set<Catch> submissionCatches;
+    private Set<Catch> catches;
 
+    /**
+     * Small catches - summarised counts of catches by method, month and river
+     */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
+    @Valid
+    private Set<SmallCatch> smallCatches;
 }
