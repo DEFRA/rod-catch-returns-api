@@ -25,8 +25,8 @@ public interface SubmissionRepository extends BaseRepository<Submission, Long> {
      */
 
     @SuppressWarnings("unused")
-    List<Submission> getByContactIdAndSeason(@Param("contact_id") Long contactId,
-                                                   @Param("season") Short season);
+    List<Submission> getByContactIdAndSeason(@Param("contact_id") String contactId,
+                                             @Param("season") Short season);
 
     /**
      * Retrieve a list of {@link Submission}s for the given reporting reference
@@ -36,7 +36,7 @@ public interface SubmissionRepository extends BaseRepository<Submission, Long> {
      */
 
     @SuppressWarnings("unused")
-    List<Submission> findByContactId(@Param("contact_id") Long contactId);
+    List<Submission> findByContactId(@Param("contact_id") String contactId);
 
     /**
      * Retrieve a list of {@link Submission}s for a set of contact ids for a given year
@@ -46,7 +46,7 @@ public interface SubmissionRepository extends BaseRepository<Submission, Long> {
      * @return list of {@link Submission}s for a set of contact ids for a given year
      */
     @SuppressWarnings("unused")
-    List<Submission> findByContactIdInAndSeason(@Param("contact_ids") Set<Long> contactIds,
+    List<Submission> findByContactIdInAndSeason(@Param("contact_ids") Set<String> contactIds,
                                                 @Param("season") Short season);
 
     @SuppressWarnings("unused")
