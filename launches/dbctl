@@ -56,12 +56,6 @@ ACTION="${1:-reset}"
 set -e
 
 case "${ACTION}" in
-    "reload")
-        MVN_TARGETS="sql:execute@drop-connections sql:execute@drop-database sql:execute@create-database liquibase:update exec:java@load-data"
-
-        # When reloading, the project needs to be compiled
-        eval "${PROJECT_ROOT}/mvnw -Dcheckstyle.skip=true -Ddependency-check.skip=true -DskipTests=true -T 1C install ${QUIET}"
-    ;;
     "reset")
         MVN_TARGETS="sql:execute@drop-connections sql:execute@drop-database sql:execute@create-database liquibase:update"
     ;;
