@@ -25,7 +25,6 @@ import javax.validation.Validator;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -68,20 +67,11 @@ public class CatchTests {
     }
 
     @Test
-    public void testCatchWithoutRiverFails() {
+    public void testCatchWithoutActivityFails() {
         final Catch cat = createValidCatch();
-        cat.setRiver(null);
+        cat.setActivity(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_RIVER_REQUIRED"));
-    }
-
-    @Test
-    public void testCatchWithoutRiverDefinedInActivityFails() {
-        final Catch cat = createValidCatch();
-        cat.getSubmission().setActivities(new HashSet<>());
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1)
-                .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_RIVER_NOT_DEFINED_IN_ACTIVITIES"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_ACTIVITY_REQUIRED"));
     }
 
     @Test
@@ -128,7 +118,7 @@ public class CatchTests {
 
         final Catch cat = new Catch();
         cat.setSubmission(submission);
-        cat.setRiver(river);
+        cat.setActivity(activity);
         cat.setDateCaught(new Date());
         cat.setSpecies(speciesRepository.getOne(RandomUtils.nextLong(1, speciesRepository.count())));
         cat.setMethod(methodRepository.getOne(RandomUtils.nextLong(1, methodRepository.count())));

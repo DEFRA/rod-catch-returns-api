@@ -88,13 +88,13 @@ public class SubmissionIT {
         return fromJson("/data/templates/activity.json.template", replacements);
     }
 
-    private static String getCatchJson(final String submissionId, final String riverId, final String speciesId, final String methodId,
+    private static String getCatchJson(final String submissionId, final String activityId, final String speciesId, final String methodId,
                                        final CatchMass.MeasurementType massType, final BigDecimal mass, final boolean released) {
         final String massProperty = CatchMass.MeasurementType.IMPERIAL.equals(massType) ? "oz" : "kg";
         final Map<String, Object> replacements = new HashMap<>();
         replacements.put("SUBMISSION", submissionId);
         replacements.put("SPECIES", speciesId);
-        replacements.put("RIVER", riverId);
+        replacements.put("ACTIVITY", activityId);
         replacements.put("METHOD", methodId);
         replacements.put("MASS", mass);
         replacements.put("MASS_TYPE", massType.name());
@@ -103,7 +103,7 @@ public class SubmissionIT {
         return fromJson("/data/templates/catch.json.template", replacements);
     }
 
-    private static String getSmallCatchJson(final String submissionId, final String riverId, final Month month, final Map<String, Integer> counts,
+    private static String getSmallCatchJson(final String submissionId, final String activityId, final Month month, final Map<String, Integer> counts,
                                             final int released) {
         final String countsJson = counts.entrySet().stream()
                 .map((e) -> getSmallCatchCountJson(e.getKey(), e.getValue()))
@@ -112,7 +112,7 @@ public class SubmissionIT {
 
         final Map<String, Object> replacements = new HashMap<>();
         replacements.put("SUBMISSION", submissionId);
-        replacements.put("RIVER", riverId);
+        replacements.put("ACTIVITY", activityId);
         replacements.put("MONTH", month.name());
         replacements.put("RELEASED", released);
         replacements.put("COUNTS_JSON", countsJson);
@@ -143,22 +143,22 @@ public class SubmissionIT {
             r.body("errors", Matchers.nullValue());
         });
 
-        final String catchJson = getCatchJson(submissionUrl, "rivers/1", "species/1", "methods/1", CatchMass.MeasurementType.METRIC, BigDecimal.ONE,
+        final String catchJson = getCatchJson(submissionUrl, activityUrl, "species/1", "methods/1", CatchMass.MeasurementType.METRIC, BigDecimal.ONE,
                 false);
         String catchUrl = createEntity("/catches", catchJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
 
-        final String smallCatchJson = getSmallCatchJson(submissionUrl, "rivers/1", Month.MARCH, Collections.singletonMap("methods/1", 5), 5);
+        final String smallCatchJson = getSmallCatchJson(submissionUrl, activityUrl, Month.MARCH, Collections.singletonMap("methods/1", 5), 5);
         String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
         deleteEntity(submissionUrl);
-        getEntity(submissionUrl).statusCode(HttpStatus.NOT_FOUND.value());
-        getEntity(activityUrl).statusCode(HttpStatus.NOT_FOUND.value());
         getEntity(catchUrl).statusCode(HttpStatus.NOT_FOUND.value());
         getEntity(smallCatchUrl).statusCode(HttpStatus.NOT_FOUND.value());
+        getEntity(activityUrl).statusCode(HttpStatus.NOT_FOUND.value());
+        getEntity(submissionUrl).statusCode(HttpStatus.NOT_FOUND.value());
     }
 }

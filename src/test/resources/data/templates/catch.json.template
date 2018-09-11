@@ -2,7 +2,7 @@
   "submission": "%SUBMISSION%",
   "dateCaught": "2018-08-08T00:00:00Z",
   "species": "%SPECIES%",
-  "river": "%RIVER%",
+  "activity": "%ACTIVITY%",
   "method": "%METHOD%",
   "mass": {
     "type": "%MASS_TYPE%",

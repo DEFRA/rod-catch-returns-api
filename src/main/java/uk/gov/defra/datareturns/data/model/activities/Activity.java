@@ -6,13 +6,18 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
+import uk.gov.defra.datareturns.data.model.catches.Catch;
 import uk.gov.defra.datareturns.data.model.rivers.River;
+import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatch;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.activities.ValidActivity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import java.util.Set;
 
 /**
  * RCR Catch
@@ -48,4 +53,16 @@ public class Activity extends AbstractBaseEntity {
      */
     @Column(nullable = false)
     private Short days;
+
+    /**
+     * The significant catches recorded by the angler that are associated with this activity (fish species, rivers, mass, etc)
+     */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
+    private Set<Catch> catches;
+
+    /**
+     * Small catches - summarised counts of catches by method, month and activity
+     */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
+    private Set<SmallCatch> smallCatches;
 }

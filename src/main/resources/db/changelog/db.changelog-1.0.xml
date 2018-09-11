@@ -362,10 +362,10 @@
                              foreignKeyName="fk_catch__submission"
                              references="rcr_submission(id)"/>
             </column>
-            <column name="river_id" type="bigint">
+            <column name="activity_id" type="bigint">
                 <constraints nullable="false"
-                             foreignKeyName="fk_catch__river"
-                             references="rcr_river(id)"/>
+                             foreignKeyName="fk_catch__activity"
+                             references="rcr_activity(id)"/>
             </column>
             <column name="date_caught" type="date">
                 <constraints nullable="false"/>
@@ -421,7 +421,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="submission_id" type="bigint"/>
-            <column name="river_id" type="bigint"/>
+            <column name="activity_id" type="bigint"/>
             <column name="date_caught" type="date"/>
             <column name="species_id" type="bigint"/>
             <column name="mass_type" type="varchar(10)"/>
@@ -455,10 +455,10 @@
                              foreignKeyName="fk_small_catch__submission"
                              references="rcr_submission(id)"/>
             </column>
-            <column name="river_id" type="bigint">
+            <column name="activity_id" type="bigint">
                 <constraints nullable="false"
-                             foreignKeyName="fk_small_catch__river"
-                             references="rcr_river(id)"/>
+                             foreignKeyName="fk_small_catch__activity"
+                             references="rcr_activity(id)"/>
             </column>
             <column name="month" type="varchar(9)">
                 <constraints nullable="false"/>
@@ -495,7 +495,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="submission_id" type="bigint"/>
-            <column name="river_id" type="bigint"/>
+            <column name="activity_id" type="bigint"/>
             <column name="month" type="varchar(9)"/>
             <column name="released" type="int"/>
         </createTable>

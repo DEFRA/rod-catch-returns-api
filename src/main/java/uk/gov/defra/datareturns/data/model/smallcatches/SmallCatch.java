@@ -6,7 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
-import uk.gov.defra.datareturns.data.model.rivers.River;
+import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.smallcatches.ValidSmallCatch;
 
@@ -44,10 +44,10 @@ public class SmallCatch extends AbstractBaseEntity {
     private Submission submission;
 
     /**
-     * The river where the catch was made
+     * The activity associated with this catch
      */
     @ManyToOne(optional = false)
-    private River river;
+    private Activity activity;
 
     /**
      * The month this record relates to

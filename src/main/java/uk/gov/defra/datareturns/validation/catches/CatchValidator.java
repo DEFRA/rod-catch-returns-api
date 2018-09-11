@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import uk.gov.defra.datareturns.data.model.catches.Catch;
-import uk.gov.defra.datareturns.validation.ValidationChecks;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -38,7 +37,7 @@ public class CatchValidator implements ConstraintValidator<ValidCatch, Catch> {
 
     @Override
     public boolean isValid(final Catch catchEntry, final ConstraintValidatorContext context) {
-        boolean valid = checkRiver(catchEntry, context);
+        boolean valid = checkActivity(catchEntry, context);
         valid = checkDate(catchEntry, context) && valid;
         valid = checkType(catchEntry, context) && valid;
         valid = checkMass(catchEntry, context) && valid;
@@ -46,12 +45,9 @@ public class CatchValidator implements ConstraintValidator<ValidCatch, Catch> {
         return valid;
     }
 
-    private boolean checkRiver(final Catch catchEntry, final ConstraintValidatorContext context) {
-        if (catchEntry.getRiver() == null) {
-            return handleError(context, "CATCH_RIVER_REQUIRED", b -> b.addPropertyNode("river"));
-        }
-        if (!ValidationChecks.checkRiverDefinedInActivities(catchEntry.getSubmission(), catchEntry.getRiver())) {
-            return handleError(context, "CATCH_RIVER_NOT_DEFINED_IN_ACTIVITIES", b -> b.addPropertyNode("river"));
+    private boolean checkActivity(final Catch catchEntry, final ConstraintValidatorContext context) {
+        if (catchEntry.getActivity() == null) {
+            return handleError(context, "CATCH_ACTIVITY_REQUIRED", b -> b.addPropertyNode("activity"));
         }
         return true;
     }

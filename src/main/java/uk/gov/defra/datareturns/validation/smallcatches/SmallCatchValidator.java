@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.defra.datareturns.data.model.method.Method;
 import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatch;
 import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatchCount;
-import uk.gov.defra.datareturns.validation.ValidationChecks;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -30,19 +29,16 @@ public class SmallCatchValidator implements ConstraintValidator<ValidSmallCatch,
 
     @Override
     public boolean isValid(final SmallCatch catchEntry, final ConstraintValidatorContext context) {
-        boolean valid = checkRiver(catchEntry, context);
+        boolean valid = checkActivity(catchEntry, context);
         valid = checkMonth(catchEntry, context) && valid;
         valid = checkMethods(catchEntry, context) && valid;
         valid = checkTotals(catchEntry, context) && valid;
         return valid;
     }
 
-    private boolean checkRiver(final SmallCatch catchEntry, final ConstraintValidatorContext context) {
-        if (catchEntry.getRiver() == null) {
-            return handleError(context, "SMALL_CATCH_RIVER_REQUIRED", b -> b.addPropertyNode("river"));
-        }
-        if (!ValidationChecks.checkRiverDefinedInActivities(catchEntry.getSubmission(), catchEntry.getRiver())) {
-            return handleError(context, "SMALL_CATCH_RIVER_NOT_DEFINED_IN_ACTIVITIES", b -> b.addPropertyNode("river"));
+    private boolean checkActivity(final SmallCatch catchEntry, final ConstraintValidatorContext context) {
+        if (catchEntry.getActivity() == null) {
+            return handleError(context, "SMALL_CATCH_ACTIVITY_REQUIRED", b -> b.addPropertyNode("river"));
         }
         return true;
     }
