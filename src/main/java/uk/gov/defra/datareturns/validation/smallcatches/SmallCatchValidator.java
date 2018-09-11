@@ -32,7 +32,8 @@ public class SmallCatchValidator implements ConstraintValidator<ValidSmallCatch,
         boolean valid = checkActivity(catchEntry, context);
         valid = checkMonth(catchEntry, context) && valid;
         valid = checkMethods(catchEntry, context) && valid;
-        valid = checkTotals(catchEntry, context) && valid;
+        valid = checkCounts(catchEntry, context) && valid;
+        valid = checkReleased(catchEntry, context) && valid;
         return valid;
     }
 
@@ -56,27 +57,31 @@ public class SmallCatchValidator implements ConstraintValidator<ValidSmallCatch,
                     .collect(Collectors.toList());
             final Set<Method> uniqueMethods = new HashSet<>(allMethodsUsed);
             if (allMethodsUsed.size() != uniqueMethods.size()) {
-                return handleError(context, "SMALL_CATCH_DUPLICATE_METHOD_IN_COUNTS", b -> b.addPropertyNode("totals"));
+                return handleError(context, "SMALL_CATCH_DUPLICATE_METHOD_IN_COUNTS", b -> b.addPropertyNode("counts"));
             }
         }
         return true;
     }
 
-    private boolean checkTotals(final SmallCatch catchEntry, final ConstraintValidatorContext context) {
-        int totalCount = 0;
+    private boolean checkCounts(final SmallCatch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getCounts() != null) {
             for (final SmallCatchCount catchByMethod : catchEntry.getCounts()) {
                 if (catchByMethod.getCount() < 0) {
-                    return handleError(context, "SMALL_CATCH_COUNT_NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("totals"));
+                    return handleError(context, "SMALL_CATCH_COUNT_NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("counts"));
                 }
-                totalCount += catchByMethod.getCount();
             }
         }
+        return true;
+    }
+
+    private boolean checkReleased(final SmallCatch catchEntry, final ConstraintValidatorContext context) {
+        int total = catchEntry.getCounts().stream().mapToInt(SmallCatchCount::getCount).sum();
+
         if (catchEntry.getReleased() < 0) {
             return handleError(context, "SMALL_CATCH_RELEASED_NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("released"));
         }
 
-        if (catchEntry.getReleased() > totalCount) {
+        if (catchEntry.getReleased() > total) {
             return handleError(context, "SMALL_CATCH_RELEASED_MORE_THAN_CAUGHT", b -> b.addPropertyNode("released"));
         }
         return true;

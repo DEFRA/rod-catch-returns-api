@@ -21,8 +21,5 @@ before_script:
 - ./cc-test-reporter before-build
 
 after_script:
-- mkdir target/sources
-- cp -RT target/generated-sources/annotations target/sources
-- cp -RT src/main/java target/sources
-- JACOCO_SOURCE_PATH=target/sources ./cc-test-reporter format-coverage target/site/jacoco/jacoco.xml --input-type jacoco
+- JACOCO_SOURCE_PATH=src/main/java ./cc-test-reporter format-coverage target/site/jacoco/jacoco.xml --input-type jacoco
 - ./cc-test-reporter upload-coverage
