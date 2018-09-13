@@ -40,6 +40,7 @@ public abstract class AbstractConstraintValidator<A extends Annotation, T> imple
      * @param checks the method(s) implementing the check functions to be executed when validating
      */
     @SafeVarargs
+    @SuppressWarnings("varargs")
     protected final void addChecks(final CheckFunction<T>... checks) {
         this.checkFunctions.addAll(Arrays.asList(checks));
     }

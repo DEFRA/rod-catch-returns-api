@@ -241,6 +241,9 @@
             <column name="season" type="smallint">
                 <constraints nullable="false"/>
             </column>
+            <column name="status" type="varchar(30)">
+                <constraints nullable="true"/>
+            </column>
             <column name="created" type="timestamp">
                 <constraints nullable="false"/>
             </column>
@@ -273,6 +276,7 @@
             </column>
             <column name="contact_id" type="varchar"/>
             <column name="season" type="smallint"/>
+            <column name="status" type="varchar(30)"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_submission_aud" columnNames="id, rev"/>

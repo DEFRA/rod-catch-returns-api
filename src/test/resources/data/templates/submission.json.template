@@ -1,4 +1,5 @@
 {
   "contactId": "%CONTACT_ID%",
-  "season": %SEASON%
+  "season": %SEASON%,
+  "status": "INCOMPLETE"
 }

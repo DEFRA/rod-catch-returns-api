@@ -14,6 +14,8 @@ import uk.gov.defra.datareturns.validation.submission.ValidSubmission;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -51,6 +53,12 @@ public class Submission extends AbstractBaseEntity {
      */
     @Column(nullable = false)
     private Short season;
+
+    /**
+     * The submission status
+     */
+    @Enumerated(EnumType.STRING)
+    private SubmissionStatus status;
 
     /**
      * The activities recorded by the angler for the season (the time in days spent on each river)

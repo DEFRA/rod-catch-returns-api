@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum SubmissionStatus {
-    Incomplete(true),
-    Submitted(false);
+    INCOMPLETE(true),
+    SUBMITTED(false);
 
     private final boolean open;
 

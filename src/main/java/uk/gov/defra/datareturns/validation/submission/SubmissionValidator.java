@@ -18,13 +18,17 @@ import java.util.Calendar;
 public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmission, Submission> {
     @Override
     public void initialize(final ValidSubmission constraintAnnotation) {
-        super.addChecks(this::checkContact, this::checkSubmissionYear);
+        super.addChecks(this::checkContact, this::checkSubmissionStatus, this::checkSubmissionYear);
     }
 
     private boolean checkContact(final Submission submission, final ConstraintValidatorContext context) {
         // FIXME: Lookup contact id in CRM.
 //        return handleError(context, "REPORTING_REFERENCE_NOT_CONFIGURED_FOR_PI", b -> b.addPropertyNode("contactId"));
         return true;
+    }
+
+    private boolean checkSubmissionStatus(final Submission submission, final ConstraintValidatorContext context) {
+        return submission.getStatus() != null || handleError(context, "STATUS_REQUIRED", b -> b.addPropertyNode("status"));
     }
 
     private boolean checkSubmissionYear(final Submission submission, final ConstraintValidatorContext context) {

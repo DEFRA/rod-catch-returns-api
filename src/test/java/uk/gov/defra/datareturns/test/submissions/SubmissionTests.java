@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
+import uk.gov.defra.datareturns.data.model.submissions.SubmissionStatus;
 import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
 import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
 
@@ -29,6 +30,7 @@ public class SubmissionTests {
         final Submission sub = new Submission();
         sub.setContactId("123");
         sub.setSeason(getYear(0));
+        sub.setStatus(SubmissionStatus.INCOMPLETE);
         return sub;
     }
 
@@ -48,6 +50,15 @@ public class SubmissionTests {
         sub.setSeason(getYear(-1));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
         Assertions.assertThat(violations).isEmpty();
+    }
+
+
+    @Test
+    public void testSubmissionStatus() {
+        final Submission sub = createValidSubmission();
+        sub.setStatus(null);
+        final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SUBMISSION_STATUS_REQUIRED"));
     }
 
     @Test
