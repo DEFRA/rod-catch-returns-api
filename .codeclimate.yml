@@ -50,3 +50,11 @@ plugins:
       - FIXME
       - TODO
       - BUG
+exclude_patterns:
+- ".mvn/"
+- "launches/"
+- "log/"
+- "src/test/"
+- "src/main/resources/"
+- "mvnw"
+- "mvnw.cmd"
