@@ -5,8 +5,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.defra.datareturns.data.model.method.Method;
 import uk.gov.defra.datareturns.data.model.method.MethodRepository;
-import uk.gov.defra.datareturns.data.model.rivers.RiverRepository;
 import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatchCount;
 import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
 import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
@@ -24,24 +24,27 @@ import java.util.Set;
 @Slf4j
 public class SmallCatchCountTests {
     @Inject
-    private RiverRepository riverRepository;
-    @Inject
     private MethodRepository methodRepository;
     @Inject
     private Validator validator;
 
+    public static SmallCatchCount createValidSmallCatchCount(final Method method, final int days) {
+        final SmallCatchCount count = new SmallCatchCount();
+        count.setMethod(method);
+        count.setCount((short) days);
+        return count;
+    }
+
     @Test
     public void testValidSmallCatchCount() {
-        final SmallCatchCount cat = createValidSmallCatchCount();
+        final SmallCatchCount cat = createValidSmallCatchCount(methodRepository.getOne(1L), 1);
         final Set<ConstraintViolation<SmallCatchCount>> violations = validator.validate(cat);
         Assertions.assertThat(violations).isEmpty();
     }
 
-
     @Test
     public void testValidSmallCatchWithoutMethodFails() {
-        final SmallCatchCount cat = createValidSmallCatchCount();
-        cat.setMethod(null);
+        final SmallCatchCount cat = createValidSmallCatchCount(null, 1);
         final Set<ConstraintViolation<SmallCatchCount>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(1)
                 .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_METHOD_REQUIRED"));
@@ -49,17 +52,9 @@ public class SmallCatchCountTests {
 
     @Test
     public void testValidSmallCatchCountNegativeFails() {
-        final SmallCatchCount cat = createValidSmallCatchCount();
-        cat.setCount((short) -1);
+        final SmallCatchCount cat = createValidSmallCatchCount(methodRepository.getOne(1L), -1);
         final Set<ConstraintViolation<SmallCatchCount>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(1)
                 .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_NOT_GREATER_THAN_ZERO"));
-    }
-
-    private SmallCatchCount createValidSmallCatchCount() {
-        final SmallCatchCount count = new SmallCatchCount();
-        count.setMethod(methodRepository.getOne(1L));
-        count.setCount((short) 1);
-        return count;
     }
 }

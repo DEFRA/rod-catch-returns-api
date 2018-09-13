@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import uk.gov.defra.datareturns.data.model.catches.Catch;
+import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
 import javax.validation.ConstraintValidatorContext;
@@ -30,8 +31,8 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
 
     @Override
     public void initialize(final ValidCatch constraintAnnotation) {
-        super.addChecks(this::checkSubmission, this::checkActivity, this::checkDate, this::checkType, this::checkMassType, this::checkMass,
-                this::checkMethod);
+        super.addChecks(this::checkSubmission, this::checkActivity, this::checkDate, this::checkSpecies,
+                this::checkMass, this::checkMassValue, this::checkMassLimits, this::checkMethod);
     }
 
     private boolean checkActivity(final Catch catchEntry, final ConstraintValidatorContext context) {
@@ -51,22 +52,43 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
         return true;
     }
 
-    private boolean checkType(final Catch catchEntry, final ConstraintValidatorContext context) {
+    private boolean checkSpecies(final Catch catchEntry, final ConstraintValidatorContext context) {
         return catchEntry.getSpecies() != null || handleError(context, "SPECIES_REQUIRED", b -> b.addPropertyNode("species"));
     }
 
-    private boolean checkMassType(final Catch catchEntry, final ConstraintValidatorContext context) {
-        return catchEntry.getMass().getType() != null || handleError(context, "MASS_TYPE_REQUIRED", b -> b.addPropertyNode("mass"));
+    private boolean checkMass(final Catch catchEntry, final ConstraintValidatorContext context) {
+        if (catchEntry.getMass() == null) {
+            return handleError(context, "MASS_REQUIRED", b -> b.addPropertyNode("mass"));
+        }
+        return catchEntry.getMass().getType() != null || handleError(context, "MASS_TYPE_REQUIRED",
+                b -> b.addPropertyNode("mass").addPropertyNode("type"));
     }
 
-    private boolean checkMass(final Catch catchEntry, final ConstraintValidatorContext context) {
-        // Ensure that the mass has been conciliated before attempting to validate based on the metric value
-        catchEntry.getMass().conciliateMass();
+    private boolean checkMassValue(final Catch catchEntry, final ConstraintValidatorContext context) {
+        if (catchEntry.getMass() != null) {
+            if (CatchMass.MeasurementType.IMPERIAL.equals(catchEntry.getMass().getType())) {
+                return catchEntry.getMass().getOz() != null || handleError(context, "MASS_OZ_REQUIRED",
+                        b -> b.addPropertyNode("mass").addPropertyNode("oz"));
+            } else if (CatchMass.MeasurementType.METRIC.equals(catchEntry.getMass().getType())) {
+                return catchEntry.getMass().getKg() != null || handleError(context, "MASS_KG_REQUIRED",
+                        b -> b.addPropertyNode("mass").addPropertyNode("kg"));
+            }
+        }
+        return true;
+    }
 
-        if (MIN_FISH_MASS_KG.compareTo(catchEntry.getMass().getKg()) > -1) {
-            return handleError(context, "MASS_BELOW_MINIMUM", b -> b.addPropertyNode("mass"));
-        } else if (MAX_FISH_MASS_KG.compareTo(catchEntry.getMass().getKg()) < 1) {
-            return handleError(context, "MASS_MAX_EXCEEDED", b -> b.addPropertyNode("mass"));
+    private boolean checkMassLimits(final Catch catchEntry, final ConstraintValidatorContext context) {
+        if (catchEntry.getMass() != null) {
+            // Ensure that the mass has been conciliated before attempting to validate based on the metric value
+            catchEntry.getMass().conciliateMass();
+
+            if (catchEntry.getMass().getKg() != null) {
+                if (MIN_FISH_MASS_KG.compareTo(catchEntry.getMass().getKg()) > -1) {
+                    return handleError(context, "MASS_BELOW_MINIMUM", b -> b.addPropertyNode("mass"));
+                } else if (MAX_FISH_MASS_KG.compareTo(catchEntry.getMass().getKg()) < 1) {
+                    return handleError(context, "MASS_MAX_EXCEEDED", b -> b.addPropertyNode("mass"));
+                }
+            }
         }
         return true;
     }

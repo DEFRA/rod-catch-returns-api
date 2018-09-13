@@ -42,6 +42,17 @@ public class SmallCatchTests {
     @Inject
     private Validator validator;
 
+    public static SmallCatch createSmallCatch(final Submission submission, final Activity activity, final List<SmallCatchCount> counts,
+                                              final int released) {
+        final SmallCatch cat = new SmallCatch();
+        cat.setSubmission(submission);
+        cat.setActivity(activity);
+        cat.setMonth(Month.JANUARY);
+        cat.setCounts(counts);
+        cat.setReleased((short) released);
+        return cat;
+    }
+
     @Test
     public void testValidSmallCatch() {
         final SmallCatch cat = createValidSmallCatch();
@@ -66,6 +77,14 @@ public class SmallCatchTests {
     }
 
     @Test
+    public void testSmallCatchWithoutMonthFails() {
+        final SmallCatch cat = createValidSmallCatch();
+        cat.setMonth(null);
+        final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_MONTH_REQUIRED"));
+    }
+
+    @Test
     public void testSmallCatchWithoutCountsFails() {
         final SmallCatch cat = createValidSmallCatch();
         cat.setCounts(null);
@@ -82,11 +101,12 @@ public class SmallCatchTests {
     }
 
     @Test
-    public void testSmallCatchWithoutMonthFails() {
+    public void testSmallCatchWithDuplicateMethodInCountsFails() {
         final SmallCatch cat = createValidSmallCatch();
-        cat.setMonth(null);
+        cat.getCounts().addAll(cat.getCounts());
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_MONTH_REQUIRED"));
+        Assertions.assertThat(violations).hasSize(1)
+                .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_METHOD_DUPLICATE_FOUND"));
     }
 
     @Test
@@ -120,18 +140,6 @@ public class SmallCatchTests {
             count.setMethod(method);
             counts.add(count);
         }
-        return createSmallValidCatch(submission, activity, counts, counts.size());
-    }
-
-
-    private SmallCatch createSmallValidCatch(final Submission submission, final Activity activity, final List<SmallCatchCount> counts,
-                                             final int released) {
-        final SmallCatch cat = new SmallCatch();
-        cat.setSubmission(submission);
-        cat.setActivity(activity);
-        cat.setMonth(Month.JANUARY);
-        cat.setCounts(counts);
-        cat.setReleased((short) released);
-        return cat;
+        return createSmallCatch(submission, activity, counts, counts.size());
     }
 }

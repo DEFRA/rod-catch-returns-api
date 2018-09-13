@@ -25,7 +25,7 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
     public void initialize(final ValidSmallCatch constraintAnnotation) {
         super.addChecks(
                 this::checkSubmission, this::checkActivity, this::checkMonth,
-                this::checkCountsProvided, this::checkCountMethodDuplicates, this::checkReleased);
+                this::checkUniqueActivityAndMonth, this::checkCountsProvided, this::checkCountMethodDuplicates, this::checkReleased);
     }
 
     private boolean checkActivity(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
@@ -38,6 +38,21 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
 
     private boolean checkCountsProvided(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
         return CollectionUtils.isNotEmpty(smallCatch.getCounts()) || handleError(context, "COUNTS_REQUIRED", b -> b.addPropertyNode("counts"));
+    }
+
+    private boolean checkUniqueActivityAndMonth(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
+        boolean valid = true;
+        if (smallCatch.getActivity() != null && smallCatch.getMonth() != null && smallCatch.getSubmission() != null
+                && smallCatch.getSubmission().getSmallCatches() != null) {
+            for (int i = 0; i < smallCatch.getSubmission().getSmallCatches().size(); i++) {
+                final SmallCatch other = smallCatch.getSubmission().getSmallCatches().get(i);
+                if (smallCatch != other && smallCatch.getActivity().equals(other.getActivity()) && smallCatch.getMonth().equals(other.getMonth())) {
+                    final int index = i;
+                    valid = handleError(context, "DUPLICATE_FOUND", b -> b.addBeanNode().inIterable().atIndex(index));
+                }
+            }
+        }
+        return valid;
     }
 
 

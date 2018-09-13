@@ -26,7 +26,7 @@ public class CatchMass {
     /**
      * Conversion factor to convert between kg/oz
      */
-    private static final BigDecimal CONVERSION = BigDecimal.valueOf(0.028349523125d);
+    private static final BigDecimal CONVERSION = new BigDecimal("0.028349523125");
 
     /**
      * The type of measurement provided by the end user
@@ -66,10 +66,10 @@ public class CatchMass {
      */
     @PrePersist
     public void conciliateMass() {
-        if (MeasurementType.IMPERIAL.equals(this.type)) {
+        if (MeasurementType.IMPERIAL.equals(this.type) && this.oz != null) {
             // Populate the mass in kg from the imperial value
             this.kg = this.oz.multiply(CONVERSION);
-        } else if (MeasurementType.METRIC.equals(this.type)) {
+        } else if (MeasurementType.METRIC.equals(this.type) && this.kg != null) {
             this.oz = this.kg.divide(CONVERSION, SCALE, RoundingMode.HALF_UP);
         }
     }

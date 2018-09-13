@@ -26,7 +26,9 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
 
     private boolean checkUniqueRiverPerSubmission(final Activity activity, final ConstraintValidatorContext context) {
         if (activity.getRiver() != null && activity.getSubmission() != null && activity.getSubmission().getActivities() != null) {
-            final long riverCount = activity.getSubmission().getActivities().stream().filter(a -> activity.getRiver().equals(a.getRiver())).count();
+            final long riverCount = activity.getSubmission().getActivities().stream()
+                    .filter(a -> activity != a && activity.getRiver().equals(a.getRiver()))
+                    .count();
             if (riverCount > 0) {
                 return handleError(context, "RIVER_DUPLICATE_FOUND", b -> b.addPropertyNode("river"));
             }

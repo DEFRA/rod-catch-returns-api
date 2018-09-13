@@ -51,7 +51,7 @@ public class CatchTests {
     }
 
     @Test
-    public void testSmallCatchWithoutSubmissionFails() {
+    public void testCatchWithoutSubmissionFails() {
         final Catch cat = createValidCatch();
         cat.setSubmission(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
@@ -88,6 +88,45 @@ public class CatchTests {
         cat.setSpecies(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_SPECIES_REQUIRED"));
+    }
+
+    @Test
+    public void testCatchWithoutMassFails() {
+        final Catch cat = createValidCatch();
+        cat.setMass(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_REQUIRED"));
+    }
+
+
+    @Test
+    public void testCatchWithoutMassTypeFails() {
+        final Catch cat = createValidCatch();
+        cat.getMass().setType(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_TYPE_REQUIRED"));
+    }
+
+    @Test
+    public void testCatchWithoutMassOzValueFails() {
+        final CatchMass catchMass = new CatchMass();
+        catchMass.set(CatchMass.MeasurementType.IMPERIAL, null);
+
+        final Catch cat = createValidCatch();
+        cat.setMass(catchMass);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_OZ_REQUIRED"));
+    }
+
+    @Test
+    public void testCatchWithoutMassKgValueFails() {
+        final CatchMass catchMass = new CatchMass();
+        catchMass.set(CatchMass.MeasurementType.METRIC, null);
+
+        final Catch cat = createValidCatch();
+        cat.setMass(catchMass);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_KG_REQUIRED"));
     }
 
     @Test
