@@ -3,12 +3,10 @@ package uk.gov.defra.datareturns.validation.submission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
+import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
-import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Calendar;
-
-import static uk.gov.defra.datareturns.validation.util.ValidationUtil.handleError;
 
 /**
  * Validate a {@link Submission} object
@@ -17,24 +15,17 @@ import static uk.gov.defra.datareturns.validation.util.ValidationUtil.handleErro
  */
 @RequiredArgsConstructor
 @Slf4j
-public class SubmissionValidator implements ConstraintValidator<ValidSubmission, Submission> {
+public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmission, Submission> {
     @Override
     public void initialize(final ValidSubmission constraintAnnotation) {
-    }
-
-    @Override
-    public boolean isValid(final Submission submission, final ConstraintValidatorContext context) {
-        boolean valid = checkContact(submission, context);
-        valid = checkSubmissionYear(submission, context) && valid;
-        return valid;
+        super.addChecks(this::checkContact, this::checkSubmissionYear);
     }
 
     private boolean checkContact(final Submission submission, final ConstraintValidatorContext context) {
         // FIXME: Lookup contact id in CRM.
-//        return handleError(context, "SUBMISSION_REPORTING_REFERENCE_NOT_CONFIGURED_FOR_PI", b -> b.addPropertyNode("contactId"));
+//        return handleError(context, "REPORTING_REFERENCE_NOT_CONFIGURED_FOR_PI", b -> b.addPropertyNode("contactId"));
         return true;
     }
-
 
     private boolean checkSubmissionYear(final Submission submission, final ConstraintValidatorContext context) {
         final int currentSubmissionYear = Calendar.getInstance().get(Calendar.YEAR);
@@ -42,8 +33,13 @@ public class SubmissionValidator implements ConstraintValidator<ValidSubmission,
         if (submission.getSeason() == null
                 || submission.getSeason() > currentSubmissionYear
                 || submission.getSeason() < oldestAllowed) {
-            return handleError(context, "SUBMISSION_YEAR_INVALID", b -> b.addPropertyNode("season"));
+            return handleError(context, "YEAR_INVALID", b -> b.addPropertyNode("season"));
         }
         return true;
+    }
+
+    @Override
+    public String getErrorPrefix() {
+        return "SUBMISSION";
     }
 }

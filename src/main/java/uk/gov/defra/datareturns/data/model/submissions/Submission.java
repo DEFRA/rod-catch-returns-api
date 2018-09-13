@@ -18,7 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
-import java.util.Set;
+import java.util.List;
 
 /**
  * RCR Submission
@@ -57,19 +57,19 @@ public class Submission extends AbstractBaseEntity {
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
     @Valid
-    private Set<Activity> activities;
+    private List<Activity> activities;
 
     /**
      * The significant catches recorded by the angler for the season (fish species, rivers, mass, etc)
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
     @Valid
-    private Set<Catch> catches;
+    private List<Catch> catches;
 
     /**
      * Small catches - summarised counts of catches by method, month and river
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
     @Valid
-    private Set<SmallCatch> smallCatches;
+    private List<SmallCatch> smallCatches;
 }

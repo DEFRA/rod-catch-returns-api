@@ -42,13 +42,13 @@ public class SubmissionIT {
         final String submissionJson = getSubmissionJson(RandomStringUtils.randomAlphanumeric(30),
                 Calendar.getInstance().get(Calendar.YEAR));
 
-        String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
+        final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
 
         final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5);
-        String activityUrl = createEntity("/activities", activityJson, (r) -> {
+        final String activityUrl = createEntity("/activities", activityJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
@@ -56,14 +56,14 @@ public class SubmissionIT {
         final String catchJson = SubmissionTestUtils
                 .getCatchJson(submissionUrl, activityUrl, "species/1", "methods/1", CatchMass.MeasurementType.METRIC, BigDecimal.ONE,
                         false);
-        String catchUrl = createEntity("/catches", catchJson, (r) -> {
+        final String catchUrl = createEntity("/catches", catchJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
 
         final String smallCatchJson = SubmissionTestUtils
                 .getSmallCatchJson(submissionUrl, activityUrl, Month.MARCH, Collections.singletonMap("methods/1", 5), 5);
-        String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
+        final String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
@@ -81,13 +81,13 @@ public class SubmissionIT {
         final String submissionJson = getSubmissionJson(RandomStringUtils.randomAlphanumeric(30),
                 Calendar.getInstance().get(Calendar.YEAR));
 
-        String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
+        final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
 
         final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5);
-        String activityUrl = createEntity("/activities", activityJson, (r) -> {
+        final String activityUrl = createEntity("/activities", activityJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
@@ -95,14 +95,14 @@ public class SubmissionIT {
         final String catchJson = SubmissionTestUtils
                 .getCatchJson(submissionUrl, activityUrl, "species/1", "methods/1", CatchMass.MeasurementType.METRIC, BigDecimal.ONE,
                         false);
-        String catchUrl = createEntity("/catches", catchJson, (r) -> {
+        final String catchUrl = createEntity("/catches", catchJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
 
         final String smallCatchJson = SubmissionTestUtils
                 .getSmallCatchJson(submissionUrl, activityUrl, Month.MARCH, Collections.singletonMap("methods/1", 5), 5);
-        String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
+        final String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
@@ -112,5 +112,34 @@ public class SubmissionIT {
         getEntity(smallCatchUrl).statusCode(HttpStatus.NOT_FOUND.value());
         getEntity(activityUrl).statusCode(HttpStatus.NOT_FOUND.value());
         getEntity(submissionUrl).statusCode(HttpStatus.OK.value());
+    }
+
+
+    @Test
+    public void testDuplicateActivityDetected() {
+        final String submissionJson = getSubmissionJson(RandomStringUtils.randomAlphanumeric(30),
+                Calendar.getInstance().get(Calendar.YEAR));
+
+        final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
+            r.statusCode(HttpStatus.CREATED.value());
+            r.body("errors", Matchers.nullValue());
+        });
+
+        final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5);
+
+        final String activity1Url = createEntity("/activities", activityJson, (r) -> {
+            r.statusCode(HttpStatus.CREATED.value());
+            r.body("errors", Matchers.nullValue());
+        });
+
+        createEntity("/activities", activityJson, (r) -> {
+            r.statusCode(HttpStatus.BAD_REQUEST.value());
+            r.body("errors", Matchers.hasSize(1));
+            r.body("errors[0].message", Matchers.hasToString("ACTIVITY_RIVER_DUPLICATE_FOUND"));
+            r.body("errors[0].entity", Matchers.hasToString("Activity"));
+        });
+
+        deleteEntity(submissionUrl);
+        getEntity(activity1Url).statusCode(HttpStatus.NOT_FOUND.value());
     }
 }

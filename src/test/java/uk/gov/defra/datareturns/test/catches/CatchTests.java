@@ -51,6 +51,14 @@ public class CatchTests {
     }
 
     @Test
+    public void testSmallCatchWithoutSubmissionFails() {
+        final Catch cat = createValidCatch();
+        cat.setSubmission(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_SUBMISSION_REQUIRED"));
+    }
+
+    @Test
     public void testCatchWithoutDateFails() {
         final Catch cat = createValidCatch();
         cat.setDateCaught(null);
@@ -114,7 +122,7 @@ public class CatchTests {
 
     private Catch createValidCatch(final Submission submission, final River river, final int days) {
         final Activity activity = ActivityTests.createValidActivity(submission, river, days);
-        submission.setActivities(Collections.singleton(activity));
+        submission.setActivities(Collections.singletonList(activity));
 
         final Catch cat = new Catch();
         cat.setSubmission(submission);

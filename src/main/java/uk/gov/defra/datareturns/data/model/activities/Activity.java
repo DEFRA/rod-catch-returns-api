@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
+import uk.gov.defra.datareturns.data.model.HasSubmission;
 import uk.gov.defra.datareturns.data.model.catches.Catch;
 import uk.gov.defra.datareturns.data.model.rivers.River;
 import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatch;
@@ -17,7 +18,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import java.util.Set;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import java.util.List;
 
 /**
  * RCR Catch
@@ -25,6 +28,9 @@ import java.util.Set;
  * @author Sam Gardner-Dell
  */
 @Entity(name = "rcr_activity")
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "uniq_activity_river_per_submission", columnNames = {"submission_id", "river_id"})
+})
 @GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
                   strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
                   parameters = {
@@ -35,7 +41,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ValidActivity
-public class Activity extends AbstractBaseEntity {
+public class Activity extends AbstractBaseEntity implements HasSubmission {
     /**
      * The parent submission
      */
@@ -58,11 +64,11 @@ public class Activity extends AbstractBaseEntity {
      * The significant catches recorded by the angler that are associated with this activity (fish species, rivers, mass, etc)
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
-    private Set<Catch> catches;
+    private List<Catch> catches;
 
     /**
      * Small catches - summarised counts of catches by method, month and activity
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
-    private Set<SmallCatch> smallCatches;
+    private List<SmallCatch> smallCatches;
 }

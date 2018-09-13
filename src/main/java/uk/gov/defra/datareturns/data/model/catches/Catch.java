@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
+import uk.gov.defra.datareturns.data.model.HasSubmission;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.method.Method;
 import uk.gov.defra.datareturns.data.model.species.Species;
@@ -38,7 +39,7 @@ import java.util.Date;
 @Getter
 @Setter
 @ValidCatch
-public class Catch extends AbstractBaseEntity {
+public class Catch extends AbstractBaseEntity implements HasSubmission {
     /**
      * The parent submission
      */

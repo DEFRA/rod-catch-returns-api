@@ -317,6 +317,8 @@
             </column>
         </createTable>
 
+        <addUniqueConstraint columnNames="submission_id, river_id" constraintName="uniq_activity_river_per_submission" tableName="rcr_activity"/>
+
         <rollback>
             <dropTable tableName="rcr_activity"/>
             <dropSequence sequenceName="rcr_activity_id_seq"/>
@@ -463,7 +465,7 @@
             <column name="month" type="varchar(9)">
                 <constraints nullable="false"/>
             </column>
-            <column name="released" type="int">
+            <column name="released" type="smallint">
                 <constraints nullable="false"/>
             </column>
             <column name="created" type="timestamp">
@@ -476,6 +478,9 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <addUniqueConstraint columnNames="submission_id, activity_id, month" constraintName="uniq_activity_and_month_per_submission"
+                             tableName="rcr_small_catch"/>
 
         <rollback>
             <dropTable tableName="rcr_small_catch"/>
@@ -497,7 +502,7 @@
             <column name="submission_id" type="bigint"/>
             <column name="activity_id" type="bigint"/>
             <column name="month" type="varchar(9)"/>
-            <column name="released" type="int"/>
+            <column name="released" type="smallint"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_small_catch_aud" columnNames="id, rev"/>
@@ -520,7 +525,7 @@
                              references="rcr_method(id)"/>
             </column>
             <column name="setordinal" type="int"/>
-            <column name="count" type="int">
+            <column name="count" type="smallint">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -541,7 +546,7 @@
             <column name="setordinal" type="int"/>
             <column name="small_catch_id" type="bigint"/>
             <column name="method_id" type="bigint"/>
-            <column name="count" type="int"/>
+            <column name="count" type="smallint"/>
         </createTable>
 
         <rollback>

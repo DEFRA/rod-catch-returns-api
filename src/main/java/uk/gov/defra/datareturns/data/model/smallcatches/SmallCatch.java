@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
+import uk.gov.defra.datareturns.data.model.HasSubmission;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.smallcatches.ValidSmallCatch;
@@ -17,8 +18,11 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.Valid;
 import java.time.Month;
-import java.util.Set;
+import java.util.List;
 
 /**
  * RCR Small Catch
@@ -26,6 +30,9 @@ import java.util.Set;
  * @author Sam Gardner-Dell
  */
 @Entity(name = "rcr_small_catch")
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "uniq_activity_and_month_per_submission", columnNames = {"submission_id", "activity_id", "month"})
+})
 @GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
                   strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
                   parameters = {
@@ -36,7 +43,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ValidSmallCatch
-public class SmallCatch extends AbstractBaseEntity {
+public class SmallCatch extends AbstractBaseEntity implements HasSubmission {
     /**
      * The parent submission
      */
@@ -60,10 +67,11 @@ public class SmallCatch extends AbstractBaseEntity {
      */
     @ElementCollection
     @CollectionTable(name = "rcr_small_catch_counts", joinColumns = @JoinColumn(name = "small_catch_id"))
-    private Set<SmallCatchCount> counts;
+    @Valid
+    private List<SmallCatchCount> counts;
 
     /**
      * The number released
      */
-    private int released;
+    private Short released;
 }

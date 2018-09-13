@@ -40,7 +40,7 @@ public final class SubmissionTestUtils {
 
     public static String fromJson(final String path, final Map<String, Object> templateValues) {
         String json = fromJson(path);
-        for (Map.Entry<String, Object> entry : templateValues.entrySet()) {
+        for (final Map.Entry<String, Object> entry : templateValues.entrySet()) {
             json = json.replaceAll("%" + entry.getKey() + "%", String.valueOf(entry.getValue()));
         }
         return json;
@@ -64,7 +64,7 @@ public final class SubmissionTestUtils {
     }
 
     public static String createEntity(final String resourceUrl, final String entityJson, final Consumer<ValidatableResponse> responseAssertions) {
-        ValidatableResponse response = given()
+        final ValidatableResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(entityJson)
                 .when()

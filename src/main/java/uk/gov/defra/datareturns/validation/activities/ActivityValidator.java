@@ -3,11 +3,9 @@ package uk.gov.defra.datareturns.validation.activities;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
+import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
-import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
-import static uk.gov.defra.datareturns.validation.util.ValidationUtil.handleError;
 
 /**
  * Validate an {@link Activity} object
@@ -16,42 +14,42 @@ import static uk.gov.defra.datareturns.validation.util.ValidationUtil.handleErro
  */
 @RequiredArgsConstructor
 @Slf4j
-public class ActivityValidator implements ConstraintValidator<ValidActivity, Activity> {
+public class ActivityValidator extends AbstractConstraintValidator<ValidActivity, Activity> {
     @Override
     public void initialize(final ValidActivity constraintAnnotation) {
-    }
-
-    @Override
-    public boolean isValid(final Activity activity, final ConstraintValidatorContext context) {
-        boolean valid = checkSubmission(activity, context);
-        valid = checkRiver(activity, context) && valid;
-        valid = checkDays(activity, context) && valid;
-        return valid;
-    }
-
-    private boolean checkSubmission(final Activity activity, final ConstraintValidatorContext context) {
-        if (activity.getSubmission() == null) {
-            return handleError(context, "ACTIVITY_SUBMISSION_REQUIRED", b -> b.addPropertyNode("submission"));
-        }
-        return true;
+        super.addChecks(this::checkSubmission, this::checkRiver, this::checkUniqueRiverPerSubmission, this::checkDays);
     }
 
     private boolean checkRiver(final Activity activity, final ConstraintValidatorContext context) {
-        if (activity.getRiver() == null) {
-            return handleError(context, "ACTIVITY_RIVER_REQUIRED", b -> b.addPropertyNode("river"));
+        return activity.getRiver() != null || handleError(context, "RIVER_REQUIRED", b -> b.addPropertyNode("river"));
+    }
+
+    private boolean checkUniqueRiverPerSubmission(final Activity activity, final ConstraintValidatorContext context) {
+        if (activity.getRiver() != null && activity.getSubmission() != null && activity.getSubmission().getActivities() != null) {
+            final long riverCount = activity.getSubmission().getActivities().stream().filter(a -> activity.getRiver().equals(a.getRiver())).count();
+            if (riverCount > 0) {
+                return handleError(context, "RIVER_DUPLICATE_FOUND", b -> b.addPropertyNode("river"));
+            }
+
         }
         return true;
     }
+
 
     private boolean checkDays(final Activity activity, final ConstraintValidatorContext context) {
         final int maxDays = activity.getSubmission() != null && activity.getSubmission().getSeason() % 4 == 0 ? 366 : 365;
 
         if (activity.getDays() < 1) {
-            return handleError(context, "ACTIVITY_DAYS_NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("days"));
+            return handleError(context, "DAYS_NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("days"));
         } else if (activity.getDays() > maxDays) {
-            return handleError(context, "ACTIVITY_DAYS_MAX_EXCEEDED", b -> b.addPropertyNode("days"));
+            return handleError(context, "DAYS_MAX_EXCEEDED", b -> b.addPropertyNode("days"));
 
         }
         return true;
+    }
+
+    @Override
+    public String getErrorPrefix() {
+        return "ACTIVITY";
     }
 }

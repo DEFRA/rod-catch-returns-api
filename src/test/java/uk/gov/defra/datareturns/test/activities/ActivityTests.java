@@ -47,6 +47,14 @@ public class ActivityTests {
     }
 
     @Test
+    public void testActivityWithoutSubmissionFails() {
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100);
+        activity.setSubmission(null);
+        final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("ACTIVITY_SUBMISSION_REQUIRED"));
+    }
+
+    @Test
     public void testActivityWithoutRiverFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100);
         activity.setRiver(null);
