@@ -60,21 +60,60 @@ public class SubmissionTests {
     }
 
     @Test
-    public void testSubmissionYear() {
+    public void testSubmissionWithoutContactIdFails() {
+        final Submission sub = createValidSubmission();
+        sub.setContactId(null);
+        final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_CONTACT_ID_REQUIRED"));
+    }
+
+    @Test
+    public void testSubmissionWithoutStatusFails() {
+        final Submission sub = createValidSubmission();
+        sub.setStatus(null);
+        final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_STATUS_REQUIRED"));
+    }
+
+    @Test
+    public void testSubmissionWithoutSeasonFails() {
+        final Submission sub = createValidSubmission();
+        sub.setSeason(null);
+        final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_SEASON_INVALID"));
+    }
+
+    @Test
+    public void testSubmissionCurrentSeason() {
+        final Submission sub = createValidSubmission();
+        final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
+        Assertions.assertThat(violations).isEmpty();
+    }
+
+    @Test
+    public void testSubmissionPreviousSeason() {
         final Submission sub = createValidSubmission();
         sub.setSeason(getYear(-1));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
         Assertions.assertThat(violations).isEmpty();
     }
 
+    @Test
+    public void testSubmissionYearTwoSeasonsPriorFails() {
+        final Submission sub = createValidSubmission();
+        sub.setSeason(getYear(-2));
+        final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_SEASON_INVALID"));
+    }
 
     @Test
-    public void testSubmissionStatus() {
+    public void testSubmissionYearInFutureFails() {
         final Submission sub = createValidSubmission();
-        sub.setStatus(null);
+        sub.setSeason(getYear(1));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SUBMISSION_STATUS_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_SEASON_INVALID"));
     }
+
 
     @Test
     public void testSubmissionWithDuplicateRiverInActivitiesFails() {
@@ -83,8 +122,7 @@ public class SubmissionTests {
         final Activity activity2 = ActivityTests.createValidActivity(sub, riverRepository.getOne(1L), 5);
         sub.setActivities(Arrays.asList(activity1, activity2));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).hasSize(2)
-                .haveAtLeast(2, SubmissionTestUtils.violationMessageMatching("ACTIVITY_RIVER_DUPLICATE_FOUND"));
+        Assertions.assertThat(violations).haveExactly(2, SubmissionTestUtils.violationMessageMatching("ACTIVITY_RIVER_DUPLICATE_FOUND"));
     }
 
     @Test
@@ -101,22 +139,6 @@ public class SubmissionTests {
 
         sub.setSmallCatches(Arrays.asList(smallCatch1, smallCatch2));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).hasSize(2).haveAtLeast(2, SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_DUPLICATE_FOUND"));
-    }
-
-    @Test
-    public void testSubmissionYearTwoYearsPriorFails() {
-        final Submission sub = createValidSubmission();
-        sub.setSeason(getYear(-2));
-        final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SUBMISSION_YEAR_INVALID"));
-    }
-
-    @Test
-    public void testSubmissionYearInFutureFails() {
-        final Submission sub = createValidSubmission();
-        sub.setSeason(getYear(1));
-        final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SUBMISSION_YEAR_INVALID"));
+        Assertions.assertThat(violations).haveExactly(2, SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_DUPLICATE_FOUND"));
     }
 }

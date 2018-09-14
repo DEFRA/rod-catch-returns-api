@@ -46,15 +46,13 @@ public class SmallCatchCountTests {
     public void testValidSmallCatchWithoutMethodFails() {
         final SmallCatchCount cat = createValidSmallCatchCount(null, 1);
         final Set<ConstraintViolation<SmallCatchCount>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1)
-                .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_METHOD_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_METHOD_REQUIRED"));
     }
 
     @Test
     public void testValidSmallCatchCountNegativeFails() {
         final SmallCatchCount cat = createValidSmallCatchCount(methodRepository.getOne(1L), -1);
         final Set<ConstraintViolation<SmallCatchCount>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1)
-                .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_NOT_GREATER_THAN_ZERO"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_NOT_GREATER_THAN_ZERO"));
     }
 }

@@ -60,7 +60,7 @@ public final class SubmissionTestUtils {
                 .when()
                 .get(entityUrl)
                 .then()
-                .log().all();
+                .log().status().log().body();
     }
 
     public static String createEntity(final String resourceUrl, final String entityJson, final Consumer<ValidatableResponse> responseAssertions) {

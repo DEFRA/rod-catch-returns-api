@@ -2,6 +2,7 @@ package uk.gov.defra.datareturns.test.catches;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +56,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setSubmission(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_SUBMISSION_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_SUBMISSION_REQUIRED"));
     }
 
     @Test
@@ -63,15 +64,15 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setDateCaught(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_DATE_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_DATE_REQUIRED"));
     }
 
     @Test
     public void testCatchWithDateMismatchToSubmissionFails() {
         final Catch cat = createValidCatch();
-        cat.getDateCaught().setYear(cat.getSubmission().getSeason() - 1);
+        cat.setDateCaught(DateUtils.addYears(cat.getDateCaught(), -1));
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_YEAR_MISMATCH"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_YEAR_MISMATCH"));
     }
 
     @Test
@@ -79,7 +80,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setActivity(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_ACTIVITY_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_ACTIVITY_REQUIRED"));
     }
 
     @Test
@@ -87,7 +88,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setSpecies(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_SPECIES_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_SPECIES_REQUIRED"));
     }
 
     @Test
@@ -95,7 +96,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setMass(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_REQUIRED"));
     }
 
 
@@ -104,7 +105,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.getMass().setType(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_TYPE_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_TYPE_REQUIRED"));
     }
 
     @Test
@@ -115,7 +116,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setMass(catchMass);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_OZ_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_OZ_REQUIRED"));
     }
 
     @Test
@@ -126,7 +127,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setMass(catchMass);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_KG_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_KG_REQUIRED"));
     }
 
     @Test
@@ -134,7 +135,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.getMass().setKg(BigDecimal.valueOf(50.1));
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_MAX_EXCEEDED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_MAX_EXCEEDED"));
     }
 
     @Test
@@ -142,7 +143,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.getMass().set(CatchMass.MeasurementType.METRIC, BigDecimal.valueOf(0.453591));
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_MASS_BELOW_MINIMUM"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_BELOW_MINIMUM"));
     }
 
     @Test
@@ -150,7 +151,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setMethod(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("CATCH_METHOD_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_METHOD_REQUIRED"));
     }
 
     private Catch createValidCatch() {

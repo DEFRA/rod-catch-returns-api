@@ -48,33 +48,32 @@ public class ActivityTests {
 
     @Test
     public void testActivityWithoutSubmissionFails() {
-        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100);
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 5);
         activity.setSubmission(null);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("ACTIVITY_SUBMISSION_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_SUBMISSION_REQUIRED"));
     }
 
     @Test
     public void testActivityWithoutRiverFails() {
-        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100);
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 10);
         activity.setRiver(null);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("ACTIVITY_RIVER_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_RIVER_REQUIRED"));
     }
 
     @Test
     public void testActivityWithNonPositiveDaysFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).hasSize(1)
-                .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_NOT_GREATER_THAN_ZERO"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_NOT_GREATER_THAN_ZERO"));
     }
 
     @Test
     public void testActivityWithMaxDaysExceeded() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 367);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_MAX_EXCEEDED"));
+        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_MAX_EXCEEDED"));
     }
 
     private River getRandomRiver() {
