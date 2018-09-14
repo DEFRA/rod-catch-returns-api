@@ -43,13 +43,6 @@ plugins:
     enabled: true
     config:
       sonar.java.source: 8
-  fixme:
-    enabled: true
-    config:
-      strings:
-      - FIXME
-      - TODO
-      - BUG
 exclude_patterns:
 - ".mvn/"
 - "launches/"
