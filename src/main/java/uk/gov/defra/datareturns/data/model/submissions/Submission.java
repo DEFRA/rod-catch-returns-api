@@ -51,7 +51,7 @@ public class Submission extends AbstractBaseEntity {
     /**
      * The season (year) pertaining to the submission
      */
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Short season;
 
     /**
