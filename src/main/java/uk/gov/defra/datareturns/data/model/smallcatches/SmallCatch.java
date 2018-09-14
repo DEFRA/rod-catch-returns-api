@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.HasSubmission;
@@ -68,6 +69,7 @@ public class SmallCatch extends AbstractBaseEntity implements HasSubmission {
     @ElementCollection
     @CollectionTable(name = "rcr_small_catch_counts", joinColumns = @JoinColumn(name = "small_catch_id"))
     @Valid
+    @NotAudited
     private List<SmallCatchCount> counts;
 
     /**

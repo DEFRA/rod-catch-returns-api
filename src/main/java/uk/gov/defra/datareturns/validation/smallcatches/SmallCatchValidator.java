@@ -47,8 +47,7 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
             for (int i = 0; i < smallCatch.getSubmission().getSmallCatches().size(); i++) {
                 final SmallCatch other = smallCatch.getSubmission().getSmallCatches().get(i);
                 if (smallCatch != other && smallCatch.getActivity().equals(other.getActivity()) && smallCatch.getMonth().equals(other.getMonth())) {
-                    final int index = i;
-                    valid = handleError(context, "DUPLICATE_FOUND", b -> b.addBeanNode().inIterable().atIndex(index));
+                    valid = handleError(context, "DUPLICATE_FOUND", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
                 }
             }
         }

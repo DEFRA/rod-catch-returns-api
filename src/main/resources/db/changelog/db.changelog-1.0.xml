@@ -528,7 +528,6 @@
                              foreignKeyName="fk_small_catch__method"
                              references="rcr_method(id)"/>
             </column>
-            <column name="setordinal" type="int"/>
             <column name="count" type="smallint">
                 <constraints nullable="false"/>
             </column>
@@ -538,25 +537,5 @@
             <dropTable tableName="rcr_small_catch_counts"/>
         </rollback>
     </changeSet>
-
-    <changeSet id="create-table: rcr_small_catch_counts_aud" author="Defra">
-        <createTable tableName="rcr_small_catch_counts_aud">
-            <column name="rev" type="integer">
-                <constraints nullable="false"/>
-            </column>
-            <column name="original_id_revtype" type="tinyint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="setordinal" type="int"/>
-            <column name="small_catch_id" type="bigint"/>
-            <column name="method_id" type="bigint"/>
-            <column name="count" type="smallint"/>
-        </createTable>
-
-        <rollback>
-            <dropTable tableName="rcr_small_catch_counts_aud"/>
-        </rollback>
-    </changeSet>
-
 
 </databaseChangeLog>
