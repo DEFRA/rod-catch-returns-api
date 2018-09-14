@@ -6,6 +6,18 @@
 
 Spring Data REST API for Rod Catch Returns.
 
+When you purchase a migratory salmon and sea trout rod licence, you are legally required to submit a catch return, which is a log of the fish caught that season. Users are sent a paper copy of the catch return form with their licence, and also directed towards the catch return website.
+
+Users are asked to submit details of the fish they caught (species, weight, number etc) and where they caught them.
+
+This API provides validation and persistence capabilities for Rod Catch Returns data.
+
+
+## Cloning
+Cloning via SSH from behind a corporate firewall which blocks port 22:
+```bash
+git clone ssh://git@ssh.github.com:443/DEFRA/rod-catch-returns-api
+```
 
 ## Prerequisites
 
