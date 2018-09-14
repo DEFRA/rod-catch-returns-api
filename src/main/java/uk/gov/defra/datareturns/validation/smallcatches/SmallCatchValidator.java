@@ -28,18 +28,46 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
                 this::checkUniqueActivityAndMonth, this::checkCountsProvided, this::checkCountMethodDuplicates, this::checkReleased);
     }
 
+    /**
+     * Check activity is provided
+     *
+     * @param smallCatch the {@link SmallCatch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkActivity(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
         return smallCatch.getActivity() != null || handleError(context, "ACTIVITY_REQUIRED", b -> b.addPropertyNode("activity"));
     }
 
+    /**
+     * Check month is provided
+     *
+     * @param smallCatch the {@link SmallCatch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkMonth(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
         return smallCatch.getMonth() != null || handleError(context, "MONTH_REQUIRED", b -> b.addPropertyNode("month"));
     }
 
+    /**
+     * Check counts have been provided
+     *
+     * @param smallCatch the {@link SmallCatch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkCountsProvided(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
         return CollectionUtils.isNotEmpty(smallCatch.getCounts()) || handleError(context, "COUNTS_REQUIRED", b -> b.addPropertyNode("counts"));
     }
 
+    /**
+     * Check that there are no duplicate small catches with the same activity and month
+     *
+     * @param smallCatch the {@link SmallCatch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkUniqueActivityAndMonth(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
         boolean valid = true;
         if (smallCatch.getActivity() != null && smallCatch.getMonth() != null && smallCatch.getSubmission() != null
@@ -55,6 +83,13 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
     }
 
 
+    /**
+     * Check that there are no duplicate counts for the same method
+     *
+     * @param smallCatch the {@link SmallCatch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkCountMethodDuplicates(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
         if (CollectionUtils.isNotEmpty(smallCatch.getCounts())) {
             final List<Method> allMethodsUsed = smallCatch.getCounts().stream().map(SmallCatchCount::getMethod).collect(Collectors.toList());
@@ -65,6 +100,13 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
         return true;
     }
 
+    /**
+     * Check that the released value is positive and that it is not greater than the total of the counts
+     *
+     * @param smallCatch the {@link SmallCatch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkReleased(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
         if (smallCatch.getReleased() < 0) {
             return handleError(context, "RELEASED_NEGATIVE", b -> b.addPropertyNode("released"));

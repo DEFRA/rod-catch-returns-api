@@ -35,10 +35,24 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
                 this::checkMass, this::checkMassValue, this::checkMassLimits, this::checkMethod);
     }
 
+    /**
+     * Check activity is provided
+     *
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkActivity(final Catch catchEntry, final ConstraintValidatorContext context) {
         return catchEntry.getActivity() != null || handleError(context, "ACTIVITY_REQUIRED", b -> b.addPropertyNode("activity"));
     }
 
+    /**
+     * Check date caught is provided and valid with respect to the the submission year
+     *
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkDate(final Catch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getDateCaught() == null) {
             return handleError(context, "DATE_REQUIRED", b -> b.addPropertyNode("dateCaught"));
@@ -52,10 +66,24 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
         return true;
     }
 
+    /**
+     * Check species is provided
+     *
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkSpecies(final Catch catchEntry, final ConstraintValidatorContext context) {
         return catchEntry.getSpecies() != null || handleError(context, "SPECIES_REQUIRED", b -> b.addPropertyNode("species"));
     }
 
+    /**
+     * Check mass is provided and its type is properly set
+     *
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkMass(final Catch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getMass() == null) {
             return handleError(context, "MASS_REQUIRED", b -> b.addPropertyNode("mass"));
@@ -64,6 +92,13 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
                 b -> b.addPropertyNode("mass").addPropertyNode("type"));
     }
 
+    /**
+     * Check mass value is provided with respect to the mass type that is set
+     *
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkMassValue(final Catch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getMass() != null) {
             if (CatchMass.MeasurementType.IMPERIAL.equals(catchEntry.getMass().getType())) {
@@ -77,6 +112,13 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
         return true;
     }
 
+    /**
+     * Check mass values are within limits
+     *
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkMassLimits(final Catch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getMass() != null) {
             // Ensure that the mass has been conciliated before attempting to validate based on the metric value
@@ -93,6 +135,13 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
         return true;
     }
 
+    /**
+     * Check that a method has been provided
+     *
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkMethod(final Catch catchEntry, final ConstraintValidatorContext context) {
         return catchEntry.getMethod() != null || handleError(context, "METHOD_REQUIRED", b -> b.addPropertyNode("method"));
     }

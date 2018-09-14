@@ -20,10 +20,25 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
         super.addChecks(this::checkSubmission, this::checkRiver, this::checkUniqueRiverPerSubmission, this::checkDays);
     }
 
+    /**
+     * Check river is provided
+     *
+     * @param activity the activity to be validated
+     * @param context  the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkRiver(final Activity activity, final ConstraintValidatorContext context) {
         return activity.getRiver() != null || handleError(context, "RIVER_REQUIRED", b -> b.addPropertyNode("river"));
     }
 
+
+    /**
+     * Check that a unique river is used in all activities
+     *
+     * @param activity the activity to be validated
+     * @param context  the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkUniqueRiverPerSubmission(final Activity activity, final ConstraintValidatorContext context) {
         if (activity.getRiver() != null && activity.getSubmission() != null && activity.getSubmission().getActivities() != null) {
             final long riverCount = activity.getSubmission().getActivities().stream()
@@ -37,7 +52,13 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
         return true;
     }
 
-
+    /**
+     * Check that the count of days spent on the river is between 1 and 365 (or 366 for a leap year)
+     *
+     * @param activity the activity to be validated
+     * @param context  the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkDays(final Activity activity, final ConstraintValidatorContext context) {
         final int maxDays = activity.getSubmission() != null && activity.getSubmission().getSeason() % 4 == 0 ? 366 : 365;
 

@@ -1,15 +1,15 @@
 package uk.gov.defra.datareturns.data.model.submissions;
 
-import lombok.Getter;
-
-@Getter
+/**
+ * The status of a {@link Submission}
+ */
 public enum SubmissionStatus {
-    INCOMPLETE(true),
-    SUBMITTED(false);
-
-    private final boolean open;
-
-    SubmissionStatus(final boolean open) {
-        this.open = open;
-    }
+    /**
+     * Submission is not complete
+     */
+    INCOMPLETE,
+    /**
+     * Submission submitted
+     */
+    SUBMITTED
 }

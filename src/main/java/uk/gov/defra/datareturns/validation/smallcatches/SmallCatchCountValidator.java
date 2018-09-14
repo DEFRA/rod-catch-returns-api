@@ -20,10 +20,24 @@ public class SmallCatchCountValidator extends AbstractConstraintValidator<ValidS
         super.addChecks(this::checkCountMethod, this::checkCountGreaterThanZero);
     }
 
+    /**
+     * Check that a method has been provided
+     *
+     * @param count   the {@link SmallCatchCount} to be validated
+     * @param context the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkCountMethod(final SmallCatchCount count, final ConstraintValidatorContext context) {
         return count.getMethod() != null || handleError(context, "METHOD_REQUIRED", b -> b.addPropertyNode("method"));
     }
 
+    /**
+     * Check that the count is greater than zero
+     *
+     * @param count   the {@link SmallCatchCount} to be validated
+     * @param context the validator context
+     * @return true if valid, false otherwise
+     */
     private boolean checkCountGreaterThanZero(final SmallCatchCount count, final ConstraintValidatorContext context) {
         return count.getCount() > 0 || handleError(context, "NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("count"));
     }

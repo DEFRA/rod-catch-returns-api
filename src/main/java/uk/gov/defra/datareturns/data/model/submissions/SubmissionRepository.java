@@ -50,6 +50,12 @@ public interface SubmissionRepository extends BaseRepository<Submission, Long> {
     List<Submission> findByContactIdInAndSeason(@Param("contact_ids") Set<String> contactIds,
                                                 @Param("season") Short season);
 
+    /**
+     * Retrieve all submissions for a given season
+     *
+     * @param season the season for which submissions should be retrievedto
+     * @return the list of {@link Submission}s for the give season
+     */
     @SuppressWarnings("unused")
     List<Submission> findBySeason(@Param("season") Short season);
 }

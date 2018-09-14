@@ -20,7 +20,13 @@ import java.math.RoundingMode;
 @Getter
 @Setter
 public class CatchMass {
+    /**
+     * Precision for {@link BigDecimal} - see also the liquibase configuration in db-changelog....
+     */
     public static final int PRECISION = 12;
+    /**
+     * Scale for {@link BigDecimal} - see also the liquibase configuration in db-changelog....
+     */
     public static final int SCALE = 6;
 
     /**
