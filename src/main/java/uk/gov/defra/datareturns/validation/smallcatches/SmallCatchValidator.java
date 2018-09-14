@@ -108,6 +108,9 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
      * @return true if valid, false otherwise
      */
     private boolean checkReleased(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
+        if (smallCatch.getReleased() == null) {
+            return handleError(context, "RELEASED_REQUIRED", b -> b.addPropertyNode("released"));
+        }
         if (smallCatch.getReleased() < 0) {
             return handleError(context, "RELEASED_NEGATIVE", b -> b.addPropertyNode("released"));
         }

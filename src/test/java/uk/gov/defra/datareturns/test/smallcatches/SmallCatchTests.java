@@ -109,6 +109,15 @@ public class SmallCatchTests {
                 .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_METHOD_DUPLICATE_FOUND"));
     }
 
+
+    @Test
+    public void testSmallCatchWithoutReleasedFails() {
+        final SmallCatch cat = createValidSmallCatch();
+        cat.setReleased(null);
+        final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_RELEASED_REQUIRED"));
+    }
+
     @Test
     public void testSmallCatchReleasedLessThanZeroFails() {
         final SmallCatch cat = createValidSmallCatch();
