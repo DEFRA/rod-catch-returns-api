@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 
-import java.io.IOException;
-
 /**
  * Controller to enable the lookup of licence information from the CRM
  *
