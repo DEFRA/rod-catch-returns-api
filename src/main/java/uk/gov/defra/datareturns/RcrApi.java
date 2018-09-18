@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Application class for the Data Returns PI submissions API.
+ * Application class for the Rod catch returns API
  *
  * @author Sam Gardner-Dell
  */

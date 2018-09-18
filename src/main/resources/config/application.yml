@@ -23,6 +23,10 @@ server:
   display-name: rcr_api
   port: 9580
 
+dynamics:
+  impl: dynamics
+  endpoint:
+
 ---
 ###############################################################################
 #
