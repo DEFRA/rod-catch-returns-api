@@ -25,4 +25,11 @@ public interface CrmLookupService {
      * @return the {@link Contact} object for the given contact id or null if not found
      */
     Contact getContact(String contactId);
+
+    /**
+     * Retrieve the contact details using the last 6 digits of the licence number
+     * @param licenceNumber
+     * @return
+     */
+    Contact getContactFromLicence(String licenceNumber);
 }

@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
 import java.net.URI;
+import java.net.URL;
 
 /**
  * Configuration options for Microsoft Dynamics integration
@@ -31,7 +32,12 @@ public class DynamicsConfiguration {
     /**
      * The dynamics endpoint
      */
-    private URI endpoint;
+    private URL endpoint;
+
+    /**
+     * The dynamics endpoint
+     */
+    private URI api;
 
     public enum DynamicsImpl {
         /**

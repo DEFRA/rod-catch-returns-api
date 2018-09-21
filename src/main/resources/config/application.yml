@@ -25,7 +25,14 @@ server:
 
 dynamics:
   impl: dynamics
-  endpoint:
+  endpoint: https://ea-fish-devsandbox.crm4.dynamics.com
+  api: api/data/v9.0
+
+active-directory:
+  tenant: Defra.onmicrosoft.com
+  authority: https://login.microsoftonline.com
+  clientId: ***REMOVED***
+  clientSecret: ***REMOVED***
 
 ---
 ###############################################################################

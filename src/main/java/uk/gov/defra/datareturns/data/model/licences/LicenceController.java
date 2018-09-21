@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 
+import java.io.IOException;
+
 /**
  * Controller to enable the lookup of licence information from the CRM
  *
@@ -32,25 +34,25 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
     private final CrmLookupService lookupService;
 
     /**
-     * Retrieve a licence based on the given (partial) licence number
+     * Retrieve a contact based on the given (partial) licence number
      *
      * @param licenceNumber the licence number used to retrieve licence information
      * @return a {@link ResponseEntity} containing the target {@link Licence} or a 404 status if not found
      * @throws IOException on error
      */
-    @GetMapping(value = "/licences/{licence}")
-    public ResponseEntity<?> getLicence(@PathVariable("licence") final String licenceNumber) {
-        final Licence licence = lookupService.getLicence(licenceNumber);
-        if (licence != null) {
-            return new ResponseEntity<>(licence, HttpStatus.OK);
+    @GetMapping(value = "/contact/{licence}")
+    public ResponseEntity<Contact> getContact(@PathVariable("licence") final String licenceNumber) {
+        final Contact contact = lookupService.getContactFromLicence(licenceNumber);
+        if (contact == null || contact.getReturnStatus().endsWith("error")) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(contact, HttpStatus.OK);
     }
 
     /**
      * @return 405, "Method Not Allowed"
      */
-    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST, RequestMethod.DELETE}, value = "/licences/*")
+    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST, RequestMethod.DELETE}, value = "/contact/*")
     @ApiIgnore
     public ResponseEntity<Licence> disabledMethods() {
         return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
