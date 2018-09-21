@@ -27,7 +27,7 @@ public class Contact implements CRMEntity {
     @JsonProperty("Postcode")
     private String postcode;
 
-    @JsonProperty("PermissionNumber")
+    @JsonProperty("ReturnPermissionNumber")
     private String permissionNumber;
 
     @JsonProperty("ReturnStatus")
