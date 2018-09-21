@@ -36,4 +36,9 @@ public class MockCrmLookupService implements CrmLookupService {
         contact.setPostcode("WA4 1AB");
         return contact;
     }
+
+    @Override
+    public Contact getContactFromLicence(String licenceNumber) {
+        return null;
+    }
 }

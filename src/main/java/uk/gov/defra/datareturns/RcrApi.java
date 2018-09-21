@@ -2,6 +2,7 @@ package uk.gov.defra.datareturns;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
 /**
  * Application class for the Rod catch returns API
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Sam Gardner-Dell
  */
 @SpringBootApplication
+@EnableCaching
 @SuppressWarnings({"checkstyle:HideUtilityClassConstructor", "NonFinalUtilityClass"})
 public class RcrApi {
     /**
