@@ -46,16 +46,6 @@ public class DynamicsCrmLookupService implements CrmLookupService {
 
     //TODO Implement
     @Override
-    public Licence getLicence(final String lookup) {
-        // FIXME: Fetch the licence data from dynamic (dynamicsConfiguration.getEndpoint())
-        final Licence licence = new Licence();
-        licence.setLicenceNumber("CCBBAA");
-        licence.setContact(getContact("0987654321"));
-        return licence;
-    }
-
-    //TODO Implement
-    @Override
     public Contact getContact(final String contactId) {
         final Contact contact = new Contact();
         contact.setId(contactId);
