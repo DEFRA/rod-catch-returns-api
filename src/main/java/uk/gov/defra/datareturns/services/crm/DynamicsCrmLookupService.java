@@ -24,9 +24,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Mock CRM lookup service
+ * CRM lookup service
  *
- * @author Sam Gardner-Dell
+ * @author Graham Willis
  */
 @Service
 @ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
@@ -34,10 +34,6 @@ import java.net.URL;
 @Slf4j
 @RequiredArgsConstructor
 public class DynamicsCrmLookupService implements CrmLookupService {
-
-    //protected class DynamicsCrmStoredProcesdures {
-      //  protected final String GET_CONTACT_BY_LICENSE_NUMBER = "defra_ GetContactByLicenseNumber";
-    //}
 
     /**
      * the dynamics configuration
@@ -48,6 +44,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     @Inject
     private TokenService tokenService;
 
+    //TODO Implement
     @Override
     public Licence getLicence(final String lookup) {
         // FIXME: Fetch the licence data from dynamic (dynamicsConfiguration.getEndpoint())
@@ -57,6 +54,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         return licence;
     }
 
+    //TODO Implement
     @Override
     public Contact getContact(final String contactId) {
         final Contact contact = new Contact();
