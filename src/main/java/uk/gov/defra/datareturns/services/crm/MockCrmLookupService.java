@@ -65,4 +65,9 @@ public class MockCrmLookupService implements CrmLookupService {
             return contact;
         }
     }
+
+    @Override
+    public Contact getContactFromLicence(String licenceNumber) {
+        return null;
+    }
 }
