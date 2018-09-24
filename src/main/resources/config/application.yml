@@ -24,7 +24,7 @@ server:
   port: 9580
 
 dynamics:
-  impl: dynamics
+  impl: mock
   endpoint:
   api:
 
@@ -53,15 +53,4 @@ liquibase:
   enabled: true
 
 ---
-###############################################################################
-#
-# Profile: mock-crm used used for front end unit tests
-#
-###############################################################################
-spring:
-  profiles: mock-crm
 
-dynamics:
-  impl: mock
-
----

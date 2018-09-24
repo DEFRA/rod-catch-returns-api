@@ -37,7 +37,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Cacheable(cacheNames = "crm-auth-token")
     public String getToken() {
-        ExecutorService service = Executors.newFixedThreadPool(1);
+        ExecutorService service = Executors.newSingleThreadExecutor();
         try {
             URI tenant = aadConfiguration.getTenant();
             URL authority = aadConfiguration.getAuthority();
@@ -81,17 +81,13 @@ public class TokenServiceImpl implements TokenService {
             long seconds = result.getExpiresAfter();
             log.debug("AAD token acquired successfully: expires in " + seconds + " seconds");
 
-            //TODO Remove
-            log.debug(result.getAccessToken());
+            // Log the token in debug mode
+            log.debug("Bearer " + result.getAccessToken());
             ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
             // Remove the token 1 minute before it is due to expire
             long delay  = Math.max(seconds - 60, 0);
-            executor.schedule(new TimerTask() {
-                public void run() {
-                    proxy.evictToken();
-                }
-            }, delay, TimeUnit.SECONDS);
+            executor.schedule(() -> proxy.evictToken(), delay, TimeUnit.SECONDS);
             executor.shutdown();
         }
 

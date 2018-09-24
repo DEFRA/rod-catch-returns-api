@@ -37,11 +37,6 @@ Run with in-memory database for testing:
 launches/serverctl run --spring.profiles.active=h2
 ```
 
-Run with the mock CRM endpoint for automated testing:
-```bash
-launches/serverctl run --spring.profiles.active=mock-crm
-```
-
 ## Verifying changes
 
 To run unit and integration tests:
