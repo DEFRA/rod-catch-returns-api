@@ -62,8 +62,9 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     @Override
     public Contact getContactFromLicence(String licenceNumber) {
         ContactQuery contactQuery = new ContactQuery();
-        contactQuery.query = contactQuery.new Query();
-        contactQuery.query.setPermissionNumber(licenceNumber);
+        ContactQuery.Query query = new ContactQuery.Query();
+        query.setPermissionNumber(licenceNumber);
+        contactQuery.setQuery(query);
         return callCRM(contactQuery);
     }
 
@@ -97,7 +98,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         @Getter
         @Setter
         @ToString
-        public class Query implements CRMQuery.Query {
+        public static class Query implements CRMQuery.Query {
             @JsonProperty("PermissionNumber")
             private String permissionNumber;
         }
