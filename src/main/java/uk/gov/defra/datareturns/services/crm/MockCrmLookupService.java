@@ -32,10 +32,14 @@ public class MockCrmLookupService implements CrmLookupService {
     static {
         for (int i = 1; i <= 8; i++) {
             Contact c = new Contact();
-            c.setPostcode(String.format("WA4 %dHT", i));
+            String permission = String.format("B7A7%d8", i);
+            String postcode = String.format("WA4 %dHT", i);
+            c.setPermissionNumber(permission);
+            c.setPostcode(postcode);
             c.setId(String.format("f8e6ee6a-8fba-e811-a96c-000%d3ab9add5", i));
             c.setReturnStatus("success");
-            licences.put(String.format("B7A7%d8", i), c);
+            licences.put(permission, c);
+            log.info("Mock licence: " + c);
         }
         byContact = licences.values()
                 .stream()
