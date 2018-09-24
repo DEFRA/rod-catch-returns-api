@@ -7,10 +7,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
-import uk.gov.defra.datareturns.data.model.licences.Licence;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -27,7 +25,7 @@ import java.util.stream.Collectors;
 public class MockCrmLookupService implements CrmLookupService {
 
     private static final Map<String, Contact> licences = new HashMap<>();
-    private static Map<String, Contact> byContact;
+    private static final Map<String, Contact> byContact;
 
     static {
         for (int i = 1; i <= 8; i++) {

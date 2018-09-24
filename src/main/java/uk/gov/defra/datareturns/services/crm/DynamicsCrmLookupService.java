@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
-import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.aad.TokenService;
 
 import javax.inject.Inject;
@@ -36,13 +35,20 @@ import java.net.URL;
 public class DynamicsCrmLookupService implements CrmLookupService {
 
     /**
-     * the dynamics configuration
+     * The dynamics configuration
      */
-    @Inject
     private DynamicsConfiguration dynamicsConfiguration;
 
-    @Inject
+    /**
+     * The dynamics authentication token service
+     */
     private TokenService tokenService;
+
+    @Inject
+    public DynamicsCrmLookupService(DynamicsConfiguration dynamicsConfiguration, TokenService tokenService) {
+        this.dynamicsConfiguration = dynamicsConfiguration;
+        this.tokenService = tokenService;
+    }
 
     //TODO Implement
     @Override
@@ -58,8 +64,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         ContactQuery contactQuery = new ContactQuery();
         contactQuery.query = contactQuery.new Query();
         contactQuery.query.setPermissionNumber(licenceNumber);
-        Contact contact = callCRM(contactQuery);
-        return contact;
+        return callCRM(contactQuery);
     }
 
     /**
@@ -81,7 +86,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      */
     @Getter
     @Setter
-    public class ContactQuery implements CRMQuery<Contact> {
+    public static class ContactQuery implements CRMQuery<Contact> {
         private final String cRMStoredProcedureName = "defra_GetContactByLicenseNumber";
         private Query query;
 
@@ -104,7 +109,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * @param <T>
      * @return
      */
-    public <T extends CRMEntity> T callCRM(CRMQuery<T> crmQuery) {
+    private <T extends CRMEntity> T callCRM(CRMQuery<T> crmQuery) {
         try {
             URL url = new URL(dynamicsConfiguration.getEndpoint(),
                     dynamicsConfiguration.getApi().toString() + "/" + crmQuery.getCRMStoredProcedureName());
