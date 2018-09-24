@@ -1,12 +1,11 @@
 package uk.gov.defra.datareturns.data.model.licences;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import uk.gov.defra.datareturns.services.crm.CRMEntity;
+
+import java.time.LocalDate;
 
 /**
  * Represents a contact entry within the CRM
@@ -15,24 +14,22 @@ import uk.gov.defra.datareturns.services.crm.CRMEntity;
  */
 @Getter
 @Setter
-@ToString
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Contact implements CRMEntity {
+public class Contact {
     /**
      * the id associated with the contact
      */
-    @JsonProperty("ContactId")
     private String id;
 
-    @JsonProperty("Postcode")
     private String postcode;
+    private String firstName;
+    private String lastName;
 
-    @JsonProperty("ReturnPermissionNumber")
-    private String permissionNumber;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private LocalDate dob;
 
-    @JsonProperty("ReturnStatus")
-    private String returnStatus;
+    private String premises;
+    private String street;
+    private String town;
+    private String locality;
 
-    @JsonProperty("ErrorMessage")
-    private String errorMessage;
 }

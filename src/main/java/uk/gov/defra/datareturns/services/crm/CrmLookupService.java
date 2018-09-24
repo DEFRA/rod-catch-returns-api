@@ -1,6 +1,7 @@
 package uk.gov.defra.datareturns.services.crm;
 
 import uk.gov.defra.datareturns.data.model.licences.Contact;
+import uk.gov.defra.datareturns.data.model.licences.Licence;
 
 /**
  * Service to retrieve contact details from the CRM
@@ -18,9 +19,9 @@ public interface CrmLookupService {
     Contact getContact(String contactId);
 
     /**
-     * Retrieve the contact details using the last 6 digits of the licence number
+     * Retrieve the Licence and contact details using the last 6 digits of the licence number
      * @param licenceNumber
-     * @return
+     * @return Licence
      */
-    Contact getContactFromLicence(String licenceNumber);
+    Licence getLicenceFromLicenceNumber(String licenceNumber);
 }

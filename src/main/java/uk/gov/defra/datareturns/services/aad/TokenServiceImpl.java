@@ -80,6 +80,9 @@ public class TokenServiceImpl implements TokenService {
              */
             long seconds = result.getExpiresAfter();
             log.debug("AAD token acquired successfully: expires in " + seconds + " seconds");
+
+            //TODO Remove
+            log.debug(result.getAccessToken());
             ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
             // Remove the token 1 minute before it is due to expire

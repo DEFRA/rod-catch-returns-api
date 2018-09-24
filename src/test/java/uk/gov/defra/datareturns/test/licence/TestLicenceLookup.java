@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
+import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.crm.MockCrmLookupService;
 import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
 
@@ -23,13 +24,13 @@ public class TestLicenceLookup {
 
     @Test
     public void testLicenceLookupSucceds() {
-        Contact contact = crmLookupService.getContactFromLicence("B7A728");
-        Assertions.assertThat(contact.getReturnStatus()).isEqualToIgnoringCase("success");
+        Licence licence = crmLookupService.getLicenceFromLicenceNumber("B7A728");
+        Assertions.assertThat(licence).isNotNull();
     }
 
     @Test
     public void testLicenceLookupFails() {
-        Contact contact = crmLookupService.getContactFromLicence("B9A72D8");
-        Assertions.assertThat(contact.getReturnStatus()).isEqualToIgnoringCase("error");
+        Licence licence = crmLookupService.getLicenceFromLicenceNumber("B9A72D8");
+        Assertions.assertThat(licence).isNull();
     }
 }

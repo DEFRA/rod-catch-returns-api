@@ -40,19 +40,19 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
      * @return a {@link ResponseEntity} containing the target {@link Licence} or a 404 status if not found
      * @throws IOException on error
      */
-    @GetMapping(value = "/contact/{licence}")
-    public ResponseEntity<Contact> getContact(@PathVariable("licence") final String licenceNumber) {
-        final Contact contact = lookupService.getContactFromLicence(licenceNumber);
-        if (contact == null || contact.getReturnStatus().endsWith("error")) {
+    @GetMapping(value = "/licence/{licence}")
+    public ResponseEntity<Licence> getContact(@PathVariable("licence") final String licenceNumber) {
+        final Licence licence = lookupService.getLicenceFromLicenceNumber(licenceNumber);
+        if (licence == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(contact, HttpStatus.OK);
+        return new ResponseEntity<>(licence, HttpStatus.OK);
     }
 
     /**
      * @return 405, "Method Not Allowed"
      */
-    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST, RequestMethod.DELETE}, value = "/contact/*")
+    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST, RequestMethod.DELETE}, value = "/licence/*")
     @ApiIgnore
     public ResponseEntity<Licence> disabledMethods() {
         return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);

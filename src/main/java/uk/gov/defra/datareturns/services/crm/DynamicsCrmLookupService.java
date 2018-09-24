@@ -16,11 +16,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
+import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.aad.TokenService;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 
 /**
  * CRM lookup service
@@ -34,20 +36,21 @@ import java.net.URL;
 @RequiredArgsConstructor
 public class DynamicsCrmLookupService implements CrmLookupService {
 
-    /**
-     * The dynamics configuration
-     */
+    // The dynamics configuration
     private DynamicsConfiguration dynamicsConfiguration;
 
-    /**
-     * The dynamics authentication token service
-     */
+
+    // The dynamics authentication token service
     private TokenService tokenService;
+
+    // A CRM query to get the licence and contact details
+    private final LicenceQuery licenceQuery = new LicenceQuery();
 
     @Inject
     public DynamicsCrmLookupService(DynamicsConfiguration dynamicsConfiguration, TokenService tokenService) {
         this.dynamicsConfiguration = dynamicsConfiguration;
         this.tokenService = tokenService;
+
     }
 
     //TODO Implement
@@ -60,12 +63,11 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     }
 
     @Override
-    public Contact getContactFromLicence(String licenceNumber) {
-        ContactQuery contactQuery = new ContactQuery();
-        ContactQuery.Query query = new ContactQuery.Query();
+    public Licence getLicenceFromLicenceNumber(String licenceNumber) {
+        LicenceQuery.Query query = new LicenceQuery.Query();
         query.setPermissionNumber(licenceNumber);
-        contactQuery.setQuery(query);
-        return callCRM(contactQuery);
+        licenceQuery.setQuery(query);
+        return Objects.requireNonNull(callCRM(licenceQuery)).getBaseEntity();
     }
 
     /**
@@ -76,6 +78,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * @param <T>
      */
     public interface CRMQuery<T extends CRMEntity> {
+        @SuppressWarnings("SameReturnValue")
         String getCRMStoredProcedureName();
         CRMQuery.Query getQuery();
         Class<T> getEntityClass();
@@ -87,18 +90,20 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      */
     @Getter
     @Setter
-    public static class ContactQuery implements CRMQuery<Contact> {
-        private final String cRMStoredProcedureName = "defra_GetContactByLicenseNumber";
+    public static class LicenceQuery implements CRMQuery<CRMLicence> {
         private Query query;
+        public Class<CRMLicence> getEntityClass() {
+            return CRMLicence.class;
+        }
 
-        public Class<Contact> getEntityClass() {
-            return Contact.class;
+        public String getCRMStoredProcedureName() {
+            return "defra_GetContactByLicenseNumber";
         }
 
         @Getter
         @Setter
         @ToString
-        public static class Query implements CRMQuery.Query {
+        static class Query implements CRMQuery.Query {
             @JsonProperty("PermissionNumber")
             private String permissionNumber;
         }
@@ -106,9 +111,9 @@ public class DynamicsCrmLookupService implements CrmLookupService {
 
     /**
      * Generic CRM call method - uses the spring rest template
-     * @param crmQuery
-     * @param <T>
-     * @return
+     * @param crmQuery - the instance of the CRM query
+     * @param <T> - The type of the returned entity
+     * @return - The returned entity object from the CRM
      */
     private <T extends CRMEntity> T callCRM(CRMQuery<T> crmQuery) {
         try {

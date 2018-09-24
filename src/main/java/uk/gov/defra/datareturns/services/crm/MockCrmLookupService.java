@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
+import uk.gov.defra.datareturns.data.model.licences.Licence;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,23 +25,29 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MockCrmLookupService implements CrmLookupService {
 
-    private static final Map<String, Contact> licences = new HashMap<>();
+    private static final Map<String, Licence> licences = new HashMap<>();
     private static final Map<String, Contact> byContact;
 
     static {
         for (int i = 1; i <= 8; i++) {
-            Contact c = new Contact();
+            Licence l = new Licence();
+
             String permission = String.format("B7A7%d8", i);
             String postcode = String.format("WA4 %dHT", i);
-            c.setPermissionNumber(permission);
+
+            l.setLicenceNumber(permission);
+            Contact c = new Contact();
+
             c.setPostcode(postcode);
             c.setId(String.format("f8e6ee6a-8fba-e811-a96c-000%d3ab9add5", i));
-            c.setReturnStatus("success");
-            licences.put(permission, c);
+
+            l.setContact(c);
+            licences.put(permission, l);
             log.info("Mock licence: " + c);
         }
         byContact = licences.values()
                 .stream()
+                .map(Licence::getContact)
                 .collect(Collectors.toMap(Contact::getId, c -> c));
     }
 
@@ -49,22 +56,16 @@ public class MockCrmLookupService implements CrmLookupService {
         if (byContact.containsKey(contactId)) {
             return byContact.get(contactId);
         } else {
-            final Contact contact = new Contact();
-            contact.setReturnStatus("error");
-            contact.setErrorMessage("Contact not found");
-            return contact;
+            return null;
         }
     }
 
     @Override
-    public Contact getContactFromLicence(String licenceNumber) {
+    public Licence getLicenceFromLicenceNumber(String licenceNumber) {
         if (licences.containsKey(licenceNumber.toUpperCase().trim())) {
             return licences.get(licenceNumber);
         } else {
-            final Contact contact = new Contact();
-            contact.setReturnStatus("error");
-            contact.setErrorMessage("Contact not found");
-            return contact;
+            return null;
         }
     }
 }
