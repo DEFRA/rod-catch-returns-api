@@ -23,6 +23,17 @@ server:
   display-name: rcr_api
   port: 9580
 
+dynamics:
+  impl: mock
+  endpoint:
+  api:
+
+active-directory:
+  tenant:
+  authority:
+  clientId:
+  clientSecret:
+
 ---
 ###############################################################################
 #
@@ -40,3 +51,6 @@ spring:
 # Enable liquibase migrations when running in-memory
 liquibase:
   enabled: true
+
+---
+

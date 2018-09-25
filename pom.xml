@@ -50,6 +50,12 @@
             <classifier>testcommons</classifier>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>adal4j</artifactId>
+            <version>1.6.2</version>
+        </dependency>
     </dependencies>
 
     <build>
