@@ -52,14 +52,14 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     private final CrmActivity.UpdateActivity updateActivity = new CrmActivity.UpdateActivity();
 
     @Inject
-    public DynamicsCrmLookupService(DynamicsConfiguration dynamicsConfiguration, TokenService tokenService) {
+    public DynamicsCrmLookupService(final DynamicsConfiguration dynamicsConfiguration, final TokenService tokenService) {
         this.dynamicsConfiguration = dynamicsConfiguration;
         this.tokenService = tokenService;
 
     }
 
     @Override
-    public Licence getLicenceFromLicenceNumber(String licenceNumber) {
+    public Licence getLicenceFromLicenceNumber(final String licenceNumber) {
         CrmLicence.LicenceQuery.Query query = new CrmLicence.LicenceQuery.Query();
         query.setPermissionNumber(licenceNumber);
         licenceQuery.setQuery(query);
@@ -67,7 +67,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     }
 
     @Override
-    public Activity createActivity(String contactId, short season) {
+    public Activity createActivity(final String contactId, final short season) {
         log.debug("Creating activity on contact: " + contactId);
         CrmActivity.CreateActivity.Query query = new CrmActivity.CreateActivity.Query();
         query.setContactId(contactId);
@@ -77,7 +77,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     }
 
     @Override
-    public Activity updateActivity(String contactId, short season) {
+    public Activity updateActivity(final String contactId, final short season) {
         log.debug("Updating activity on contact: " + contactId);
         CrmActivity.UpdateActivity.Query query = new CrmActivity.UpdateActivity.Query();
         query.setContactId(contactId);
@@ -92,7 +92,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * @param <T> - The type of the returned entity
      * @return - The returned entity object from the CRM
      */
-    private <T extends CrmEntity> T callCRM(CrmEntity.CRMQuery<T> crmQuery) {
+    private <T extends CrmEntity> T callCRM(final CrmEntity.CRMQuery<T> crmQuery) {
         try {
             URL url = new URL(dynamicsConfiguration.getEndpoint(),
                     dynamicsConfiguration.getApi().toString() + "/" + crmQuery.getCRMStoredProcedureName());

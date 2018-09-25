@@ -15,7 +15,13 @@ import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledExecutorService;
+
 /**
  * Service to retrieve access token from Azure active directory
  *
@@ -61,7 +67,7 @@ public class TokenServiceImpl implements TokenService {
             AuthenticationResult token = future.get();
             String accessToken = token.getAccessToken();
             return accessToken;
-        } catch (MalformedURLException|InterruptedException|ExecutionException e) {
+        } catch (MalformedURLException | InterruptedException | ExecutionException e) {
             log.error("Error fetching token: " + e.getMessage());
         } finally {
             service.shutdown();
@@ -73,7 +79,7 @@ public class TokenServiceImpl implements TokenService {
      * Token acquire callback
      */
     private class Callback implements AuthenticationCallback<AuthenticationResult> {
-        public void onSuccess(AuthenticationResult result) {
+        public void onSuccess(final AuthenticationResult result) {
 
             // Success: execute a timer to evict the token from the cache before it expires
             long seconds = result.getExpiresAfter();
@@ -89,7 +95,7 @@ public class TokenServiceImpl implements TokenService {
             executor.shutdown();
         }
 
-        public void onFailure(Throwable throwable) {
+        public void onFailure(final Throwable throwable) {
             // We failed to obtain a token.
             log.error("Failed to acquire token from AAD: " + throwable.toString());
         }

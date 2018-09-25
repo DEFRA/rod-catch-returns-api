@@ -12,7 +12,6 @@ import uk.gov.defra.datareturns.data.model.licences.Licence;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Mock CRM lookup service
@@ -48,7 +47,7 @@ public class MockCrmLookupService implements CrmLookupService {
     }
 
     @Override
-    public Licence getLicenceFromLicenceNumber(String licenceNumber) {
+    public Licence getLicenceFromLicenceNumber(final String licenceNumber) {
         if (licences.containsKey(licenceNumber.toUpperCase().trim())) {
             return licences.get(licenceNumber);
         } else {
@@ -57,13 +56,13 @@ public class MockCrmLookupService implements CrmLookupService {
     }
 
     @Override
-    public Activity createActivity(String contactId, short season) {
+    public Activity createActivity(final String contactId, final short season) {
         log.debug("Mock: Creating activity on contact: " + contactId);
         return null;
     }
 
     @Override
-    public Activity updateActivity(String contactId, short season) {
+    public Activity updateActivity(final String contactId, final short season) {
         log.debug("Mock: Updating activity on contact: " + contactId);
         return null;
     }

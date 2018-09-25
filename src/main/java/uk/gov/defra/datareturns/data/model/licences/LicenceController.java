@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 
-import java.io.IOException;
 
 /**
  * Controller to enable the lookup of licence information from the CRM
@@ -38,7 +37,6 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
      *
      * @param licenceNumber the licence number used to retrieve licence information
      * @return a {@link ResponseEntity} containing the target {@link Licence} or a 404 status if not found
-     * @throws IOException on error
      */
     @GetMapping(value = "/licence/{licence}")
     public ResponseEntity<Licence> getContact(@PathVariable("licence") final String licenceNumber) {

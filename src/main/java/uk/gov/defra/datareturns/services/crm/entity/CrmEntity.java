@@ -19,6 +19,6 @@ public interface CrmEntity<E> {
         String getCRMStoredProcedureName();
         Query getQuery();
         Class<T> getEntityClass();
-        interface Query {}
+        interface Query { }
     }
 }
