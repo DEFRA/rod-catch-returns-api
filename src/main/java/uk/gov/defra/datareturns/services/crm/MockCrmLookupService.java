@@ -25,7 +25,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MockCrmLookupService implements CrmLookupService {
 
-    private static final Map<String, Licence> licences = new HashMap<>();
+    private static final Map<String, Licence> LICENCES = new HashMap<>();
 
     static {
         for (int i = 1; i <= 8; i++) {
@@ -41,15 +41,15 @@ public class MockCrmLookupService implements CrmLookupService {
             c.setId(String.format("f8e6ee6a-8fba-e811-a96c-000%d3ab9add5", i));
 
             l.setContact(c);
-            licences.put(permission, l);
+            LICENCES.put(permission, l);
             log.info("Mock licence: " + c);
         }
     }
 
     @Override
     public Licence getLicenceFromLicenceNumber(final String licenceNumber) {
-        if (licences.containsKey(licenceNumber.toUpperCase().trim())) {
-            return licences.get(licenceNumber);
+        if (LICENCES.containsKey(licenceNumber.toUpperCase().trim())) {
+            return LICENCES.get(licenceNumber);
         } else {
             return null;
         }
