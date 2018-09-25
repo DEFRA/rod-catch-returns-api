@@ -6,6 +6,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import uk.gov.defra.datareturns.data.model.licences.Activity;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
 
@@ -26,7 +27,6 @@ import java.util.stream.Collectors;
 public class MockCrmLookupService implements CrmLookupService {
 
     private static final Map<String, Licence> licences = new HashMap<>();
-    private static final Map<String, Contact> byContact;
 
     static {
         for (int i = 1; i <= 8; i++) {
@@ -45,19 +45,6 @@ public class MockCrmLookupService implements CrmLookupService {
             licences.put(permission, l);
             log.info("Mock licence: " + c);
         }
-        byContact = licences.values()
-                .stream()
-                .map(Licence::getContact)
-                .collect(Collectors.toMap(Contact::getId, c -> c));
-    }
-
-    @Override
-    public Contact getContact(final String contactId) {
-        if (byContact.containsKey(contactId)) {
-            return byContact.get(contactId);
-        } else {
-            return null;
-        }
     }
 
     @Override
@@ -67,5 +54,17 @@ public class MockCrmLookupService implements CrmLookupService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Activity createActivity(String contactId, short season) {
+        log.debug("Mock: Creating activity on contact: " + contactId);
+        return null;
+    }
+
+    @Override
+    public Activity updateActivity(String contactId, short season) {
+        log.debug("Mock: Updating activity on contact: " + contactId);
+        return null;
     }
 }

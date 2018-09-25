@@ -15,7 +15,6 @@ import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.TimerTask;
 import java.util.concurrent.*;
 /**
  * Service to retrieve access token from Azure active directory
@@ -29,10 +28,10 @@ public class TokenServiceImpl implements TokenService {
     private TokenServiceImpl proxy;
 
     @Inject
-    AADConfiguration aadConfiguration;
+    private AADConfiguration aadConfiguration;
 
     @Inject
-    DynamicsConfiguration dynamicsConfiguration;
+    private DynamicsConfiguration dynamicsConfiguration;
 
     @Override
     @Cacheable(cacheNames = "crm-auth-token")
@@ -75,9 +74,8 @@ public class TokenServiceImpl implements TokenService {
      */
     private class Callback implements AuthenticationCallback<AuthenticationResult> {
         public void onSuccess(AuthenticationResult result) {
-            /**
-             * Success: execute a timer to evict the token from the cache before it expires
-             */
+
+            // Success: execute a timer to evict the token from the cache before it expires
             long seconds = result.getExpiresAfter();
             log.debug("AAD token acquired successfully: expires in " + seconds + " seconds");
 
@@ -92,6 +90,7 @@ public class TokenServiceImpl implements TokenService {
         }
 
         public void onFailure(Throwable throwable) {
+            // We failed to obtain a token.
             log.error("Failed to acquire token from AAD: " + throwable.toString());
         }
     }

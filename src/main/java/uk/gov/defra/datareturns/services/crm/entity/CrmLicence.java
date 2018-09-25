@@ -1,4 +1,4 @@
-package uk.gov.defra.datareturns.services.crm;
+package uk.gov.defra.datareturns.services.crm.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter;
 @Setter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CRMLicence implements CRMEntity<Licence> {
+public class CrmLicence implements CrmEntity<Licence> {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/y");
     /**
      * the id associated with the contact
@@ -77,5 +77,29 @@ public class CRMLicence implements CRMEntity<Licence> {
         contact.setLocality(locality);
         licence.setContact(contact);
         return licence;
+    }
+
+    /**
+     * This Query is used to get the contact details from the licence number
+     */
+    @Getter
+    @Setter
+    public static class LicenceQuery implements CRMQuery<CrmLicence> {
+        private Query query;
+        public Class<CrmLicence> getEntityClass() {
+            return CrmLicence.class;
+        }
+
+        public String getCRMStoredProcedureName() {
+            return "defra_GetContactByLicenseNumber";
+        }
+
+        @Getter
+        @Setter
+        @ToString
+        public static class Query implements CRMQuery.Query {
+            @JsonProperty("PermissionNumber")
+            private String permissionNumber;
+        }
     }
 }
