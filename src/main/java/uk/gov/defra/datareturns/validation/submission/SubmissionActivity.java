@@ -6,6 +6,7 @@ import org.springframework.data.rest.core.annotation.HandleAfterSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
+import uk.gov.defra.datareturns.data.model.submissions.SubmissionStatus;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 
 /**
@@ -25,6 +26,8 @@ public class SubmissionActivity {
 
     @HandleAfterSave
     public void saveSubmission(final Submission submission) {
-        lookupService.updateActivity(submission.getContactId(), submission.getSeason());
+        if (submission.getStatus() == SubmissionStatus.SUBMITTED) {
+            lookupService.updateActivity(submission.getContactId(), submission.getSeason());
+        }
     }
 }
