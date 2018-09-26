@@ -27,7 +27,8 @@ public class CrmActivity implements CrmEntity<Activity> {
     @JsonIgnore
     public Activity getBaseEntity() {
         if (returnStatus.equals("error")) {
-            log.error("Error retrieving activity response from CRM: " + errorMessage);
+            // This is a warning because the activity can be create and removed by the CRM
+            log.warn("Error retrieving activity response from CRM: " + errorMessage);
             return null;
         }
         Activity activity = new Activity();

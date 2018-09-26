@@ -21,7 +21,9 @@ public class SubmissionActivity {
 
     @HandleAfterCreate
     public void createSubmission(final Submission submission) {
-        lookupService.createActivity(submission.getContactId(), submission.getSeason());
+        if (submission.getStatus() == SubmissionStatus.INCOMPLETE) {
+            lookupService.createActivity(submission.getContactId(), submission.getSeason());
+        }
     }
 
     @HandleAfterSave
