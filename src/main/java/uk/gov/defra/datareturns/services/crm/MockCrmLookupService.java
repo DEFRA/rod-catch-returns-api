@@ -42,7 +42,7 @@ public class MockCrmLookupService implements CrmLookupService {
 
             l.setContact(c);
             LICENCES.put(permission, l);
-            log.info("Mock licence: " + c);
+            log.info("Mock licence: " + l);
         }
     }
 
