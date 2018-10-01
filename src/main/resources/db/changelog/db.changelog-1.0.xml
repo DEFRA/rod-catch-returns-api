@@ -318,6 +318,9 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="small_catch_mass" type="numeric(12, 6)">
+                <constraints nullable="false"/>
+            </column>
             <column name="created" type="timestamp">
                 <constraints nullable="false"/>
             </column>
@@ -349,6 +352,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="varchar"/>
+            <column name="small_catch_mass" type="numeric(12, 6)"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_species_aud" columnNames="id, rev"/>
@@ -690,5 +694,4 @@
             <dropTable tableName="rcr_small_catch_counts"/>
         </rollback>
     </changeSet>
-
 </databaseChangeLog>

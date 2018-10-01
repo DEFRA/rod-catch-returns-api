@@ -7,7 +7,9 @@ import org.hibernate.envers.Audited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import java.math.BigDecimal;
 
 /**
  * RCR Species (e.g. Salmon, Sea Trout) reference data
@@ -29,4 +31,11 @@ public class Species extends AbstractBaseEntity {
      * The species name
      */
     private String name;
+
+    /**
+     * The assumed mass of a small catch entry for this species
+     */
+    @Column(precision = 12, scale = 6)
+    private BigDecimal smallCatchMass;
+
 }
