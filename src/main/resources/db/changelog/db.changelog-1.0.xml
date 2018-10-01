@@ -385,8 +385,11 @@
             <column name="season" type="smallint">
                 <constraints nullable="false"/>
             </column>
-            <column name="status" type="varchar(30)">
-                <constraints nullable="true"/>
+            <column name="status" type="varchar(12)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source" type="varchar(12)">
+                <constraints nullable="false"/>
             </column>
             <column name="created" type="timestamp">
                 <constraints nullable="false"/>
@@ -399,9 +402,14 @@
             </column>
         </createTable>
 
-        <addUniqueConstraint columnNames="contact_id, season" constraintName="uniq_contact_id_and_year" tableName="rcr_submission"/>
+        <addUniqueConstraint columnNames="contact_id, season" constraintName="uniq_contact_id_and_season" tableName="rcr_submission"/>
+
+        <createIndex indexName="rcr_submission_season_idx" tableName="rcr_submission">
+            <column name="season"/>
+        </createIndex>
 
         <rollback>
+            <dropIndex tableName="rcr_submission" indexName="rcr_submission_season_idx"/>
             <dropTable tableName="rcr_submission"/>
             <dropSequence sequenceName="rcr_submission_id_seq"/>
         </rollback>
@@ -420,7 +428,8 @@
             </column>
             <column name="contact_id" type="varchar"/>
             <column name="season" type="smallint"/>
-            <column name="status" type="varchar(30)"/>
+            <column name="status" type="varchar(12)"/>
+            <column name="source" type="varchar(12)"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_submission_aud" columnNames="id, rev"/>

@@ -1,5 +1,6 @@
 {
   "contactId": "%CONTACT_ID%",
   "season": %SEASON%,
+  "source": "WEB",
   "status": "INCOMPLETE"
 }

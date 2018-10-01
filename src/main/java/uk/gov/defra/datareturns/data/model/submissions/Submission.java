@@ -29,7 +29,7 @@ import java.util.List;
  */
 @Entity(name = "rcr_submission")
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "uniq_contact_id_and_year", columnNames = {"contactId", "season"})
+        @UniqueConstraint(name = "uniq_contact_id_and_season", columnNames = {"contactId", "season"})
 })
 @GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
                   strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
@@ -59,6 +59,12 @@ public class Submission extends AbstractBaseEntity {
      */
     @Enumerated(EnumType.STRING)
     private SubmissionStatus status;
+
+    /**
+     * The submission source
+     */
+    @Enumerated(EnumType.STRING)
+    private SubmissionSource source;
 
     /**
      * The activities recorded by the angler for the season (the time in days spent on each river)
