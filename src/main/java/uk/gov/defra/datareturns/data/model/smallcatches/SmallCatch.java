@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
+import uk.gov.defra.datareturns.data.conversion.MonthConverter;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.HasSubmission;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
@@ -13,10 +14,9 @@ import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.smallcatches.ValidSmallCatch;
 
 import javax.persistence.CollectionTable;
+import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -60,7 +60,7 @@ public class SmallCatch extends AbstractBaseEntity implements HasSubmission {
     /**
      * The month this record relates to
      */
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = MonthConverter.class)
     private Month month;
 
     /**
