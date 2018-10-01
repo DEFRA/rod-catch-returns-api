@@ -34,6 +34,12 @@ active-directory:
   clientId:
   clientSecret:
 
+validation:
+  # Enable/disable all validation functionality
+  enabled: true
+  # Allow the current year and the previous (-1)
+  submission-year-allowed-range-offset: -1
+
 ---
 ###############################################################################
 #
