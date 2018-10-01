@@ -31,6 +31,143 @@
 
     <!--
     ****************************************************************
+    Reference Data - Regions
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_region" author="Defra">
+        <createSequence sequenceName="rcr_region_id_seq" startValue="1"/>
+
+        <createTable tableName="rcr_region">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_region_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="name" constraintName="uniq_region_name" tableName="rcr_region"/>
+
+        <rollback>
+            <dropTable tableName="rcr_region"/>
+            <dropSequence sequenceName="rcr_region_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_region_aud" author="Defra">
+        <createTable tableName="rcr_region_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_region_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_region_aud"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="load-table: rcr_region" author="Defra">
+        <loadData file="db/data/regions.csv"
+                  tableName="rcr_region">
+            <column name="name" type="string" header="name"/>
+            <column name="created" type="date" header="created"/>
+            <column name="last_modified" type="date" header="last_modified"/>
+            <column name="version" type="numeric" header="version"/>
+        </loadData>
+    </changeSet>
+
+
+    <!--
+    ****************************************************************
+    Reference Data - Catchments
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_catchment" author="Defra">
+        <createSequence sequenceName="rcr_catchment_id_seq" startValue="1"/>
+
+        <createTable tableName="rcr_catchment">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_catchment_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_catchment__region"
+                             references="rcr_region(id)"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="name" constraintName="uniq_catchment_name" tableName="rcr_catchment"/>
+
+        <rollback>
+            <dropTable tableName="rcr_catchment"/>
+            <dropSequence sequenceName="rcr_catchment_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_catchment_aud" author="Defra">
+        <createTable tableName="rcr_catchment_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar"/>
+            <column name="region_id" type="bigint"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_catchment_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_catchment_aud"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="load-table: rcr_catchment" author="Defra">
+        <loadData file="db/data/catchments.csv"
+                  tableName="rcr_catchment">
+            <column name="name" type="string" header="name"/>
+            <column name="region_id" type="numeric" header="region_id"/>
+            <column name="created" type="date" header="created"/>
+            <column name="last_modified" type="date" header="last_modified"/>
+            <column name="version" type="numeric" header="version"/>
+        </loadData>
+    </changeSet>
+
+
+    <!--
+    ****************************************************************
     Reference Data - Rivers
     ****************************************************************
     -->
@@ -43,6 +180,11 @@
             </column>
             <column name="name" type="varchar(255)">
                 <constraints nullable="false"/>
+            </column>
+            <column name="catchment_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_river__catchment"
+                             references="rcr_catchment(id)"/>
             </column>
             <column name="created" type="timestamp">
                 <constraints nullable="false"/>
@@ -75,6 +217,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="varchar"/>
+            <column name="catchment_id" type="bigint"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_river_aud" columnNames="id, rev"/>
@@ -87,6 +230,7 @@
         <loadData file="db/data/rivers.csv"
                   tableName="rcr_river">
             <column name="name" type="string" header="name"/>
+            <column name="catchment_id" type="numeric" header="catchment_id"/>
             <column name="created" type="date" header="created"/>
             <column name="last_modified" type="date" header="last_modified"/>
             <column name="version" type="numeric" header="version"/>

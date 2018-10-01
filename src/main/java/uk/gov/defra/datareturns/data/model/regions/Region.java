@@ -1,4 +1,4 @@
-package uk.gov.defra.datareturns.data.model.rivers;
+package uk.gov.defra.datareturns.data.model.regions;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,33 +8,37 @@ import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.catchments.Catchment;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.validation.Valid;
+import java.util.List;
 
 /**
- * RCR River reference data
+ * RCR Region
  *
  * @author Sam Gardner-Dell
  */
-@Entity(name = "rcr_river")
+@Entity(name = "rcr_region")
 @GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
                   strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
                   parameters = {
-                          @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "rcr_river_id_seq")
+                          @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "rcr_region_id_seq")
                   }
 )
 @Audited
 @Getter
 @Setter
-public class River extends AbstractBaseEntity {
+public class Region extends AbstractBaseEntity {
     /**
-     * The river name
+     * The region name
      */
     private String name;
 
     /**
-     * The {@link Catchment} associated with this {@link River}
+     * The catchments associated with this Region
      */
-    @ManyToOne(optional = false)
-    private Catchment catchment;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "region")
+    @Valid
+    private List<Catchment> catchments;
 }
