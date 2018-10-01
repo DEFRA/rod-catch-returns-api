@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <!--
+    ****************************************************************
+    Reporting Views
+    ****************************************************************
+    -->
+
+    <changeSet id="create-view: rcv_effort_by_location" author="Defra">
+        <createView viewName="rcv_effort_by_location" replaceIfExists="true">
+            <![CDATA[
+                select sub.season, act.river_id, sum(act.days) as days
+                from rcr_activity act
+                       inner join rcr_submission sub on act.submission_id = sub.id
+                group by sub.season, act.river_id;
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_effort_by_location"/>
+        </rollback>
+    </changeSet>
+
+
+    <!--
+    ****************************************************************
+    Large catch reporting
+    ****************************************************************
+    -->
+    <changeSet id="create-view: rcv_large_catches" author="Defra">
+        <createView viewName="rcv_large_catches" replaceIfExists="true">
+            <![CDATA[
+              select sub.season                                                                 as season,
+                     extract(MONTH from catches.date_caught) :: integer                         as month,
+                     act.river_id                                                               as river_id,
+                     catches.species_id                                                         as species_id,
+                     count(*)                                                                   as caught,
+                     max(catches.mass_kg)                                                       as caught_max_mass,
+                     min(catches.mass_kg)                                                       as caught_min_mass,
+                     avg(catches.mass_kg)                                                       as caught_avg_mass,
+                     sum(catches.mass_kg)                                                       as caught_total_mass,
+                     count(catches.released) filter (where catches.released is true)            as released,
+                     coalesce(sum(catches.mass_kg) filter (where catches.released is true), 0)  as released_total_mass
+              from rcr_catch catches
+                     inner join rcr_submission sub on (catches.submission_id = sub.id)
+                     inner join rcr_activity act on catches.activity_id = act.id
+              group by (sub.season,
+                        extract(MONTH from catches.date_caught),
+                        act.river_id,
+                        catches.species_id);
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_large_catches"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-view: rcv_large_catches_by_contact" author="Defra">
+        <createView viewName="rcv_large_catches_by_contact" replaceIfExists="true">
+            <![CDATA[
+              select sub.contact_id                                                             as contact_id,
+                     sub.season                                                                 as season,
+                     extract(MONTH from catches.date_caught) :: integer                         as month,
+                     act.river_id                                                               as river_id,
+                     catches.species_id                                                         as species_id,
+                     count(*)                                                                   as caught,
+                     max(catches.mass_kg)                                                       as caught_max_mass,
+                     min(catches.mass_kg)                                                       as caught_min_mass,
+                     avg(catches.mass_kg)                                                       as caught_avg_mass,
+                     sum(catches.mass_kg)                                                       as caught_total_mass,
+                     count(catches.released) filter (where catches.released is true)            as released,
+                     coalesce(sum(catches.mass_kg) filter (where catches.released is true), 0)  as released_total_mass
+              from rcr_catch catches
+                     inner join rcr_submission sub on (catches.submission_id = sub.id)
+                     inner join rcr_activity act on catches.activity_id = act.id
+              group by (sub.contact_id,
+                        sub.season,
+                        extract(MONTH from catches.date_caught),
+                        act.river_id,
+                        catches.species_id);
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_large_catches_by_contact"/>
+        </rollback>
+    </changeSet>
+
+
+    <!--
+    ****************************************************************
+    Small catch reporting
+    ****************************************************************
+    -->
+    <changeSet id="create-view: rcv_small_catches" author="Defra">
+        <createView viewName="rcv_small_catches" replaceIfExists="true">
+            <![CDATA[
+                select *
+                from
+                     (select sub.season                              as season,
+                             sc.month                                as month,
+                             act.river_id                            as river_id,
+                             sp.id                                   as species_id,
+                             sum(counts.count)                       as caught,
+                             max(sp.small_catch_mass)                as caught_max_mass,
+                             min(sp.small_catch_mass)                as caught_min_mass,
+                             avg(sp.small_catch_mass)                as caught_avg_mass,
+                             sum(counts.count * sp.small_catch_mass) as caught_total_mass
+                      from rcr_small_catch_counts counts
+                             inner join rcr_small_catch sc on (counts.small_catch_id = sc.id)
+                             inner join rcr_activity act on (sc.activity_id = act.id)
+                             inner join rcr_submission sub on (sc.submission_id = sub.id)
+                             inner join rcr_species sp on (sp.id = 2)
+                      group by (season, month, river_id, species_id)) catches
+                natural join
+                      (select sub.season                             as season,
+                              sc.month                               as month,
+                              act.river_id                           as river_id,
+                              sp.id                                  as species_id,
+                              sum(sc.released)                       as released,
+                              sum(sc.released * sp.small_catch_mass) as released_total_mass
+                       from rcr_small_catch sc
+                              inner join rcr_activity act on sc.activity_id = act.id
+                              inner join rcr_submission sub on sc.submission_id = sub.id
+                              inner join rcr_species sp on (sp.id = 2)
+                       group by (season, month, river_id, species_id)) releases;
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_small_catches"/>
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="create-view: rcv_small_catches_by_contact" author="Defra">
+        <createView viewName="rcv_small_catches_by_contact" replaceIfExists="true">
+            <![CDATA[
+                select *
+                from
+                     (select sub.contact_id                          as contact_id,
+                             sub.season                              as season,
+                             sc.month                                as month,
+                             act.river_id                            as river_id,
+                             sp.id                                   as species_id,
+                             sum(counts.count)                       as caught,
+                             max(sp.small_catch_mass)                as caught_max_mass,
+                             min(sp.small_catch_mass)                as caught_min_mass,
+                             avg(sp.small_catch_mass)                as caught_avg_mass,
+                             sum(counts.count * sp.small_catch_mass) as caught_total_mass
+                      from rcr_small_catch_counts counts
+                             inner join rcr_small_catch sc on (counts.small_catch_id = sc.id)
+                             inner join rcr_activity act on (sc.activity_id = act.id)
+                             inner join rcr_submission sub on (sc.submission_id = sub.id)
+                             inner join rcr_species sp on (sp.id = 2)
+                      group by (contact_id, season, month, river_id, species_id)) catches
+                natural join
+                      (select sub.contact_id                         as contact_id,
+                              sub.season                             as season,
+                              sc.month                               as month,
+                              act.river_id                           as river_id,
+                              sp.id                                  as species_id,
+                              sum(sc.released)                       as released,
+                              sum(sc.released * sp.small_catch_mass) as released_total_mass
+                       from rcr_small_catch sc
+                              inner join rcr_activity act on sc.activity_id = act.id
+                              inner join rcr_submission sub on sc.submission_id = sub.id
+                              inner join rcr_species sp on (sp.id = 2)
+                       group by (contact_id, season, month, river_id, species_id)) releases;
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_small_catches_by_contact"/>
+        </rollback>
+    </changeSet>
+
+
+    <!--
+    ****************************************************************
+    Aggregated catch reporting
+    ****************************************************************
+    -->
+    <changeSet id="create-view: rcv_catch_report_data" author="Defra">
+        <createView viewName="rcv_catch_report_data" replaceIfExists="true">
+            <![CDATA[
+              select agg.season                                                       as season,
+                     to_char(to_timestamp(agg.month :: text, 'MM'), 'Month')          as month,
+                     reg.name                                                         as region,
+                     ctm.name                                                         as catchment,
+                     riv.name                                                         as river,
+                     spc.name                                                         as species,
+                     agg.caught                                                       as caught,
+                     agg.caught_max_mass                                              as caught_max_mass,
+                     agg.caught_min_mass                                              as caught_min_mass,
+                     agg.caught_avg_mass                                              as caught_avg_mass,
+                     agg.caught_total_mass                                            as caught_total_mass,
+                     agg.released                                                     as released,
+                     agg.released_total_mass                                          as released_total_mass
+              from (select * from rcv_large_catches l
+                    union all (select * from rcv_small_catches s)) agg
+                     inner join rcr_species spc on (agg.species_id = spc.id)
+                     inner join rcr_river riv on (agg.river_id = riv.id)
+                     inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
+                     inner join rcr_region reg on (ctm.region_id = reg.id);
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_catch_report_data"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Note: These two had to be split out from the rcv_catch_report_data view above due to incompatibility between postgres and h2 row_number functions -->
+    <changeSet id="create-view: rcv_catch_report" author="Defra" dbms="postgresql">
+        <createView viewName="rcv_catch_report" replaceIfExists="true">
+            <![CDATA[
+              select row_number() over() as id, data.*
+              from (select * from rcv_catch_report_data) data;
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_catch_report"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-view: rcv_catch_report" author="Defra" dbms="h2">
+        <createView viewName="rcv_catch_report" replaceIfExists="true">
+            <![CDATA[
+              select rownum() :: bigint as id, data.*
+              from (select * from rcv_catch_report_data) data;
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_catch_report"/>
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="create-view: rcv_catch_report_by_contact_data" author="Defra">
+        <createView viewName="rcv_catch_report_by_contact_data" replaceIfExists="true">
+            <![CDATA[
+              select agg.contact_id                                                               as contact_id,
+                     agg.season                                                                   as season,
+                     to_char(to_timestamp(agg.month :: text, 'MM'), 'Month')                      as month,
+                     reg.name                                                                     as region,
+                     ctm.name                                                                     as catchment,
+                     riv.name                                                                     as river,
+                     spc.name                                                                     as species,
+                     agg.caught                                                                   as caught,
+                     agg.caught_max_mass                                                          as caught_max_mass,
+                     agg.caught_min_mass                                                          as caught_min_mass,
+                     agg.caught_avg_mass                                                          as caught_avg_mass,
+                     agg.caught_total_mass                                                        as caught_total_mass,
+                     agg.released                                                                 as released,
+                     agg.released_total_mass                                                      as released_total_mass
+              from (select * from rcv_large_catches_by_contact l
+                    union all (select * from rcv_small_catches_by_contact s)) agg
+                     inner join rcr_species spc on (agg.species_id = spc.id)
+                     inner join rcr_river riv on (agg.river_id = riv.id)
+                     inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
+                     inner join rcr_region reg on (ctm.region_id = reg.id);
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_catch_report_by_contact_data"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Note: These two had to be split out from the rcv_catch_report_by_contact_data view above due to incompatibility between postgres and h2 row_number functions -->
+    <changeSet id="create-view: rcv_catch_report_by_contact" author="Defra" dbms="postgresql">
+        <createView viewName="rcv_catch_report_by_contact" replaceIfExists="true">
+            <![CDATA[
+              select row_number() over() as id, data.*
+              from (select * from rcv_catch_report_by_contact_data) data;
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_catch_report_by_contact"/>
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="create-view: rcv_catch_report_by_contact" author="Defra" dbms="h2">
+        <createView viewName="rcv_catch_report_by_contact" replaceIfExists="true">
+            <![CDATA[
+              select rownum() :: bigint as id, data.*
+              from (select * from rcv_catch_report_by_contact_data) data;
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_catch_report_by_contact"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
