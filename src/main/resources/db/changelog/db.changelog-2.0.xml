@@ -185,42 +185,29 @@
     Aggregated catch reporting
     ****************************************************************
     -->
-    <changeSet id="create-view: rcv_catch_report_data" author="Defra">
-        <createView viewName="rcv_catch_report_data" replaceIfExists="true">
-            <![CDATA[
-              select agg.season                                                       as season,
-                     to_char(to_timestamp(agg.month :: text, 'MM'), 'Month')          as month,
-                     reg.name                                                         as region,
-                     ctm.name                                                         as catchment,
-                     riv.name                                                         as river,
-                     spc.name                                                         as species,
-                     agg.caught                                                       as caught,
-                     agg.caught_max_mass                                              as caught_max_mass,
-                     agg.caught_min_mass                                              as caught_min_mass,
-                     agg.caught_avg_mass                                              as caught_avg_mass,
-                     agg.caught_total_mass                                            as caught_total_mass,
-                     agg.released                                                     as released,
-                     agg.released_total_mass                                          as released_total_mass
-              from (select * from rcv_large_catches l
-                    union all (select * from rcv_small_catches s)) agg
-                     inner join rcr_species spc on (agg.species_id = spc.id)
-                     inner join rcr_river riv on (agg.river_id = riv.id)
-                     inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
-                     inner join rcr_region reg on (ctm.region_id = reg.id);
-            ]]>
-        </createView>
-
-        <rollback>
-            <dropView viewName="rcv_catch_report_data"/>
-        </rollback>
-    </changeSet>
-
-    <!-- Note: These two had to be split out from the rcv_catch_report_data view above due to incompatibility between postgres and h2 row_number functions -->
-    <changeSet id="create-view: rcv_catch_report" author="Defra" dbms="postgresql">
+    <changeSet id="create-view: rcv_catch_report" author="Defra">
         <createView viewName="rcv_catch_report" replaceIfExists="true">
             <![CDATA[
-              select row_number() over() as id, data.*
-              from (select * from rcv_catch_report_data) data;
+                select concat(agg.season, agg.month, agg.river_id, agg.species_id) as id,
+                       agg.season                                                                  as season,
+                       to_char(to_timestamp(agg.month :: text, 'MM'), 'Month')                     as month,
+                       reg.name                                                                    as region,
+                       ctm.name                                                                    as catchment,
+                       riv.name                                                                    as river,
+                       spc.name                                                                    as species,
+                       agg.caught                                                                  as caught,
+                       agg.caught_max_mass                                                         as caught_max_mass,
+                       agg.caught_min_mass                                                         as caught_min_mass,
+                       agg.caught_avg_mass                                                         as caught_avg_mass,
+                       agg.caught_total_mass                                                       as caught_total_mass,
+                       agg.released                                                                as released,
+                       agg.released_total_mass                                                     as released_total_mass
+                from (select * from rcv_large_catches_by_contact l
+                      union all (select * from rcv_small_catches_by_contact s)) agg
+                       inner join rcr_species spc on (agg.species_id = spc.id)
+                       inner join rcr_river riv on (agg.river_id = riv.id)
+                       inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
+                       inner join rcr_region reg on (ctm.region_id = reg.id);
             ]]>
         </createView>
 
@@ -229,57 +216,30 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="create-view: rcv_catch_report" author="Defra" dbms="h2">
-        <createView viewName="rcv_catch_report" replaceIfExists="true">
-            <![CDATA[
-              select rownum() :: bigint as id, data.*
-              from (select * from rcv_catch_report_data) data;
-            ]]>
-        </createView>
-
-        <rollback>
-            <dropView viewName="rcv_catch_report"/>
-        </rollback>
-    </changeSet>
-
-
-    <changeSet id="create-view: rcv_catch_report_by_contact_data" author="Defra">
-        <createView viewName="rcv_catch_report_by_contact_data" replaceIfExists="true">
-            <![CDATA[
-              select agg.contact_id                                                               as contact_id,
-                     agg.season                                                                   as season,
-                     to_char(to_timestamp(agg.month :: text, 'MM'), 'Month')                      as month,
-                     reg.name                                                                     as region,
-                     ctm.name                                                                     as catchment,
-                     riv.name                                                                     as river,
-                     spc.name                                                                     as species,
-                     agg.caught                                                                   as caught,
-                     agg.caught_max_mass                                                          as caught_max_mass,
-                     agg.caught_min_mass                                                          as caught_min_mass,
-                     agg.caught_avg_mass                                                          as caught_avg_mass,
-                     agg.caught_total_mass                                                        as caught_total_mass,
-                     agg.released                                                                 as released,
-                     agg.released_total_mass                                                      as released_total_mass
-              from (select * from rcv_large_catches_by_contact l
-                    union all (select * from rcv_small_catches_by_contact s)) agg
-                     inner join rcr_species spc on (agg.species_id = spc.id)
-                     inner join rcr_river riv on (agg.river_id = riv.id)
-                     inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
-                     inner join rcr_region reg on (ctm.region_id = reg.id);
-            ]]>
-        </createView>
-
-        <rollback>
-            <dropView viewName="rcv_catch_report_by_contact_data"/>
-        </rollback>
-    </changeSet>
-
-    <!-- Note: These two had to be split out from the rcv_catch_report_by_contact_data view above due to incompatibility between postgres and h2 row_number functions -->
-    <changeSet id="create-view: rcv_catch_report_by_contact" author="Defra" dbms="postgresql">
+    <changeSet id="create-view: rcv_catch_report_by_contact" author="Defra">
         <createView viewName="rcv_catch_report_by_contact" replaceIfExists="true">
             <![CDATA[
-              select row_number() over() as id, data.*
-              from (select * from rcv_catch_report_by_contact_data) data;
+                select concat(agg.contact_id, agg.season, agg.month, agg.river_id, agg.species_id) as id,
+                       agg.contact_id                                                              as contact_id,
+                       agg.season                                                                  as season,
+                       to_char(to_timestamp(agg.month :: text, 'MM'), 'Month')                     as month,
+                       reg.name                                                                    as region,
+                       ctm.name                                                                    as catchment,
+                       riv.name                                                                    as river,
+                       spc.name                                                                    as species,
+                       agg.caught                                                                  as caught,
+                       agg.caught_max_mass                                                         as caught_max_mass,
+                       agg.caught_min_mass                                                         as caught_min_mass,
+                       agg.caught_avg_mass                                                         as caught_avg_mass,
+                       agg.caught_total_mass                                                       as caught_total_mass,
+                       agg.released                                                                as released,
+                       agg.released_total_mass                                                     as released_total_mass
+                from (select * from rcv_large_catches_by_contact l
+                      union all (select * from rcv_small_catches_by_contact s)) agg
+                       inner join rcr_species spc on (agg.species_id = spc.id)
+                       inner join rcr_river riv on (agg.river_id = riv.id)
+                       inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
+                       inner join rcr_region reg on (ctm.region_id = reg.id);
             ]]>
         </createView>
 
@@ -287,19 +247,4 @@
             <dropView viewName="rcv_catch_report_by_contact"/>
         </rollback>
     </changeSet>
-
-
-    <changeSet id="create-view: rcv_catch_report_by_contact" author="Defra" dbms="h2">
-        <createView viewName="rcv_catch_report_by_contact" replaceIfExists="true">
-            <![CDATA[
-              select rownum() :: bigint as id, data.*
-              from (select * from rcv_catch_report_by_contact_data) data;
-            ]]>
-        </createView>
-
-        <rollback>
-            <dropView viewName="rcv_catch_report_by_contact"/>
-        </rollback>
-    </changeSet>
-
 </databaseChangeLog>

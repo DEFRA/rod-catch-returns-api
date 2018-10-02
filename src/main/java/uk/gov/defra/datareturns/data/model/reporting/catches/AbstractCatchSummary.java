@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 @Headers
 public abstract class AbstractCatchSummary {
     @Id
-    private Long id;
+    private String id;
     @Basic
     @Parsed(field = "Season")
     private Short season;
