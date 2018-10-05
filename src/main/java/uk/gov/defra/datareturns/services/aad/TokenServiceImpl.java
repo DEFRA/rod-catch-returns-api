@@ -30,12 +30,11 @@ import java.util.concurrent.ScheduledExecutorService;
 @Service
 @Slf4j
 public class TokenServiceImpl implements TokenService {
+
     @Inject
-    private TokenServiceImpl proxy;
+    private final TokenServiceImpl proxy = null;
 
     private final AADConfiguration aadConfiguration;
-
-    private final URL authority;
     private URL tokenPath;
     private final URL resource;
 
@@ -44,7 +43,7 @@ public class TokenServiceImpl implements TokenService {
         this.aadConfiguration = aadConfiguration;
 
         final URI tenant = aadConfiguration.getTenant();
-        authority = aadConfiguration.getAuthority();
+        final URL authority = aadConfiguration.getAuthority();
         resource = dynamicsConfiguration.getEndpoint();
 
         try {
@@ -127,9 +126,10 @@ public class TokenServiceImpl implements TokenService {
             // Return the token as a string
             AuthenticationResult token = future.get();
 
-            return token.getAccessToken();
+            return token == null ? null : token.getAccessToken();
         } catch (MalformedURLException | InterruptedException | ExecutionException e) {
             log.error("Error fetching token: " + e.getMessage());
+
         } finally {
             service.shutdown();
         }
@@ -164,14 +164,13 @@ public class TokenServiceImpl implements TokenService {
 
         public void onFailure(final Throwable throwable) {
             // We failed to obtain a token.
-            log.error("Failed to acquire identity token from AAD for user: " + username + " " + throwable.toString());
+            log.error("Failed to acquire identity token from AAD for user: " + username);
         }
     }
 
     /**
      * Evict the token from the cache for system token
      */
-    @SuppressWarnings("WeakerAccess")
     @CacheEvict(cacheNames = "crm-auth-token", allEntries = true)
     public void evictToken() {
         log.debug("Evicting AAD token from cache");
@@ -179,9 +178,8 @@ public class TokenServiceImpl implements TokenService {
 
     /**
      * Evict user identity tokens from the cache
-     * @param username
+     * @param username - the stored username
      */
-    @SuppressWarnings("WeakerAccess")
     @CacheEvict(cacheNames = "crm-auth-token-identity", key="#username")
     public void evictIdentityToken(final String username) {
         log.debug("Evicting AAD token from cache for user:" + username);

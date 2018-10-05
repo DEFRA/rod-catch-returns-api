@@ -96,7 +96,11 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     public Identity getAuthenticatedUserRoles(final String username, final String password) {
         log.debug("Getting identity for user: " + username);
         final String token = tokenService.getTokenForUserIdentity(username, password);
-        return Objects.requireNonNull(callCRM(identityQuery, token));
+        if (token == null) {
+            return null;
+        } else {
+            return Objects.requireNonNull(callCRM(identityQuery, token));
+        }
     }
 
     /**

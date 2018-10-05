@@ -41,6 +41,10 @@ validation:
   # Allow the current year and the previous (-1)
   submission-year-allowed-range-offset: -1
 
+log:
+  level:
+    com.microsoft.aad.adal4j.AcquireTokenCallable: none
+
 ---
 ###############################################################################
 #
