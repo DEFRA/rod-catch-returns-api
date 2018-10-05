@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.defra.datareturns.data.model.licences.Activity;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
+import uk.gov.defra.datareturns.services.crm.entity.Identity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,5 +66,11 @@ public class MockCrmLookupService implements CrmLookupService {
     public Activity updateActivity(final String contactId, final short season) {
         log.debug("Mock: Updating activity on contact: " + contactId);
         return null;
+    }
+
+    @Override
+    public Identity getAuthenticatedUserRoles(final String username, final String password) {
+        log.debug("Mock: finding roles for user: " + username);
+        return new Identity();
     }
 }

@@ -14,9 +14,12 @@ import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 import uk.gov.defra.datareturns.data.model.licences.Activity;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.aad.TokenService;
+import uk.gov.defra.datareturns.services.crm.entity.CrmBaseEntity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmActivity;
-import uk.gov.defra.datareturns.services.crm.entity.CrmEntity;
+import uk.gov.defra.datareturns.services.crm.entity.CrmCall;
+import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
+import uk.gov.defra.datareturns.services.crm.entity.Identity;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
@@ -51,6 +54,9 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     // A CRM query to update the activity status
     private final CrmActivity.UpdateActivity updateActivity = new CrmActivity.UpdateActivity();
 
+    // A CRM query to get teh internal user identity
+    private final CrmIdentity.IdentityQuery identityQuery = new CrmIdentity.IdentityQuery();
+
     @Inject
     public DynamicsCrmLookupService(final DynamicsConfiguration dynamicsConfiguration, final TokenService tokenService) {
         this.dynamicsConfiguration = dynamicsConfiguration;
@@ -63,7 +69,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         CrmLicence.LicenceQuery.Query query = new CrmLicence.LicenceQuery.Query();
         query.setPermissionNumber(licenceNumber);
         licenceQuery.setQuery(query);
-        return Objects.requireNonNull(callCRM(licenceQuery)).getBaseEntity();
+        return Objects.requireNonNull(callCRM(licenceQuery, tokenService.getToken()));
     }
 
     @Override
@@ -73,7 +79,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         query.setContactId(contactId);
         query.setSeason(season);
         createActivity.setQuery(query);
-        return Objects.requireNonNull(callCRM(createActivity)).getBaseEntity();
+        return Objects.requireNonNull(callCRM(createActivity, tokenService.getToken()));
     }
 
     @Override
@@ -83,7 +89,14 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         query.setContactId(contactId);
         query.setSeason(season);
         updateActivity.setQuery(query);
-        return Objects.requireNonNull(callCRM(updateActivity)).getBaseEntity();
+        return Objects.requireNonNull(callCRM(updateActivity, tokenService.getToken()));
+    }
+
+    @Override
+    public Identity getAuthenticatedUserRoles(final String username, final String password) {
+        log.debug("Getting identity for user: " + username);
+        final String token = tokenService.getTokenForUserIdentity(username, password);
+        return Objects.requireNonNull(callCRM(identityQuery, token));
     }
 
     /**
@@ -92,29 +105,38 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * @param <T> - The type of the returned entity
      * @return - The returned entity object from the CRM
      */
-    private <T extends CrmEntity> T callCRM(final CrmEntity.CRMQuery<T> crmQuery) {
+    private <B extends CrmBaseEntity, T extends CrmCall<B>> B callCRM(final CrmCall.CRMQuery<T> crmQuery, final String token) {
         try {
             URL url = new URL(dynamicsConfiguration.getEndpoint(),
                     dynamicsConfiguration.getApi().toString() + "/" + crmQuery.getCRMStoredProcedureName());
 
             String urlString = url.toString();
+            log.debug("CRM Query: " + urlString);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + tokenService.getToken());
-            HttpEntity<CrmEntity.CRMQuery.Query> entity = new HttpEntity<>(crmQuery.getQuery(), headers);
+            headers.set("Authorization", "Bearer " + token);
+            HttpEntity<CrmCall.CRMQuery.Query> entity;
+
+            if (crmQuery.getQuery() != null) {
+                entity = new HttpEntity<>(crmQuery.getQuery(), headers);
+                log.debug("Payload: " + crmQuery.getQuery());
+            } else {
+                entity = new HttpEntity<>(headers);
+            }
+
             RestTemplate restTemplate = new RestTemplate();
 
-            log.debug("CRM Query: " + urlString);
-            log.debug("Payload: " + crmQuery.getQuery());
-
-            return restTemplate.postForObject(
+            T result = restTemplate.postForObject(
                     urlString,
                     entity, crmQuery.getEntityClass());
+
+            return result.getBaseEntity();
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;
         }
     }
+
 }

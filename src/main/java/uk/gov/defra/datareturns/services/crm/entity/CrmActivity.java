@@ -11,7 +11,7 @@ import uk.gov.defra.datareturns.data.model.licences.Activity;
 @Getter
 @Setter
 @Slf4j
-public class CrmActivity implements CrmEntity<Activity> {
+public class CrmActivity implements CrmCall<Activity> {
     public enum Status { submitted, started }
 
     @JsonProperty("RCRActivityId")

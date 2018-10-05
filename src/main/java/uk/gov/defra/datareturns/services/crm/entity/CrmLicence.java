@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter;
 @Setter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CrmLicence implements CrmEntity<Licence> {
+public class CrmLicence implements CrmCall<Licence> {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/y");
     /**
      * the id associated with the contact

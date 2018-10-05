@@ -2,6 +2,7 @@ package uk.gov.defra.datareturns.services.crm;
 
 import uk.gov.defra.datareturns.data.model.licences.Activity;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
+import uk.gov.defra.datareturns.services.crm.entity.Identity;
 
 /**
  * Service to retrieve contact details from the CRM
@@ -33,4 +34,12 @@ public interface CrmLookupService {
      * @return An activity entity object
      */
     Activity updateActivity(String contactId, short season);
+
+    /**
+     * Get the roles associated with an AD user in the CRM
+     * @param username An AAD username
+     * @param password An AAD password
+     * @return An AAD identity
+     */
+    Identity getAuthenticatedUserRoles(String username, String password);
 }

@@ -26,5 +26,6 @@ public class AADConfiguration {
     private URL authority;
     private String clientId;
     private String clientSecret;
+    private String identityClientId;
 }
 

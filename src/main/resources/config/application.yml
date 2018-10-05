@@ -33,6 +33,7 @@ active-directory:
   authority:
   clientId:
   clientSecret:
+  identityClientId:
 
 validation:
   # Enable/disable all validation functionality

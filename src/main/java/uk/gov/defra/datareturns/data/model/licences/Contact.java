@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import uk.gov.defra.datareturns.services.crm.entity.CrmBaseEntity;
 
 import java.time.LocalDate;
 
@@ -16,7 +17,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @ToString
-public class Contact {
+public class Contact implements CrmBaseEntity {
     /**
      * the id associated with the contact
      */
