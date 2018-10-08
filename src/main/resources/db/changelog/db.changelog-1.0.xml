@@ -91,6 +91,11 @@
             <column name="last_modified" type="date" header="last_modified"/>
             <column name="version" type="numeric" header="version"/>
         </loadData>
+
+
+        <rollback>
+            <delete tableName="rcr_region"/>
+        </rollback>
     </changeSet>
 
 
@@ -163,6 +168,10 @@
             <column name="last_modified" type="date" header="last_modified"/>
             <column name="version" type="numeric" header="version"/>
         </loadData>
+
+        <rollback>
+            <delete tableName="rcr_catchment"/>
+        </rollback>
     </changeSet>
 
 
@@ -235,6 +244,10 @@
             <column name="last_modified" type="date" header="last_modified"/>
             <column name="version" type="numeric" header="version"/>
         </loadData>
+
+        <rollback>
+            <delete tableName="rcr_river"/>
+        </rollback>
     </changeSet>
 
 
@@ -300,6 +313,10 @@
             <column name="last_modified" type="date" header="last_modified"/>
             <column name="version" type="numeric" header="version"/>
         </loadData>
+
+        <rollback>
+            <delete tableName="rcr_method"/>
+        </rollback>
     </changeSet>
 
 
@@ -369,6 +386,10 @@
             <column name="last_modified" type="date" header="last_modified"/>
             <column name="version" type="numeric" header="version"/>
         </loadData>
+
+        <rollback>
+            <delete tableName="rcr_species"/>
+        </rollback>
     </changeSet>
 
     <!--
