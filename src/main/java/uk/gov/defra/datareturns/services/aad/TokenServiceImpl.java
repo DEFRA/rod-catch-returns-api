@@ -39,7 +39,7 @@ public class TokenServiceImpl implements TokenService {
     private final URL resource;
 
     @Inject
-    public TokenServiceImpl(AADConfiguration aadConfiguration, DynamicsConfiguration dynamicsConfiguration) {
+    public TokenServiceImpl(final AADConfiguration aadConfiguration, final DynamicsConfiguration dynamicsConfiguration) {
         this.aadConfiguration = aadConfiguration;
 
         final URI tenant = aadConfiguration.getTenant();
@@ -111,7 +111,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    @Cacheable(cacheNames = "crm-auth-token-identity", key="#username")
+    @Cacheable(cacheNames = "crm-auth-token-identity", key = "#username")
     public String getTokenForUserIdentity(final String username, final String password) {
         ExecutorService service = Executors.newSingleThreadExecutor();
         try {
@@ -121,7 +121,8 @@ public class TokenServiceImpl implements TokenService {
             AuthenticationContext context = new AuthenticationContext(tokenPath.toString(), true, service);
 
             // Attempt to acquire a token and fire the callback defined below
-            Future<AuthenticationResult> future = context.acquireToken(resource.toString(), clientId, username, password, new IdentityTokenCallback(username));
+            Future<AuthenticationResult> future = context.acquireToken(resource.toString(), clientId, username, password,
+                    new IdentityTokenCallback(username));
 
             // Return the token as a string
             AuthenticationResult token = future.get();
@@ -180,8 +181,8 @@ public class TokenServiceImpl implements TokenService {
      * Evict user identity tokens from the cache
      * @param username - the stored username
      */
-    @CacheEvict(cacheNames = "crm-auth-token-identity", key="#username")
+    @CacheEvict(cacheNames = "crm-auth-token-identity", key = "#username")
     public void evictIdentityToken(final String username) {
-        log.debug("Evicting AAD token from cache for user:" + username);
+        log.debug("Evicting AAD token from cache for user: " + username);
     }
 }

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Arrays;
+
 @Getter
 @Setter
 @ToString
@@ -27,7 +29,7 @@ public class CrmIdentity implements CrmCall<Identity> {
         //    return null;
         //}
         Identity identity = new Identity();
-        identity.setRoles(roles.split(","));
+        identity.setRoles(Arrays.asList(roles.split(",")));
         return identity;
     }
 
