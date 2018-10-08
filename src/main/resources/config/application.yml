@@ -14,7 +14,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/rcr_api
     username: rcr_owner
     password: rcr_owner
-    driverClassName: org.postgresql.Driver
+    driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL95Dialect
 

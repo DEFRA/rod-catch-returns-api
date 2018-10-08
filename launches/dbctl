@@ -17,7 +17,7 @@ function die_on() {
 # Usage helper
 function print_usage() {
     echo "Usage:"
-    echo "dbctl [--quiet|-q] [init|*reset|reload]"
+    echo "dbctl [--quiet|-q] [init|*reset|update]"
     echo "e.g.:"
     echo "  dbctl -q reload"
 }
@@ -55,16 +55,22 @@ ACTION="${1:-reset}"
 
 set -e
 
+echo "Sourcing ${PROJECT_ROOT}/.env"
+export $(cat ${PROJECT_ROOT}/.env | xargs)
+
 case "${ACTION}" in
+    "update")
+        ${PROJECT_ROOT}/mvnw liquibase:update ${QUIET}
+    ;;
     "reset")
-        MVN_TARGETS="sql:execute@drop-connections sql:execute@drop-database sql:execute@create-database liquibase:update"
+        ${PROJECT_ROOT}/mvnw liquibase:rollback -Dliquibase.rollbackTag=empty ${QUIET}
+        ${PROJECT_ROOT}/mvnw liquibase:update ${QUIET}
     ;;
     "init")
-        MVN_TARGETS="sql:execute@drop-connections sql:execute@drop-database sql:execute@create-database"
+        ${PROJECT_ROOT}/mvnw liquibase:dropAll
+        ${PROJECT_ROOT}/mvnw liquibase:tag -Dliquibase.tag=empty ${QUIET}
     ;;
     *)
-        die_on "Unrecognised action '${ACTION}', should be one of init, reset, reload"
+        die_on "Unrecognised action '${ACTION}', should be one of init, reset, update"
     ;;
 esac
-
-eval "${PROJECT_ROOT}/mvnw ${MVN_TARGETS} ${QUIET}"

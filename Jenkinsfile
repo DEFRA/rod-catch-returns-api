@@ -1,38 +1,73 @@
 @Library('defra-shared') _
-@Library('data-returns-ci')
-
-def buildProperties
-node {
-    buildProperties = buildConfiguration('rcr_api.groovy')
-}
 
 pipeline {
-    agent { label buildProperties['jenkins.slave'] }
+    agent any
     stages {
-        stage('Build project artifacts') {
-            steps {
-                sh 'printenv'
-                sh "./mvnw -B -DskipTests -Ddependency-check.skip=true -DskipTests=true -Dcheckstyle.skip=true -T 1C clean package"
-            }
-        }
-        stage('Build docker image') {
-            steps {
-                sh "./mvnw dockerfile:build"
-            }
-        }
-        stage('Push docker image') {
+        stage('Preparation') {
             steps {
                 script {
-                    docker.withRegistry(buildProperties['ecr.registry.url'], buildProperties['ecr.registry.credentials']) {
-                        docker.image(buildProperties['ecr.repository.name'] + ':latest').push(generateBuildTag())
-                    }
+                    git 'https://github.com/DEFRA/rod-catch-returns-api.git'
+                    buildTag = generateBuildTag()
+                    currentBuild.displayName = "${buildTag}"
+                    jarFileName = "rcr_api-${buildTag}.jar"
+                    targetRepo = "rcr-snapshots"
+                    stageDir = "${WORKSPACE}/target/dist"
+                    distFile = "${WORKSPACE}/target/rcr_api-${buildTag}.tgz"
+
                 }
             }
         }
-        stage("Cleanup") {
+        stage('Build') {
             steps {
-                cleanWs cleanWhenFailure: false
+                script {
+                    sh  """
+                        printenv
+                        ./mvnw versions:set -DnewVersion=${buildTag}
+                        ./mvnw  -T 1C -B --update-snapshots -DskipTests -Ddependency-check.skip=true -DskipTests=true -Dcheckstyle.skip=true clean package
+                    """
+                }
             }
+        }
+        stage('Create distribution') {
+            steps {
+                script {
+                    sh  """
+                        mkdir ${stageDir}
+                        cp target/${jarFileName} ${stageDir}/rcr_api.jar
+                        cd ${stageDir} && tar cvzf ${distFile} * && cd -
+                    """
+                }
+            }
+        }
+        stage('Archive distribution') {
+            steps {
+                script {
+                    def server = Artifactory.server 'defra-artifactory'
+
+                    def buildInfo = Artifactory.newBuildInfo()
+                    buildInfo.name = 'rcr_api'
+                    buildInfo.number = "${buildTag}"
+                    buildInfo.env.capture = true
+                    buildInfo.env.collect()
+
+                    def uploadSpec = """{
+                      "files": [
+                        {
+                          "pattern": "${distFile}",
+                          "target": "${targetRepo}/api/"
+                        }
+                     ]
+                    }"""
+
+                    server.upload spec: uploadSpec, buildInfo: buildInfo
+                    server.publishBuildInfo buildInfo
+                }
+            }
+        }
+    }
+    post {
+        cleanup {
+            cleanWs cleanWhenFailure: false
         }
     }
 }
