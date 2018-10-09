@@ -41,6 +41,11 @@ validation:
   # Allow the current year and the previous (-1)
   submission-year-allowed-range-offset: -1
 
+logging:
+  level:
+    com.microsoft.aad.adal4j: off
+
+
 ---
 ###############################################################################
 #
@@ -60,4 +65,18 @@ liquibase:
   enabled: true
 
 ---
+###############################################################################
+#
+# Profile: CRM test data
+#
+###############################################################################
+spring:
+  profiles: crm-test-data
+  profiles.include:
+      - h2
 
+test-data:
+  licence:
+    licence-number: D9D80E
+    postcode: ST15 0LE
+---

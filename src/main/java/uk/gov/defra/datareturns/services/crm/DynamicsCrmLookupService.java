@@ -41,7 +41,6 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     // The dynamics configuration
     private DynamicsConfiguration dynamicsConfiguration;
 
-
     // The dynamics authentication token service
     private TokenService tokenService;
 
@@ -61,7 +60,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     public DynamicsCrmLookupService(final DynamicsConfiguration dynamicsConfiguration, final TokenService tokenService) {
         this.dynamicsConfiguration = dynamicsConfiguration;
         this.tokenService = tokenService;
-
+        log.info("Creating dynamics lookup service");
     }
 
     @Override
@@ -69,7 +68,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         CrmLicence.LicenceQuery.Query query = new CrmLicence.LicenceQuery.Query();
         query.setPermissionNumber(licenceNumber);
         licenceQuery.setQuery(query);
-        return Objects.requireNonNull(callCRM(licenceQuery, tokenService.getToken()));
+        return callCRM(licenceQuery, tokenService.getToken());
     }
 
     @Override
@@ -79,7 +78,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         query.setContactId(contactId);
         query.setSeason(season);
         createActivity.setQuery(query);
-        return Objects.requireNonNull(callCRM(createActivity, tokenService.getToken()));
+        return callCRM(createActivity, tokenService.getToken());
     }
 
     @Override
@@ -89,7 +88,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         query.setContactId(contactId);
         query.setSeason(season);
         updateActivity.setQuery(query);
-        return Objects.requireNonNull(callCRM(updateActivity, tokenService.getToken()));
+        return callCRM(updateActivity, tokenService.getToken());
     }
 
     @Override
@@ -99,7 +98,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         if (token == null) {
             return null;
         } else {
-            return Objects.requireNonNull(callCRM(identityQuery, token));
+            return callCRM(identityQuery, token);
         }
     }
 
