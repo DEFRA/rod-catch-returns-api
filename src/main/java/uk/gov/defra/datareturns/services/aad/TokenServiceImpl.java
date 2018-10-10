@@ -105,13 +105,11 @@ public class TokenServiceImpl implements TokenService {
         }
 
         public void onFailure(final Throwable throwable) {
-            // We failed to obtain a token.
-            log.error("Failed to acquire token from AAD: " + throwable.toString());
         }
     }
 
     @Override
-    @Cacheable(cacheNames = "crm-auth-token-identity", key = "#username")
+    @Cacheable(cacheNames = "crm-auth-token-identity")
     public String getTokenForUserIdentity(final String username, final String password) {
         ExecutorService service = Executors.newSingleThreadExecutor();
         try {
@@ -122,7 +120,7 @@ public class TokenServiceImpl implements TokenService {
 
             // Attempt to acquire a token and fire the callback defined below
             Future<AuthenticationResult> future = context.acquireToken(resource.toString(), clientId, username, password,
-                    new IdentityTokenCallback(username));
+                    new IdentityTokenCallback(username, password));
 
             // Return the token as a string
             AuthenticationResult token = future.get();
@@ -130,7 +128,6 @@ public class TokenServiceImpl implements TokenService {
             return token == null ? null : token.getAccessToken();
         } catch (MalformedURLException | InterruptedException | ExecutionException e) {
             log.error("Error fetching token: " + e.getMessage());
-
         } finally {
             service.shutdown();
         }
@@ -142,8 +139,10 @@ public class TokenServiceImpl implements TokenService {
      */
     private class IdentityTokenCallback implements AuthenticationCallback<AuthenticationResult> {
         private final String username;
+        private final String password;
 
-        IdentityTokenCallback(final String username) {
+        IdentityTokenCallback(final String username, final String password) {
+            this.password = password;
             this.username = username;
         }
 
@@ -159,13 +158,11 @@ public class TokenServiceImpl implements TokenService {
 
             // Remove the token 1 minute before it is due to expire
             long delay = Math.max(seconds - 60, 0);
-            executor.schedule(() -> proxy.evictIdentityToken(username), delay, TimeUnit.SECONDS);
+            executor.schedule(() -> proxy.evictIdentityToken(username, password), delay, TimeUnit.SECONDS);
             executor.shutdown();
         }
 
         public void onFailure(final Throwable throwable) {
-            // We failed to obtain a token.
-            log.error("Failed to acquire identity token from AAD for user: " + username);
         }
     }
 
@@ -181,8 +178,8 @@ public class TokenServiceImpl implements TokenService {
      * Evict user identity tokens from the cache
      * @param username - the stored username
      */
-    @CacheEvict(cacheNames = "crm-auth-token-identity", key = "#username")
-    public void evictIdentityToken(final String username) {
+    @CacheEvict(cacheNames = "crm-auth-token-identity")
+    public void evictIdentityToken(final String username, final String password) {
         log.debug("Evicting AAD token from cache for user: " + username);
     }
 }

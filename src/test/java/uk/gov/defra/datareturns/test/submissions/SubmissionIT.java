@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
-import uk.gov.defra.datareturns.testcommons.restassured.RestAssuredRule;
+import uk.gov.defra.datareturns.testutils.RcrRestAssuredRule;
 import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
 
 import javax.inject.Inject;
@@ -41,7 +41,7 @@ import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getSubmissi
 public class SubmissionIT {
     @Inject
     @Rule
-    public RestAssuredRule restAssuredRule;
+    public RcrRestAssuredRule restAssuredRule;
 
     @Test
     public void testSubmissionJourney() {
@@ -52,7 +52,6 @@ public class SubmissionIT {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
-
 
         // Create some activities
         final List<String> activities = createActivities(submissionUrl, Pair.of("rivers/3", 20), Pair.of("rivers/5", 40));

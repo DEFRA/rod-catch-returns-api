@@ -5,3 +5,12 @@ spring:
 server:
   address: 127.0.0.1
   port: 9581
+
+# Licence authentication details
+authentication:
+  username: D9D80E
+  password: ST150LE
+
+dynamics:
+  impl: dynamics
+
