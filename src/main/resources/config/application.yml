@@ -45,7 +45,6 @@ logging:
   level:
     com.microsoft.aad.adal4j: off
 
-
 ---
 ###############################################################################
 #
@@ -64,19 +63,4 @@ spring:
 liquibase:
   enabled: true
 
----
-###############################################################################
-#
-# Profile: CRM test data
-#
-###############################################################################
-spring:
-  profiles: crm-test-data
-  profiles.include:
-      - h2
-
-test-data:
-  licence:
-    licence-number: D9D80E
-    postcode: ST15 0LE
 ---

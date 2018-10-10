@@ -28,7 +28,7 @@ public class CrmActivity implements CrmCall<Activity> {
     public Activity getBaseEntity() {
         if (returnStatus.equals("error")) {
             // This is a warning because the activity can be create and removed by the CRM
-            log.warn("Error retrieving activity response from CRM: " + errorMessage);
+            log.warn("Error retrieving activity response from CRM");
             return null;
         }
         Activity activity = new Activity();

@@ -14,8 +14,8 @@ import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 import uk.gov.defra.datareturns.data.model.licences.Activity;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.aad.TokenService;
-import uk.gov.defra.datareturns.services.crm.entity.CrmBaseEntity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmActivity;
+import uk.gov.defra.datareturns.services.crm.entity.CrmBaseEntity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmCall;
 import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
@@ -24,7 +24,6 @@ import uk.gov.defra.datareturns.services.crm.entity.Identity;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Objects;
 
 /**
  * CRM lookup service

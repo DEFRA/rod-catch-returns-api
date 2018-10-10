@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
-import uk.gov.defra.datareturns.testcommons.restassured.RestAssuredRule;
 import uk.gov.defra.datareturns.testutils.RcrRestAssuredRule;
 import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
 
