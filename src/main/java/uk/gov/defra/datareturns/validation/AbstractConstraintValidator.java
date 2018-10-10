@@ -1,10 +1,8 @@
 package uk.gov.defra.datareturns.validation;
 
-import uk.gov.defra.datareturns.config.ValidatorConfiguration;
 import uk.gov.defra.datareturns.data.model.HasSubmission;
 import uk.gov.defra.datareturns.validation.util.ValidationUtil;
 
-import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.lang.annotation.Annotation;
@@ -26,19 +24,12 @@ public abstract class AbstractConstraintValidator<A extends Annotation, T> imple
      * The list of validation checks to be performed
      */
     private final List<CheckFunction<T>> checkFunctions = new ArrayList<>();
-    /**
-     * Validation configuration settings
-     */
-    @Inject
-    private ValidatorConfiguration config;
 
     @Override
     public final boolean isValid(final T value, final ConstraintValidatorContext context) {
         boolean valid = true;
-        if (config.isEnabled()) {
-            for (final CheckFunction<T> check : checkFunctions) {
-                valid = check.apply(value, context) && valid;
-            }
+        for (final CheckFunction<T> check : checkFunctions) {
+            valid = check.apply(value, context) && valid;
         }
         return valid;
     }
@@ -62,7 +53,7 @@ public abstract class AbstractConstraintValidator<A extends Annotation, T> imple
      * @param context the validator context
      * @return true if the object's reference to its submission is not null, false otherwise
      */
-    protected boolean checkSubmission(final HasSubmission obj, final ConstraintValidatorContext context) {
+    public boolean checkSubmission(final HasSubmission obj, final ConstraintValidatorContext context) {
         return obj.getSubmission() != null || handleError(context, "SUBMISSION_REQUIRED", b -> b.addPropertyNode("submission"));
     }
 

@@ -1,6 +1,7 @@
 package uk.gov.defra.datareturns.services.aad;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
 public class TokenServiceImpl implements TokenService {
 
     @Inject

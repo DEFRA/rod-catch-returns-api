@@ -2,11 +2,9 @@ package uk.gov.defra.datareturns.validation.submission;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.defra.datareturns.config.ValidatorConfiguration;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
-import javax.inject.Inject;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Calendar;
 
@@ -18,9 +16,6 @@ import java.util.Calendar;
 @RequiredArgsConstructor
 @Slf4j
 public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmission, Submission> {
-    @Inject
-    private ValidatorConfiguration validatorConfiguration;
-
     @Override
     public void initialize(final ValidSubmission constraintAnnotation) {
         super.addChecks(this::checkContact, this::checkSubmissionStatus, this::checkSubmissionSeason);
@@ -58,8 +53,8 @@ public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmis
      */
     private boolean checkSubmissionSeason(final Submission submission, final ConstraintValidatorContext context) {
         final int currentSeason = Calendar.getInstance().get(Calendar.YEAR);
-        final int oldestAllowed = currentSeason + validatorConfiguration.getSubmissionYearAllowedRangeOffset();
-        return (submission.getSeason() != null && submission.getSeason() <= currentSeason && submission.getSeason() >= oldestAllowed)
+        final int lastSeason = currentSeason - 1;
+        return (submission.getSeason() != null && submission.getSeason() <= currentSeason && submission.getSeason() >= lastSeason)
                 || handleError(context, "SEASON_INVALID", b -> b.addPropertyNode("season"));
     }
 
