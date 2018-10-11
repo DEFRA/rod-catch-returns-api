@@ -128,7 +128,7 @@ public class TokenServiceImpl implements TokenService {
             AuthenticationResult token = future.get();
 
             return token == null ? null : token.getAccessToken();
-        } catch (MalformedURLException | InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             log.error("Error fetching token: " + e.getMessage());
         } finally {
             service.shutdown();
