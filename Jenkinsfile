@@ -1,4 +1,5 @@
-@Library('defra-shared') _
+@Library('defra-shared@master') _
+def arti = new uk.gov.defra.jenkins.Artifactory(this, env.DEFRA_ARTIFACTORY_ID, env.DEFRA_ARTIFACTORY_CREDENTIALS_ID)
 
 pipeline {
     agent any
@@ -6,14 +7,9 @@ pipeline {
         stage('Preparation') {
             steps {
                 script {
-                    git 'https://github.com/DEFRA/rod-catch-returns-api.git'
-                    buildTag = generateBuildTag()
-                    currentBuild.displayName = "${buildTag}"
-                    jarFileName = "rcr_api-${buildTag}.jar"
-                    targetRepo = "rcr-snapshots"
-                    stageDir = "${WORKSPACE}/target/dist"
-                    distFile = "${WORKSPACE}/target/rcr_api-${buildTag}.tgz"
-
+                    BUILD_TAG = buildTag.updateJenkinsJob()
+                    JAR_FILENAME = "rcr_api-${BUILD_TAG}.jar"
+                    STAGE_DIR = "${WORKSPACE}/target/dist"
                 }
             }
         }
@@ -21,9 +17,8 @@ pipeline {
             steps {
                 script {
                     sh  """
-                        printenv
-                        ./mvnw versions:set -DnewVersion=${buildTag}
-                        ./mvnw  -T 1C -B --update-snapshots -DskipTests -Ddependency-check.skip=true -DskipTests=true -Dcheckstyle.skip=true clean package
+                        ./mvnw versions:set -DnewVersion=${BUILD_TAG}
+                        ./mvnw  -T 1C -B --update-snapshots -Dcheckstyle.skip=true -Dfindbugs.skip=true -Ddependency-check.skip=true -DskipTests=true -Dcheckstyle.skip=true clean package
                     """
                 }
             }
@@ -31,10 +26,10 @@ pipeline {
         stage('Create distribution') {
             steps {
                 script {
+                    // Stage a distribution in the STAGE_DIR folder
                     sh  """
-                        mkdir ${stageDir}
-                        cp target/${jarFileName} ${stageDir}/rcr_api.jar
-                        cd ${stageDir} && tar cvzf ${distFile} * && cd -
+                        mkdir ${STAGE_DIR}
+                        cp target/${JAR_FILENAME} ${STAGE_DIR}/rcr_api.jar
                     """
                 }
             }
@@ -42,25 +37,14 @@ pipeline {
         stage('Archive distribution') {
             steps {
                 script {
-                    def server = Artifactory.server 'defra-artifactory'
-
-                    def buildInfo = Artifactory.newBuildInfo()
-                    buildInfo.name = 'rcr_api'
-                    buildInfo.number = "${buildTag}"
-                    buildInfo.env.capture = true
-                    buildInfo.env.collect()
-
-                    def uploadSpec = """{
-                      "files": [
-                        {
-                          "pattern": "${distFile}",
-                          "target": "${targetRepo}/api/"
-                        }
-                     ]
-                    }"""
-
-                    server.upload spec: uploadSpec, buildInfo: buildInfo
-                    server.publishBuildInfo buildInfo
+                    DIST_FILE = arti.createDistributionFile(STAGE_DIR, "rcr_api")
+                }
+            }
+        }
+        stage('Upload distribution') {
+            steps {
+                script {
+                    arti.uploadArtifact("rcr-snapshots/api/", "rcr_api", BUILD_TAG, DIST_FILE)
                 }
             }
         }
