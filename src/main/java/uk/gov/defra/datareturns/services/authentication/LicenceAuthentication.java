@@ -2,6 +2,7 @@ package uk.gov.defra.datareturns.services.authentication;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +32,7 @@ public class LicenceAuthentication implements AuthenticationProvider {
     }
 
     @Override
+    @Cacheable(cacheNames = "crm-licence-auth", key = "#authentication.name")
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
 
         String licenceStr = authentication.getName();

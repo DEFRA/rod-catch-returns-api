@@ -2,6 +2,7 @@ package uk.gov.defra.datareturns.services.authentication;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,6 +34,7 @@ public class ActiveDirectoryAuthentication implements AuthenticationProvider {
     }
 
     @Override
+    @Cacheable(cacheNames = "crm-aad-auth", key = "#authentication.name")
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
 
         String username = authentication.getName();
