@@ -1,5 +1,5 @@
 @Library('defra-shared@master') _
-def arti = new uk.gov.defra.jenkins.Artifactory(this, env.DEFRA_ARTIFACTORY_ID, env.DEFRA_ARTIFACTORY_CREDENTIALS_ID)
+def arti = defraArtifactory()
 
 pipeline {
     agent any
