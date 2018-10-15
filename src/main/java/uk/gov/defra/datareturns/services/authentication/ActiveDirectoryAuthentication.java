@@ -62,7 +62,7 @@ public class ActiveDirectoryAuthentication implements AuthenticationProvider {
             }
 
             Collection<? extends GrantedAuthority> authorities = identity.getRoles()
-                    .stream().map(r -> new SimpleGrantedAuthority(r)).collect(toCollection(ArrayList::new));
+                    .stream().map(SimpleGrantedAuthority::new).collect(toCollection(ArrayList::new));
 
             ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
             executor.schedule(() -> proxy.evictAuthentication(authentication), aadConfiguration.getAadAuthTtlHours(), TimeUnit.HOURS);
