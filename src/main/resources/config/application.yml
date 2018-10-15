@@ -31,9 +31,11 @@ dynamics:
 active-directory:
   tenant:
   authority:
-  clientId:
-  clientSecret:
-  identityClientId:
+  client-id:
+  client-secret:
+  identity-client-id:
+  licence-auth-ttl-hours: 24
+  aad-auth-ttl-hours: 24
 
 validation:
   # Enable/disable all validation functionality
