@@ -23,13 +23,13 @@ public class TestLicenceLookup {
 
     @Test
     public void testLicenceLookupSucceds() {
-        Licence licence = crmLookupService.getLicenceFromLicenceNumber("B7A728");
+        final Licence licence = crmLookupService.getLicenceFromLicenceNumber("B7A728");
         Assertions.assertThat(licence).isNotNull();
     }
 
     @Test
     public void testLicenceLookupFails() {
-        Licence licence = crmLookupService.getLicenceFromLicenceNumber("B9A72D8");
+        final Licence licence = crmLookupService.getLicenceFromLicenceNumber("B9A72D8");
         Assertions.assertThat(licence).isNull();
     }
 }

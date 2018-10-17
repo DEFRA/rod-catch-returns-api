@@ -24,25 +24,21 @@ public class MockLicenceAuthentication implements AuthenticationProvider {
     @Override
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
 
-        String licenceStr = authentication.getName();
-        String postcode = authentication.getCredentials().toString();
+        final String licenceStr = authentication.getName();
+        final String postcode = authentication.getCredentials().toString();
 
         log.debug("Authenticating licence: " + licenceStr);
 
-        try {
-            if (MockLicenceData.LICENCES.containsKey(licenceStr.toUpperCase().trim())) {
-                final Licence licence = MockLicenceData.LICENCES.get(licenceStr.toUpperCase().trim());
-                final String contactPostcode = licence.getContact().getPostcode().replaceAll(" ", "");
-                if (contactPostcode.equalsIgnoreCase(postcode)) {
-                    Collection<? extends GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("LICENCE_HOLDER"));
-                    return new UsernamePasswordAuthenticationToken(licenceStr, contactPostcode, authorities);
-                }
+        if (MockLicenceData.LICENCES.containsKey(licenceStr.toUpperCase().trim())) {
+            final Licence licence = MockLicenceData.LICENCES.get(licenceStr.toUpperCase().trim());
+            final String contactPostcode = licence.getContact().getPostcode().replaceAll(" ", "");
+            if (contactPostcode.equalsIgnoreCase(postcode)) {
+                final Collection<? extends GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("LICENCE_HOLDER"));
+                return new UsernamePasswordAuthenticationToken(licenceStr, contactPostcode, authorities);
             }
-
-            throw new Exception();
-        } catch (Exception e) {
-            throw new BadCredentialsException("Mock licence authentication failed");
         }
+
+        throw new BadCredentialsException("Mock licence authentication failed");
     }
 
     @Override

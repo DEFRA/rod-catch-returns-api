@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class LicenceAuthentication implements AuthenticationProvider {
 
     private final AADConfiguration aadConfiguration;
-    private CrmLookupService crmLookupService;
+    private final CrmLookupService crmLookupService;
 
     @Inject
     private final LicenceAuthentication proxy = null;
@@ -45,35 +45,29 @@ public class LicenceAuthentication implements AuthenticationProvider {
     @Cacheable(cacheNames = "crm-licence-auth", key = "{ #authentication.name, #authentication.credentials }")
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
 
-        String licenceStr = authentication.getName();
-        String postcode = authentication.getCredentials().toString();
+        final String licenceStr = authentication.getName();
+        final String postcode = authentication.getCredentials().toString();
 
         log.debug("Authenticating licence: " + licenceStr);
 
-        try {
-            final Licence licence = crmLookupService.getLicenceFromLicenceNumber(licenceStr);
+        final Licence licence = crmLookupService.getLicenceFromLicenceNumber(licenceStr);
+        if (licence == null) {
+            throw new BadCredentialsException("licence authentication failed - no identity was found for given credentials.");
+        }
 
-            if (licence == null) {
-                throw new Exception();
-            }
+        final String contactPostcode = licence.getContact().getPostcode().replaceAll(" ", "");
 
-            final String contactPostcode = licence.getContact().getPostcode().replaceAll(" ", "");
+        if (contactPostcode.equalsIgnoreCase(postcode.replaceAll(" ", ""))) {
+            final Collection<? extends GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("LICENCE_HOLDER"));
 
-            if (contactPostcode.equalsIgnoreCase(postcode.replaceAll(" ", ""))) {
-                Collection<? extends GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("LICENCE_HOLDER"));
+            // Set up a timer to authorization from the cache
+            final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+            executor.schedule(() -> proxy.evictAuthentication(authentication), aadConfiguration.getLicenceAuthTtlHours(), TimeUnit.HOURS);
+            executor.shutdown();
 
-                // Set up a timer to authorization from the cache
-                ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-                executor.schedule(() -> proxy.evictAuthentication(authentication), aadConfiguration.getLicenceAuthTtlHours(), TimeUnit.HOURS);
-                executor.shutdown();
-
-                return new UsernamePasswordAuthenticationToken(licenceStr, contactPostcode, authorities);
-            } else {
-                throw new Exception();
-            }
-
-        } catch (Exception e) {
-            throw new BadCredentialsException("licence authentication failed");
+            return new UsernamePasswordAuthenticationToken(licenceStr, contactPostcode, authorities);
+        } else {
+            throw new BadCredentialsException("licence authentication failed - no identity could be retrieved for the given credentials");
         }
     }
 

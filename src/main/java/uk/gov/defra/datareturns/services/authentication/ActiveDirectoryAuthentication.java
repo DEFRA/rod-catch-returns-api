@@ -33,7 +33,7 @@ import static java.util.stream.Collectors.toCollection;
 @ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
 @Slf4j
 public class ActiveDirectoryAuthentication implements AuthenticationProvider {
-    private CrmLookupService crmLookupService;
+    private final CrmLookupService crmLookupService;
     private final AADConfiguration aadConfiguration;
 
     @Inject
@@ -49,29 +49,25 @@ public class ActiveDirectoryAuthentication implements AuthenticationProvider {
     @Cacheable(cacheNames = "crm-aad-auth", key = "{ #authentication.name, #authentication.credentials }")
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
 
-        String username = authentication.getName();
-        String password = authentication.getCredentials().toString();
+        final String username = authentication.getName();
+        final String password = authentication.getCredentials().toString();
 
         log.debug("Authenticating user: " + username);
 
-        try {
-            final Identity identity = crmLookupService.getAuthenticatedUserRoles(username, password);
+        final Identity identity = crmLookupService.getAuthenticatedUserRoles(username, password);
 
-            if (identity == null) {
-                throw new Exception();
-            }
-
-            Collection<? extends GrantedAuthority> authorities = identity.getRoles()
-                    .stream().map(SimpleGrantedAuthority::new).collect(toCollection(ArrayList::new));
-
-            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-            executor.schedule(() -> proxy.evictAuthentication(authentication), aadConfiguration.getAadAuthTtlHours(), TimeUnit.HOURS);
-            executor.shutdown();
-
-            return new UsernamePasswordAuthenticationToken(username, password, authorities);
-        } catch (Exception e) {
-            throw new BadCredentialsException("AAD authentication failed");
+        if (identity == null) {
+            throw new BadCredentialsException("AAD authentication failed - no identity was found for given credentials.");
         }
+
+        final Collection<? extends GrantedAuthority> authorities = identity.getRoles()
+                .stream().map(SimpleGrantedAuthority::new).collect(toCollection(ArrayList::new));
+
+        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.schedule(() -> proxy.evictAuthentication(authentication), aadConfiguration.getAadAuthTtlHours(), TimeUnit.HOURS);
+        executor.shutdown();
+
+        return new UsernamePasswordAuthenticationToken(username, password, authorities);
     }
 
     @CacheEvict(cacheNames = "crm-aad-auth", key = "{ #authentication.name, #authentication.credentials }")

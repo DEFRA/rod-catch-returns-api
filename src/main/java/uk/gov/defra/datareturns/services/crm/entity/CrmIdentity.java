@@ -28,7 +28,7 @@ public class CrmIdentity implements CrmCall<Identity> {
         //if (returnStatus.equals("error")) {
         //    return null;
         //}
-        Identity identity = new Identity();
+        final Identity identity = new Identity();
         identity.setRoles(Arrays.asList(roles.split(",")));
         return identity;
     }

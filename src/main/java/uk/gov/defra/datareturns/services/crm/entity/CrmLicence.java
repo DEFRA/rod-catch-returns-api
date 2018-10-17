@@ -63,9 +63,9 @@ public class CrmLicence implements CrmCall<Licence> {
         if (returnStatus.equals("error")) {
             return null;
         }
-        Licence licence = new Licence();
+        final Licence licence = new Licence();
         licence.setLicenceNumber(permissionNumber);
-        Contact contact = new Contact();
+        final Contact contact = new Contact();
         contact.setId(id);
         contact.setPostcode(postcode);
         contact.setFirstName(firstName);

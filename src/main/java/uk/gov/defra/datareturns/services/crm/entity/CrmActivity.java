@@ -31,7 +31,7 @@ public class CrmActivity implements CrmCall<Activity> {
             log.warn("Error retrieving activity response from CRM");
             return null;
         }
-        Activity activity = new Activity();
+        final Activity activity = new Activity();
         activity.setId(id);
         return activity;
     }

@@ -24,7 +24,7 @@ public class IdentityController {
 
     @GetMapping(value = "/identity")
     public ResponseEntity<Identity> getIdentity(@RequestParam("username") final String username, @RequestParam("password") final String password) {
-        Identity identity = lookupService.getAuthenticatedUserRoles(username, password);
+        final Identity identity = lookupService.getAuthenticatedUserRoles(username, password);
         return new ResponseEntity<>(identity, HttpStatus.OK);
     }
 }

@@ -64,7 +64,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
 
     @Override
     public Licence getLicenceFromLicenceNumber(final String licenceNumber) {
-        CrmLicence.LicenceQuery.Query query = new CrmLicence.LicenceQuery.Query();
+        final CrmLicence.LicenceQuery.Query query = new CrmLicence.LicenceQuery.Query();
         query.setPermissionNumber(licenceNumber);
         licenceQuery.setQuery(query);
         return callCRM(licenceQuery, tokenService.getToken());
@@ -73,7 +73,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     @Override
     public Activity createActivity(final String contactId, final short season) {
         log.debug("Creating activity on contact: " + contactId);
-        CrmActivity.CreateActivity.Query query = new CrmActivity.CreateActivity.Query();
+        final CrmActivity.CreateActivity.Query query = new CrmActivity.CreateActivity.Query();
         query.setContactId(contactId);
         query.setSeason(season);
         createActivity.setQuery(query);
@@ -83,7 +83,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     @Override
     public Activity updateActivity(final String contactId, final short season) {
         log.debug("Updating activity on contact: " + contactId);
-        CrmActivity.UpdateActivity.Query query = new CrmActivity.UpdateActivity.Query();
+        final CrmActivity.UpdateActivity.Query query = new CrmActivity.UpdateActivity.Query();
         query.setContactId(contactId);
         query.setSeason(season);
         updateActivity.setQuery(query);
@@ -109,16 +109,16 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      */
     private <B extends CrmBaseEntity, T extends CrmCall<B>> B callCRM(final CrmCall.CRMQuery<T> crmQuery, final String token) {
         try {
-            URL url = new URL(dynamicsConfiguration.getEndpoint(),
+            final URL url = new URL(dynamicsConfiguration.getEndpoint(),
                     dynamicsConfiguration.getApi().toString() + "/" + crmQuery.getCRMStoredProcedureName());
 
-            String urlString = url.toString();
+            final String urlString = url.toString();
             log.debug("CRM Query: " + urlString);
 
-            HttpHeaders headers = new HttpHeaders();
+            final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + token);
-            HttpEntity<CrmCall.CRMQuery.Query> entity;
+            final HttpEntity<CrmCall.CRMQuery.Query> entity;
 
             if (crmQuery.getQuery() != null) {
                 entity = new HttpEntity<>(crmQuery.getQuery(), headers);
@@ -127,15 +127,15 @@ public class DynamicsCrmLookupService implements CrmLookupService {
                 entity = new HttpEntity<>(headers);
             }
 
-            RestTemplate restTemplate = new RestTemplate();
+            final RestTemplate restTemplate = new RestTemplate();
 
-            T result = restTemplate.postForObject(
+            final T result = restTemplate.postForObject(
                     urlString,
                     entity, crmQuery.getEntityClass());
 
             return result.getBaseEntity();
 
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             e.printStackTrace();
             return null;
         }

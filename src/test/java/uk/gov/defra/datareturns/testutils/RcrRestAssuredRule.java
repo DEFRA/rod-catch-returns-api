@@ -18,7 +18,7 @@ public class RcrRestAssuredRule extends RestAssuredRule {
     private AuthConfig authConfig;
 
     protected AuthenticationScheme getAuthentication() {
-        PreemptiveBasicAuthScheme authScheme = new PreemptiveBasicAuthScheme();
+        final PreemptiveBasicAuthScheme authScheme = new PreemptiveBasicAuthScheme();
         authScheme.setUserName(authConfig.getUsername());
         authScheme.setPassword(authConfig.getPassword());
         log.info("Setting CRM authentication details: " + authConfig);

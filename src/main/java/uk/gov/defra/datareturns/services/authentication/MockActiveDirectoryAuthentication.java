@@ -28,22 +28,18 @@ public class MockActiveDirectoryAuthentication implements AuthenticationProvider
     @Cacheable(cacheNames = "crm-aad-auth", key = "{ #authentication.name, #authentication.credentials }")
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
 
-        String username = authentication.getName();
-        String password = authentication.getCredentials().toString();
+        final String username = authentication.getName();
+        final String password = authentication.getCredentials().toString();
 
         log.debug("Authenticating user: " + username);
 
-        try {
-            if (username.equalsIgnoreCase("captain.beefheart@troutmask.replica.com") && password.equalsIgnoreCase("123456")) {
-                final Identity identity = new Identity();
-                identity.setRoles(Collections.singletonList("FMT_USER"));
-                Collection<? extends GrantedAuthority> authorities = identity.getRoles()
-                        .stream().map(SimpleGrantedAuthority::new).collect(toCollection(ArrayList::new));
-                return new UsernamePasswordAuthenticationToken(username, password, authorities);
-            } else {
-                throw new Exception();
-            }
-        } catch (Exception e) {
+        if (username.equalsIgnoreCase("captain.beefheart@troutmask.replica.com") && password.equalsIgnoreCase("123456")) {
+            final Identity identity = new Identity();
+            identity.setRoles(Collections.singletonList("FMT_USER"));
+            final Collection<? extends GrantedAuthority> authorities = identity.getRoles()
+                    .stream().map(SimpleGrantedAuthority::new).collect(toCollection(ArrayList::new));
+            return new UsernamePasswordAuthenticationToken(username, password, authorities);
+        } else {
             throw new BadCredentialsException("Mock AAD authentication failed");
         }
     }
