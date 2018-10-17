@@ -13,9 +13,13 @@ import uk.gov.defra.datareturns.config.AADConfiguration;
 import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -54,6 +58,15 @@ public class TokenServiceImpl implements TokenService {
         }
     }
 
+    private static AuthenticationContext createAuthenticationContext(final String authority, final ExecutorService service) throws IOException {
+        final AuthenticationContext context = new AuthenticationContext(authority, true, service);
+        // Use ProxySelector to determine correct proxy (the adalj sdk has a bug which doesn't automatically select the correct proxy.
+        // Note, the .get(0) is safe because the list will always contain at least 1 proxy instance even if a proxy isn't used (Proxy.NO_PROXY)
+        final Proxy proxy = ProxySelector.getDefault().select(URI.create(authority)).get(0);
+        context.setProxy(proxy);
+        return context;
+    }
+
     @Override
     @Cacheable(cacheNames = "crm-auth-token")
     public String getToken() {
@@ -67,17 +80,19 @@ public class TokenServiceImpl implements TokenService {
             // Generate a credentials payload from the clientId and secret
             final ClientCredential clientCredential = new ClientCredential(clientId, clientSecret);
 
-            final AuthenticationContext context = new AuthenticationContext(tokenPath.toString(), true, service);
+            final AuthenticationContext context = createAuthenticationContext(tokenPath.toString(), service);
 
             // Attempt to acquire a token and fire the callback defined below
             final Future<AuthenticationResult> future = context.acquireToken(resource.toString(),
                     clientCredential, new SystemTokenCallback());
 
             // Return the token as a string
-            final AuthenticationResult token = future.get();
+            final AuthenticationResult result = future.get();
 
-            return token.getAccessToken();
-        } catch (final Exception e) {
+            if (result != null) {
+                return result.getAccessToken();
+            }
+        } catch (final IOException | InterruptedException | ExecutionException e) {
             log.error("Error fetching system token", e);
         } finally {
             service.shutdown();
@@ -93,17 +108,19 @@ public class TokenServiceImpl implements TokenService {
             log.debug("Attempting to fetch user identity AAD token from " + tokenPath);
 
             final String clientId = aadConfiguration.getIdentityClientId();
-            final AuthenticationContext context = new AuthenticationContext(tokenPath.toString(), true, service);
+            final AuthenticationContext context = createAuthenticationContext(tokenPath.toString(), service);
 
             // Attempt to acquire a token and fire the callback defined below
             final Future<AuthenticationResult> future = context.acquireToken(resource.toString(), clientId, username, password,
                     new IdentityTokenCallback(username, password));
 
             // Return the token as a string
-            final AuthenticationResult token = future.get();
+            final AuthenticationResult result = future.get();
 
-            return token == null ? null : token.getAccessToken();
-        } catch (final Exception e) {
+            if (result != null) {
+                return result.getAccessToken();
+            }
+        } catch (final IOException | InterruptedException | ExecutionException e) {
             log.error("Error fetching identity token", e);
         } finally {
             service.shutdown();
