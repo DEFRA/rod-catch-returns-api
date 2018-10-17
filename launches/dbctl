@@ -60,14 +60,14 @@ export $(cat ${PROJECT_ROOT}/.env | xargs)
 
 case "${ACTION}" in
     "update")
-        ${PROJECT_ROOT}/mvnw liquibase:update ${QUIET}
+        ${PROJECT_ROOT}/mvnw resources:resources liquibase:update ${QUIET}
     ;;
     "reset")
-        ${PROJECT_ROOT}/mvnw liquibase:rollback -Dliquibase.rollbackTag=empty ${QUIET}
+        ${PROJECT_ROOT}/mvnw resources:resources liquibase:rollback -Dliquibase.rollbackTag=empty ${QUIET}
         ${PROJECT_ROOT}/mvnw liquibase:update ${QUIET}
     ;;
     "init")
-        ${PROJECT_ROOT}/mvnw liquibase:dropAll
+        ${PROJECT_ROOT}/mvnw resources:resources liquibase:dropAll
         ${PROJECT_ROOT}/mvnw liquibase:tag -Dliquibase.tag=empty ${QUIET}
     ;;
     *)
