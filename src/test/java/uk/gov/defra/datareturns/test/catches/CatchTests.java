@@ -156,12 +156,12 @@ public class CatchTests {
 
     private Catch createValidCatch() {
         final River targetRiver = riverRepository.getOne(RandomUtils.nextLong(1, 100));
-        return createValidCatch(SubmissionTests.createValidSubmission(), targetRiver, (short) 100);
+        return createValidCatch(SubmissionTests.createValidSubmission(), targetRiver);
     }
 
 
-    private Catch createValidCatch(final Submission submission, final River river, final int days) {
-        final Activity activity = ActivityTests.createValidActivity(submission, river, days);
+    private Catch createValidCatch(final Submission submission, final River river) {
+        final Activity activity = ActivityTests.createValidActivity(submission, river, 100, 100);
         submission.setActivities(Collections.singletonList(activity));
 
         final Catch cat = new Catch();

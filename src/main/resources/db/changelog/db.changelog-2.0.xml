@@ -12,7 +12,10 @@
     <changeSet id="create-view: rcv_effort_by_location" author="Defra">
         <createView viewName="rcv_effort_by_location" replaceIfExists="true">
             <![CDATA[
-                select sub.season, act.river_id, sum(act.days) as days
+                select sub.season,
+                       act.river_id,
+                       sum(act.days_fished_with_mandatory_release) as days_fished_with_mandatory_release,
+                       sum(act.days_fished_other) as days_fished_other
                 from rcr_activity act
                        inner join rcr_submission sub on act.submission_id = sub.id
                 group by sub.season, act.river_id;

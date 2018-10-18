@@ -97,11 +97,13 @@ public final class SubmissionTestUtils {
         return fromJson("/data/templates/submission.json.template", replacements);
     }
 
-    public static String getActivityJson(final String submissionId, final String riverId, final int days) {
+    public static String getActivityJson(final String submissionId, final String riverId, final int daysFishedWithMandatoryRelease,
+                                         final int daysFishedOther) {
         final Map<String, Object> replacements = new HashMap<>();
         replacements.put("SUBMISSION", submissionId);
         replacements.put("RIVER", riverId);
-        replacements.put("DAYS", days);
+        replacements.put("DAYS_FISHED_WITH_MANDATORY_RELEASE", daysFishedWithMandatoryRelease);
+        replacements.put("DAYS_FISHED_OTHER", daysFishedOther);
         return fromJson("/data/templates/activity.json.template", replacements);
     }
 

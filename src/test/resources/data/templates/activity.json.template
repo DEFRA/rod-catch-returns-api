@@ -1,5 +1,6 @@
 {
   "submission": "%SUBMISSION%",
   "river": "%RIVER%",
-  "days": %DAYS%
+  "daysFishedWithMandatoryRelease": %DAYS_FISHED_WITH_MANDATORY_RELEASE%,
+  "daysFishedOther": %DAYS_FISHED_OTHER%
 }

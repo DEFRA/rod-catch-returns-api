@@ -55,10 +55,16 @@ public class Activity extends AbstractBaseEntity implements HasSubmission {
     private River river;
 
     /**
-     * The number of days fished
+     * The number of days fished during the mandatory release period
      */
     @Column(nullable = false)
-    private Short days;
+    private Short daysFishedWithMandatoryRelease;
+
+    /**
+     * The number of days fished at other times during the season
+     */
+    @Column(nullable = false)
+    private Short daysFishedOther;
 
     /**
      * The significant catches recorded by the angler that are associated with this activity (fish species, rivers, mass, etc)

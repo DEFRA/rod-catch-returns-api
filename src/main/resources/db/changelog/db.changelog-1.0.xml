@@ -485,7 +485,10 @@
                              foreignKeyName="fk_activity__river"
                              references="rcr_river(id)"/>
             </column>
-            <column name="days" type="smallint">
+            <column name="days_fished_with_mandatory_release" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="days_fished_other" type="smallint">
                 <constraints nullable="false"/>
             </column>
             <column name="created" type="timestamp">
@@ -520,7 +523,8 @@
             </column>
             <column name="submission_id" type="bigint"/>
             <column name="river_id" type="bigint"/>
-            <column name="days" type="smallint"/>
+            <column name="days_fished_with_mandatory_release" type="smallint"/>
+            <column name="days_fished_other" type="smallint"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_activity_aud" columnNames="id, rev"/>

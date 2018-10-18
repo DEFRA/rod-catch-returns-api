@@ -118,8 +118,8 @@ public class SubmissionTests {
     @Test
     public void testSubmissionWithDuplicateRiverInActivitiesFails() {
         final Submission sub = createValidSubmission();
-        final Activity activity1 = ActivityTests.createValidActivity(sub, riverRepository.getOne(1L), 5);
-        final Activity activity2 = ActivityTests.createValidActivity(sub, riverRepository.getOne(1L), 5);
+        final Activity activity1 = ActivityTests.createValidActivity(sub, riverRepository.getOne(1L), 5, 5);
+        final Activity activity2 = ActivityTests.createValidActivity(sub, riverRepository.getOne(1L), 5, 5);
         sub.setActivities(Arrays.asList(activity1, activity2));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
         Assertions.assertThat(violations).haveExactly(2, SubmissionTestUtils.violationMessageMatching("ACTIVITY_RIVER_DUPLICATE_FOUND"));
@@ -128,7 +128,7 @@ public class SubmissionTests {
     @Test
     public void testSubmissionWithDuplicateSmallCatchFails() {
         final Submission sub = createValidSubmission();
-        final Activity activity = ActivityTests.createValidActivity(sub, riverRepository.getOne(1L), 5);
+        final Activity activity = ActivityTests.createValidActivity(sub, riverRepository.getOne(1L), 5, 5);
         final List<SmallCatchCount> counts = Collections.singletonList(
                 SmallCatchCountTests.createValidSmallCatchCount(methodRepository.getOne(1L), 1)
         );

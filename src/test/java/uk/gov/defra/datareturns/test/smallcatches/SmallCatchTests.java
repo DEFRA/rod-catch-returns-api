@@ -139,7 +139,7 @@ public class SmallCatchTests {
         final Submission submission = SubmissionTests.createValidSubmission();
         final River river = riverRepository.getOne(RandomUtils.nextLong(1, 100));
 
-        final Activity activity = ActivityTests.createValidActivity(submission, river, 1);
+        final Activity activity = ActivityTests.createValidActivity(submission, river, 1, 1);
         submission.setActivities(Collections.singletonList(activity));
 
         final List<SmallCatchCount> counts = new ArrayList<>();

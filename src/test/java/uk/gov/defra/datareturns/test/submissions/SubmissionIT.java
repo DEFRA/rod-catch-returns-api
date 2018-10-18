@@ -1,5 +1,7 @@
 package uk.gov.defra.datareturns.test.submissions;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
@@ -54,7 +56,9 @@ public class SubmissionIT {
         });
 
         // Create some activities
-        final List<String> activities = createActivities(submissionUrl, Pair.of("rivers/3", 20), Pair.of("rivers/5", 40));
+        final List<String> activities = createActivities(submissionUrl,
+                ActivityDef.of("rivers/3", 20, 5),
+                ActivityDef.of("rivers/5", 40, 30));
         final Map<String, List<String>> catchesByActivity = new HashMap<>();
         final Map<String, List<String>> smallCatchesByActivity = new HashMap<>();
 
@@ -82,11 +86,11 @@ public class SubmissionIT {
         getEntity(submissionUrl).statusCode(HttpStatus.NOT_FOUND.value());
     }
 
-    @SafeVarargs
-    private final List<String> createActivities(final String submissionUrl, final Pair<String, Integer>... daysFishedByRiver) {
+    private final List<String> createActivities(final String submissionUrl, final ActivityDef... activityDefs) {
         final List<String> activities = new ArrayList<>();
-        for (final Pair<String, Integer> riverAndDay : daysFishedByRiver) {
-            final String activityJson = getActivityJson(submissionUrl, riverAndDay.getFirst(), riverAndDay.getSecond());
+        for (final ActivityDef act : activityDefs) {
+            final String activityJson = getActivityJson(submissionUrl, act.getRiver(), act.getDaysFishedWithMandatoryRelease(),
+                    act.getDaysFishedOther());
             log.info("Creating activity");
             final String activityUrl = createEntity("/activities", activityJson, (r) -> {
                 r.statusCode(HttpStatus.CREATED.value());
@@ -151,7 +155,7 @@ public class SubmissionIT {
             r.body("errors", Matchers.nullValue());
         });
 
-        final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5);
+        final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5, 5);
         final String activityUrl = createEntity("/activities", activityJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
@@ -190,8 +194,7 @@ public class SubmissionIT {
             r.body("errors", Matchers.nullValue());
         });
 
-        final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5);
-
+        final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5, 5);
         final String activity1Url = createEntity("/activities", activityJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
@@ -203,8 +206,15 @@ public class SubmissionIT {
             r.body("errors[0].message", Matchers.hasToString("ACTIVITY_RIVER_DUPLICATE_FOUND"));
             r.body("errors[0].entity", Matchers.hasToString("Activity"));
         });
-
         deleteEntity(submissionUrl);
         getEntity(activity1Url).statusCode(HttpStatus.NOT_FOUND.value());
+    }
+
+    @AllArgsConstructor(staticName = "of")
+    @Getter
+    private static class ActivityDef {
+        private final String river;
+        private final int daysFishedWithMandatoryRelease;
+        private final int daysFishedOther;
     }
 }

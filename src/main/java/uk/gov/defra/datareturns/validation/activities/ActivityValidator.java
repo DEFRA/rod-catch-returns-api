@@ -53,22 +53,27 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
     }
 
     /**
-     * Check that the count of days spent on the river is between 1 and 365 (or 366 for a leap year)
+     * Check that the count of days spent on the river is within possible maximums
      *
      * @param activity the activity to be validated
      * @param context  the validator context
      * @return true if valid, false otherwise
      */
     private boolean checkDays(final Activity activity, final ConstraintValidatorContext context) {
-        final int maxDays = activity.getSubmission() != null && activity.getSubmission().getSeason() % 4 == 0 ? 366 : 365;
+        final int maxDaysMandatory = activity.getSubmission() != null && activity.getSubmission().getSeason() % 4 == 0 ? 168 : 167;
+        final int maxDaysOther = 198;
+        boolean valid = true;
 
-        if (activity.getDays() < 1) {
-            return handleError(context, "DAYS_NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("days"));
-        } else if (activity.getDays() > maxDays) {
-            return handleError(context, "DAYS_MAX_EXCEEDED", b -> b.addPropertyNode("days"));
-
+        if (activity.getDaysFishedWithMandatoryRelease() < 1 && activity.getDaysFishedOther() < 1) {
+            valid = handleError(context, "DAYS_FISHED_NOT_GREATER_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
         }
-        return true;
+        if (activity.getDaysFishedWithMandatoryRelease() > maxDaysMandatory) {
+            valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
+        }
+        if (activity.getDaysFishedOther() > maxDaysOther) {
+            valid = handleError(context, "DAYS_FISHED_OTHER_MAX_EXCEEDED", b -> b.addPropertyNode("daysFishedOther"));
+        }
+        return valid;
     }
 
     @Override

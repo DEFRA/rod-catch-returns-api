@@ -31,24 +31,26 @@ public class ActivityTests {
     @Inject
     private Validator validator;
 
-    public static Activity createValidActivity(final Submission submission, final River river, final int days) {
+    public static Activity createValidActivity(final Submission submission, final River river, final int daysFishedWithMandatoryRelease,
+                                               final int daysFishedOther) {
         final Activity activity = new Activity();
         activity.setRiver(river);
-        activity.setDays((short) days);
+        activity.setDaysFishedWithMandatoryRelease((short) daysFishedWithMandatoryRelease);
+        activity.setDaysFishedOther((short) daysFishedOther);
         activity.setSubmission(submission);
         return activity;
     }
 
     @Test
     public void testValidActivity() {
-        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100);
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100, 100);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
         Assertions.assertThat(violations).isEmpty();
     }
 
     @Test
     public void testActivityWithoutSubmissionFails() {
-        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 5);
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 5, 5);
         activity.setSubmission(null);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
         Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_SUBMISSION_REQUIRED"));
@@ -56,7 +58,7 @@ public class ActivityTests {
 
     @Test
     public void testActivityWithoutRiverFails() {
-        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 10);
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 10, 10);
         activity.setRiver(null);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
         Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_RIVER_REQUIRED"));
@@ -64,16 +66,57 @@ public class ActivityTests {
 
     @Test
     public void testActivityWithNonPositiveDaysFails() {
-        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0);
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 0);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_NOT_GREATER_THAN_ZERO"));
+        Assertions.assertThat(violations).haveExactly(1,
+                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_NOT_GREATER_THAN_ZERO"));
     }
 
     @Test
-    public void testActivityWithMaxDaysExceeded() {
-        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 367);
+    public void testActivityWithMaxDaysWithMandatoryReleaseExceededNonLeapYear() {
+        final Submission sub = SubmissionTests.createValidSubmission();
+        sub.setSeason((short) 2018);
+
+        final Activity activity = createValidActivity(sub, getRandomRiver(), 167, 0);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_MAX_EXCEEDED"));
+        Assertions.assertThat(violations).haveExactly(0,
+                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
+
+        final Activity activity2 = createValidActivity(sub, getRandomRiver(), 168, 0);
+        final Set<ConstraintViolation<Activity>> violations2 = validator.validate(activity2);
+        Assertions.assertThat(violations2).haveExactly(1,
+                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
+    }
+
+    @Test
+    public void testActivityWithMaxDaysWithMandatoryReleaseExceededForLeapYear() {
+        final Submission sub = SubmissionTests.createValidSubmission();
+        sub.setSeason((short) 2020);
+
+        final Activity activity = createValidActivity(sub, getRandomRiver(), 168, 0);
+        final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
+        Assertions.assertThat(violations).haveExactly(0,
+                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
+
+        final Activity activity2 = createValidActivity(sub, getRandomRiver(), 169, 0);
+        final Set<ConstraintViolation<Activity>> violations2 = validator.validate(activity2);
+        Assertions.assertThat(violations2).haveExactly(1,
+                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
+    }
+
+
+    @Test
+    public void testActivityWithMaxDaysOtherExceeded() {
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 198);
+        final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
+        Assertions.assertThat(violations).haveExactly(0,
+                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_MAX_EXCEEDED"));
+
+
+        final Activity activity2 = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 199);
+        final Set<ConstraintViolation<Activity>> violations2 = validator.validate(activity2);
+        Assertions.assertThat(violations2).haveExactly(1,
+                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_MAX_EXCEEDED"));
     }
 
     private River getRandomRiver() {
