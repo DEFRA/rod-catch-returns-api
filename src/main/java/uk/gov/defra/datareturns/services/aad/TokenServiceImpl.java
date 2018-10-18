@@ -15,8 +15,6 @@ import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.Proxy;
-import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
@@ -191,6 +189,10 @@ public class TokenServiceImpl implements TokenService {
         }
 
         public void onFailure(final Throwable throwable) {
+            // Don't log authentication failures
+            if (throwable.getMessage().contains("\"error\":\"invalid_grant\"")) {
+                return;
+            }
             log.error("AAD identity token acquisition failed", throwable);
         }
     }
