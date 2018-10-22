@@ -65,6 +65,21 @@ public class ActivityTests {
     }
 
     @Test
+    public void testActivityWithNegativeDaysFishedWithManadatoryReleaseFails() {
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), -1, 1);
+        final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
+        Assertions.assertThat(violations).haveExactly(1,
+                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_NEGATIVE"));
+    }
+    @Test
+    public void testActivityWithNegativeDaysFishedOtherFails() {
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 1, -1);
+        final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
+        Assertions.assertThat(violations).haveExactly(1,
+                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_NEGATIVE"));
+    }
+
+    @Test
     public void testActivityWithNonPositiveDaysFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 0);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
