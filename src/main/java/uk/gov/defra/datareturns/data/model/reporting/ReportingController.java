@@ -77,6 +77,7 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
             response.setHeader("Content-Type", "text/csv; charset=UTF-8");
             response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
             final CsvWriter csvWriter = new CsvWriter(writer, settings);
+            csvWriter.writeHeaders();
             csvWriter.processRecords(entries);
             csvWriter.flush();
             csvWriter.close();

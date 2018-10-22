@@ -1,52 +1,50 @@
 package uk.gov.defra.datareturns.test.submissions;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
-import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
-import uk.gov.defra.datareturns.testutils.RcrRestAssuredRule;
-import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
+import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
+import uk.gov.defra.datareturns.testutils.WithEndUser;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.Month;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.ActivityDef;
+import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.createActivities;
+import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.createCatches;
 import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.createEntity;
+import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.createSmallCatches;
 import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.deleteEntity;
 import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getActivityJson;
+import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getCatchJson;
 import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getEntity;
+import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getSmallCatchJson;
 import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getSubmissionJson;
+import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.patchEntity;
 
 /**
  * Integration tests submission-level property validation
  */
 @RunWith(SpringRunner.class)
-@WebIntegrationTest
+@RestAssuredTest
+@WithEndUser
 @Slf4j
 public class SubmissionIT {
-    @Inject
-    @Rule
-    public RcrRestAssuredRule restAssuredRule;
-
     @Test
     public void testSubmissionJourney() {
+        // Create the submission
         final String submissionJson = getSubmissionJson(RandomStringUtils.randomAlphanumeric(30),
                 Calendar.getInstance().get(Calendar.YEAR));
 
@@ -68,7 +66,7 @@ public class SubmissionIT {
             catches.addAll(createCatches(submissionUrl, activityUrl, "species/1", "methods/1",
                     Pair.of(CatchMass.MeasurementType.METRIC, BigDecimal.ONE),
                     Pair.of(CatchMass.MeasurementType.IMPERIAL, new BigDecimal(23))));
-            catches.addAll(createCatches(submissionUrl, activityUrl, "species/2", "methods/3",
+            catches.addAll(createCatches(submissionUrl, activityUrl, "species/2", "methods/2",
                     Pair.of(CatchMass.MeasurementType.METRIC, new BigDecimal(0.8343434d)),
                     Pair.of(CatchMass.MeasurementType.IMPERIAL, new BigDecimal(45.3434d))));
             catchesByActivity.put(activityUrl, catches);
@@ -79,71 +77,20 @@ public class SubmissionIT {
 
         }
 
+        // Submit the submission
+        final String submissionPatchStr = "{ \"status\": \"SUBMITTED\" }";
+        patchEntity(submissionUrl, submissionPatchStr, (r) -> {
+            r.statusCode(HttpStatus.OK.value());
+            r.body("errors", Matchers.nullValue());
+        });
+
+
         deleteEntity(submissionUrl);
         activities.forEach(url -> getEntity(url).statusCode(HttpStatus.NOT_FOUND.value()));
         catchesByActivity.values().stream().flatMap(List::stream).forEach(url -> getEntity(url).statusCode(HttpStatus.NOT_FOUND.value()));
         smallCatchesByActivity.values().stream().flatMap(List::stream).forEach(url -> getEntity(url).statusCode(HttpStatus.NOT_FOUND.value()));
         getEntity(submissionUrl).statusCode(HttpStatus.NOT_FOUND.value());
     }
-
-    private final List<String> createActivities(final String submissionUrl, final ActivityDef... activityDefs) {
-        final List<String> activities = new ArrayList<>();
-        for (final ActivityDef act : activityDefs) {
-            final String activityJson = getActivityJson(submissionUrl, act.getRiver(), act.getDaysFishedWithMandatoryRelease(),
-                    act.getDaysFishedOther());
-            log.info("Creating activity");
-            final String activityUrl = createEntity("/activities", activityJson, (r) -> {
-                r.statusCode(HttpStatus.CREATED.value());
-                r.body("errors", Matchers.nullValue());
-            });
-            activities.add(activityUrl);
-        }
-        return activities;
-    }
-
-    @SafeVarargs
-    final List<String> createCatches(final String submissionUrl, final String activityUrl, final String species, final String method,
-                                     final Pair<CatchMass.MeasurementType, BigDecimal>... catchEntries) {
-
-        final List<String> catches = new ArrayList<>();
-        for (final Pair<CatchMass.MeasurementType, BigDecimal> catchEntry : catchEntries) {
-            final String catchJson = SubmissionTestUtils
-                    .getCatchJson(submissionUrl, activityUrl, species, method, catchEntry.getFirst(), catchEntry.getSecond(),
-                            false);
-
-            log.info("Creating catch");
-            final String catchUrl = createEntity("/catches", catchJson, (r) -> {
-                r.statusCode(HttpStatus.CREATED.value());
-                r.body("errors", Matchers.nullValue());
-            });
-            catches.add(catchUrl);
-        }
-        return catches;
-    }
-
-    @SafeVarargs
-    final List<String> createSmallCatches(final String submissionUrl, final String activityUrl, final int released,
-                                          final Pair<String, Integer>... methodCounts) {
-
-        final List<String> smallCatches = new ArrayList<>();
-        final Map<String, Integer> counts = Arrays.stream(methodCounts).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-
-        for (final Month month : Month.values()) {
-            final String smallCatchJson = SubmissionTestUtils
-                    .getSmallCatchJson(submissionUrl, activityUrl, month, counts, released);
-
-
-            log.info("Creating small catch");
-            final String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
-                r.statusCode(HttpStatus.CREATED.value());
-                r.body("errors", Matchers.nullValue());
-            });
-
-            smallCatches.add(smallCatchUrl);
-        }
-        return smallCatches;
-    }
-
 
     @Test
     public void testCatchesDeletedWithActivity() {
@@ -161,16 +108,14 @@ public class SubmissionIT {
             r.body("errors", Matchers.nullValue());
         });
 
-        final String catchJson = SubmissionTestUtils
-                .getCatchJson(submissionUrl, activityUrl, "species/1", "methods/1", CatchMass.MeasurementType.METRIC, BigDecimal.ONE,
-                        false);
+        final String catchJson = getCatchJson(submissionUrl, activityUrl, "species/1", "methods/1",
+                CatchMass.MeasurementType.METRIC, BigDecimal.ONE, false);
         final String catchUrl = createEntity("/catches", catchJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
         });
 
-        final String smallCatchJson = SubmissionTestUtils
-                .getSmallCatchJson(submissionUrl, activityUrl, Month.MARCH, Collections.singletonMap("methods/1", 5), 5);
+        final String smallCatchJson = getSmallCatchJson(submissionUrl, activityUrl, Month.MARCH, Collections.singletonMap("methods/1", 5), 5);
         final String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
@@ -208,13 +153,5 @@ public class SubmissionIT {
         });
         deleteEntity(submissionUrl);
         getEntity(activity1Url).statusCode(HttpStatus.NOT_FOUND.value());
-    }
-
-    @AllArgsConstructor(staticName = "of")
-    @Getter
-    private static class ActivityDef {
-        private final String river;
-        private final int daysFishedWithMandatoryRelease;
-        private final int daysFishedOther;
     }
 }

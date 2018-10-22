@@ -1,7 +1,7 @@
 package uk.gov.defra.datareturns.data.model.method;
 
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import uk.gov.defra.datareturns.data.BaseRepository;
+import uk.gov.defra.datareturns.data.model.SecuredRepository;
 
 
 /**
@@ -10,5 +10,5 @@ import uk.gov.defra.datareturns.data.BaseRepository;
  * @author Sam Gardner-Dell
  */
 @RepositoryRestResource
-public interface MethodRepository extends BaseRepository<Method, Long> {
+public interface MethodRepository extends SecuredRepository<Method, Long> {
 }

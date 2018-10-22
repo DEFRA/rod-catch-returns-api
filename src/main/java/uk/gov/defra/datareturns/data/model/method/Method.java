@@ -6,7 +6,9 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
+import uk.gov.defra.datareturns.data.model.AbstractSecuredEntity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 
 /**
@@ -24,9 +26,10 @@ import javax.persistence.Entity;
 @Audited
 @Getter
 @Setter
-public class Method extends AbstractBaseEntity {
+public class Method extends AbstractSecuredEntity {
     /**
      * The method name
      */
+    @Column
     private String name;
 }

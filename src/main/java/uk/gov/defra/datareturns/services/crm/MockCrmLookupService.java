@@ -11,17 +11,25 @@ import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.data.model.licences.MockLicenceData;
 import uk.gov.defra.datareturns.services.crm.entity.Identity;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Mock CRM lookup service
  *
  * @author Sam Gardner-Dell
  */
 @Service
-@ConditionalOnProperty(name = "dynamics.impl", havingValue = "mock")
+@ConditionalOnProperty(name = "dynamics.impl", havingValue = "MOCK")
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @Slf4j
 @RequiredArgsConstructor
 public class MockCrmLookupService implements CrmLookupService {
+    private static final Pattern USER_PTN = Pattern.compile("(?i)admin.*@example.com");
+
+
     @Override
     public Licence getLicenceFromLicenceNumber(final String licenceNumber) {
         if (MockLicenceData.LICENCES.containsKey(licenceNumber.toUpperCase().trim())) {
@@ -45,7 +53,12 @@ public class MockCrmLookupService implements CrmLookupService {
 
     @Override
     public Identity getAuthenticatedUserRoles(final String username, final String password) {
-        log.debug("Mock: finding roles for user: " + username);
-        return new Identity();
+        final Matcher userMatcher = USER_PTN.matcher(username);
+        if (userMatcher.matches() && password.contains("admin")) {
+            final Identity identity = new Identity();
+            identity.setRoles(new HashSet<>(Collections.singletonList("RcrAdminUser")));
+            return identity;
+        }
+        return null;
     }
 }

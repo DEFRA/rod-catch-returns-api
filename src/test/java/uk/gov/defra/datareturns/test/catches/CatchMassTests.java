@@ -6,7 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
-import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
+import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
+import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
 import javax.inject.Inject;
 import javax.validation.Validator;
@@ -16,7 +17,8 @@ import java.math.BigDecimal;
  * Unit tests for the {@link CatchMass} class
  */
 @RunWith(SpringRunner.class)
-@WebIntegrationTest
+@ApiContextTest
+@WithAdminUser
 @Slf4j
 public class CatchMassTests {
     @Inject

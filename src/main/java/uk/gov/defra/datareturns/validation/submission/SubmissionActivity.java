@@ -21,14 +21,14 @@ public class SubmissionActivity {
 
     @HandleAfterCreate
     public void createSubmission(final Submission submission) {
-        if (submission.getStatus() == SubmissionStatus.INCOMPLETE) {
+        if (SubmissionStatus.INCOMPLETE.equals(submission.getStatus())) {
             lookupService.createActivity(submission.getContactId(), submission.getSeason());
         }
     }
 
     @HandleAfterSave
     public void saveSubmission(final Submission submission) {
-        if (submission.getStatus() == SubmissionStatus.SUBMITTED) {
+        if (SubmissionStatus.SUBMITTED.equals(submission.getStatus())) {
             lookupService.updateActivity(submission.getContactId(), submission.getSeason());
         }
     }

@@ -19,7 +19,6 @@ import java.net.URL;
  */
 @Configuration
 @EnableConfigurationProperties
-@ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
 @ConfigurationProperties(prefix = "dynamics")
 @Getter
 @Setter
@@ -31,18 +30,6 @@ public class DynamicsConfiguration {
     @NotNull
     private DynamicsImpl impl;
 
-    /**
-     * The dynamics endpoint
-     */
-    @NotNull
-    private URL endpoint;
-
-    /**
-     * The dynamics endpoint
-     */
-    @NotNull
-    private URI api;
-
     public enum DynamicsImpl {
         /**
          * the configured dynamics endpoint will be queried
@@ -52,5 +39,25 @@ public class DynamicsConfiguration {
          * no connectivity to dynamics - mock data will be used
          */
         MOCK
+    }
+
+    @Configuration
+    @ConfigurationProperties(prefix = "dynamics.endpoint")
+    @ConditionalOnProperty(name = "dynamics.impl", havingValue = "DYNAMICS")
+    @Getter
+    @Setter
+    @Validated
+    public static class Endpoint {
+        /**
+         * The dynamics endpoint url
+         */
+        @NotNull
+        private URL url;
+
+        /**
+         * The dynamics api path
+         */
+        @NotNull
+        private URI apiPath;
     }
 }

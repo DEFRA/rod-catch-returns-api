@@ -17,8 +17,9 @@ import uk.gov.defra.datareturns.data.model.species.SpeciesRepository;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.test.activities.ActivityTests;
 import uk.gov.defra.datareturns.test.submissions.SubmissionTests;
-import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
+import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
 import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
+import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
@@ -32,7 +33,8 @@ import java.util.Set;
  * Integration tests catch object property validation
  */
 @RunWith(SpringRunner.class)
-@WebIntegrationTest
+@ApiContextTest
+@WithAdminUser
 @Slf4j
 public class CatchTests {
     @Inject

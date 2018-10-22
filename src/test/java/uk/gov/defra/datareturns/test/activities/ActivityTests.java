@@ -11,8 +11,9 @@ import uk.gov.defra.datareturns.data.model.rivers.River;
 import uk.gov.defra.datareturns.data.model.rivers.RiverRepository;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.test.submissions.SubmissionTests;
-import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
+import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
 import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
+import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
@@ -23,7 +24,8 @@ import java.util.Set;
  * Integration tests catch object property validation
  */
 @RunWith(SpringRunner.class)
-@WebIntegrationTest
+@ApiContextTest
+@WithAdminUser
 @Slf4j
 public class ActivityTests {
     @Inject
@@ -71,6 +73,7 @@ public class ActivityTests {
         Assertions.assertThat(violations).haveExactly(1,
                 SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_NEGATIVE"));
     }
+
     @Test
     public void testActivityWithNegativeDaysFishedOtherFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 1, -1);

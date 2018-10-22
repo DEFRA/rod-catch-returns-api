@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Arrays;
+import java.util.HashSet;
 
 @Getter
 @Setter
@@ -29,7 +30,8 @@ public class CrmIdentity implements CrmCall<Identity> {
         //    return null;
         //}
         final Identity identity = new Identity();
-        identity.setRoles(Arrays.asList(roles.split(",")));
+
+        identity.setRoles(new HashSet<>(Arrays.asList(roles.split(","))));
         return identity;
     }
 
@@ -40,9 +42,11 @@ public class CrmIdentity implements CrmCall<Identity> {
     @Setter
     public static class IdentityQuery implements CRMQuery<CrmIdentity> {
         private CrmIdentity.IdentityQuery.Query query;
+
         public Class<CrmIdentity> getEntityClass() {
             return CrmIdentity.class;
         }
+
         public String getCRMStoredProcedureName() {
             return "defra_GetRcrRolesByUser";
         }

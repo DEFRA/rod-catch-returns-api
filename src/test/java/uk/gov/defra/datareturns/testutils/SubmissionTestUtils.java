@@ -1,9 +1,14 @@
 package uk.gov.defra.datareturns.testutils;
 
+import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Condition;
+import org.hamcrest.Matchers;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 
@@ -12,7 +17,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Month;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -21,7 +29,7 @@ import static io.restassured.RestAssured.given;
 
 
 /**
- * Test utilities for submission
+ * Test utilities for submissions
  *
  * @author Sam Gardner-Dell
  */
@@ -60,7 +68,7 @@ public final class SubmissionTestUtils {
                 .when()
                 .get(entityUrl)
                 .then()
-                .log().status().log().body();
+                .log().ifValidationFails(LogDetail.ALL);
     }
 
     public static String createEntity(final String resourceUrl, final String entityJson, final Consumer<ValidatableResponse> responseAssertions) {
@@ -70,7 +78,26 @@ public final class SubmissionTestUtils {
                 .when()
                 .post(resourceUrl)
                 .then()
-                .log().all();
+                .log().ifValidationFails(LogDetail.ALL);
+
+        responseAssertions.accept(response);
+
+        String entityUrl = null;
+        if (response != null) {
+            entityUrl = response.extract().header("Location");
+        }
+        return entityUrl;
+    }
+
+    public static String patchEntity(final String resourceUrl, final String entityJson, final Consumer<ValidatableResponse> responseAssertions) {
+        final ValidatableResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(entityJson)
+                .when()
+                .patch(resourceUrl)
+                .then()
+                .log().ifValidationFails(LogDetail.ALL);
+
         responseAssertions.accept(response);
 
         String entityUrl = null;
@@ -86,7 +113,7 @@ public final class SubmissionTestUtils {
                 .when()
                 .delete(url)
                 .then()
-                .log().all()
+                .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
 
@@ -143,5 +170,65 @@ public final class SubmissionTestUtils {
         replacements.put("METHOD", methodId);
         replacements.put("COUNT", count);
         return fromJson("/data/templates/small.catch.count.json.template", replacements);
+    }
+
+    @SafeVarargs
+    public static List<String> createCatches(final String submissionUrl, final String activityUrl, final String species, final String method,
+                                             final Pair<CatchMass.MeasurementType, BigDecimal>... catchEntries) {
+
+        final List<String> catches = new ArrayList<>();
+        for (final Pair<CatchMass.MeasurementType, BigDecimal> catchEntry : catchEntries) {
+            final String catchJson = SubmissionTestUtils
+                    .getCatchJson(submissionUrl, activityUrl, species, method, catchEntry.getFirst(), catchEntry.getSecond(),
+                            false);
+            final String catchUrl = createEntity("/catches", catchJson, (r) -> {
+                r.statusCode(HttpStatus.CREATED.value());
+                r.body("errors", Matchers.nullValue());
+            });
+            catches.add(catchUrl);
+        }
+        return catches;
+    }
+
+    @SafeVarargs
+    public static List<String> createSmallCatches(final String submissionUrl, final String activityUrl, final int released,
+                                                  final Pair<String, Integer>... methodCounts) {
+
+        final List<String> smallCatches = new ArrayList<>();
+        final Map<String, Integer> counts = Arrays.stream(methodCounts).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+
+        for (final Month month : Month.values()) {
+            final String smallCatchJson = SubmissionTestUtils
+                    .getSmallCatchJson(submissionUrl, activityUrl, month, counts, released);
+            final String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
+                r.statusCode(HttpStatus.CREATED.value());
+                r.body("errors", Matchers.nullValue());
+            });
+
+            smallCatches.add(smallCatchUrl);
+        }
+        return smallCatches;
+    }
+
+    public static List<String> createActivities(final String submissionUrl, final ActivityDef... activityDefs) {
+        final List<String> activities = new ArrayList<>();
+        for (final ActivityDef act : activityDefs) {
+            final String activityJson = getActivityJson(submissionUrl, act.getRiver(), act.getDaysFishedWithMandatoryRelease(),
+                    act.getDaysFishedOther());
+            final String activityUrl = createEntity("/activities", activityJson, (r) -> {
+                r.statusCode(HttpStatus.CREATED.value());
+                r.body("errors", Matchers.nullValue());
+            });
+            activities.add(activityUrl);
+        }
+        return activities;
+    }
+
+    @AllArgsConstructor(staticName = "of")
+    @Getter
+    public static class ActivityDef {
+        private final String river;
+        private final int daysFishedWithMandatoryRelease;
+        private final int daysFishedOther;
     }
 }

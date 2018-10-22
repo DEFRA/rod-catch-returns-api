@@ -1,12 +1,11 @@
 package uk.gov.defra.datareturns.services.authentication;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,39 +13,26 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
-import uk.gov.defra.datareturns.config.AADConfiguration;
+import uk.gov.defra.datareturns.config.CacheManagerConfiguration;
+import uk.gov.defra.datareturns.config.SecurityConfiguration;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
-import uk.gov.defra.datareturns.services.crm.DynamicsCrmLookupService;
 import uk.gov.defra.datareturns.services.crm.entity.Identity;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import static java.util.stream.Collectors.toCollection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Scope(BeanDefinition.SCOPE_SINGLETON)
-@ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
+@CacheConfig(cacheManager = CacheManagerConfiguration.AUTHENTICATION_CACHE_MANAGER)
 @Slf4j
-public class ActiveDirectoryAuthentication implements AuthenticationProvider {
+@RequiredArgsConstructor
+public class ActiveDirectoryAuthentication implements ActiveDirectoryAuthenticationProvider {
     private final CrmLookupService crmLookupService;
-    private final AADConfiguration aadConfiguration;
-
-    @Inject
-    private final ActiveDirectoryAuthentication proxy = null;
-
-    @Inject
-    public ActiveDirectoryAuthentication(final DynamicsCrmLookupService dynamicsCrmLookupService, final AADConfiguration aadConfiguration) {
-        this.crmLookupService = dynamicsCrmLookupService;
-        this.aadConfiguration = aadConfiguration;
-    }
+    private final SecurityConfiguration securityConfiguration;
 
     @Override
-    @Cacheable(cacheNames = "crm-aad-auth", key = "{ #authentication.name, #authentication.credentials }")
+    @Cacheable(cacheNames = "crm-aad-auth",
+               key = "{ #authentication.name, #authentication.credentials }")
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
 
         final String username = authentication.getName();
@@ -55,24 +41,16 @@ public class ActiveDirectoryAuthentication implements AuthenticationProvider {
         log.debug("Authenticating user: " + username);
 
         final Identity identity = crmLookupService.getAuthenticatedUserRoles(username, password);
-
         if (identity == null) {
             throw new BadCredentialsException("AAD authentication failed - no identity was found for given credentials.");
         }
 
-        final Collection<? extends GrantedAuthority> authorities = identity.getRoles()
-                .stream().map(SimpleGrantedAuthority::new).collect(toCollection(ArrayList::new));
-
-        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.schedule(() -> proxy.evictAuthentication(authentication), aadConfiguration.getAadAuthTtlHours(), TimeUnit.HOURS);
-        executor.shutdown();
+        final List<GrantedAuthority> authorities = identity.getRoles().stream()
+                .flatMap(crmRole -> securityConfiguration.getRoleAuthorities().get(crmRole).stream())
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
 
         return new UsernamePasswordAuthenticationToken(username, password, authorities);
-    }
-
-    @CacheEvict(cacheNames = "crm-aad-auth", key = "{ #authentication.name, #authentication.credentials }")
-    public void evictAuthentication(final Authentication authentication) {
-        log.debug("Evicting AAD authentication from cache: " + authentication.getName());
     }
 
     @Override

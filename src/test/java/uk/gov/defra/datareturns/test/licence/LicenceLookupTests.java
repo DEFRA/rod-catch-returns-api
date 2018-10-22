@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
-import uk.gov.defra.datareturns.services.crm.MockCrmLookupService;
-import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
+import uk.gov.defra.datareturns.services.crm.CrmLookupService;
+import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
 
 import javax.inject.Inject;
 
@@ -15,11 +15,11 @@ import javax.inject.Inject;
  * Integration tests licence lookup
  */
 @RunWith(SpringRunner.class)
-@WebIntegrationTest
+@ApiContextTest
 @Slf4j
-public class TestLicenceLookup {
+public class LicenceLookupTests {
     @Inject
-    private MockCrmLookupService crmLookupService;
+    private CrmLookupService crmLookupService;
 
     @Test
     public void testLicenceLookupSucceds() {

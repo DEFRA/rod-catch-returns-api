@@ -39,11 +39,5 @@ public class AADConfiguration {
 
     @NotNull
     private String identityClientId;
-
-    @NotNull
-    private short licenceAuthTtlHours;
-
-    @NotNull
-    private short aadAuthTtlHours;
 }
 

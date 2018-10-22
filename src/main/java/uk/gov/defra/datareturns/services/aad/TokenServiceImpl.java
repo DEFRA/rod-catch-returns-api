@@ -42,17 +42,17 @@ public class TokenServiceImpl implements TokenService {
     private URL tokenPath;
 
     @Inject
-    public TokenServiceImpl(final AADConfiguration aadConfiguration, final DynamicsConfiguration dynamicsConfiguration) {
+    public TokenServiceImpl(final AADConfiguration aadConfiguration, final DynamicsConfiguration.Endpoint endpoint) {
         this.aadConfiguration = aadConfiguration;
 
         final URI tenant = aadConfiguration.getTenant();
         final URL authority = aadConfiguration.getAuthority();
-        resource = dynamicsConfiguration.getEndpoint();
+        resource = endpoint.getUrl();
 
         try {
             this.tokenPath = new URL(authority, tenant.toString());
         } catch (final MalformedURLException e) {
-            log.error("Error in token specification: " + e.getMessage());
+            log.error("Error in token specification", e);
         }
     }
 

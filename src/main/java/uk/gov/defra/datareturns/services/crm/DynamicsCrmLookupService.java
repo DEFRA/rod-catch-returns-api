@@ -21,8 +21,7 @@ import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
 import uk.gov.defra.datareturns.services.crm.entity.Identity;
 
-import javax.inject.Inject;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -36,31 +35,35 @@ import java.net.URL;
 @Slf4j
 @RequiredArgsConstructor
 public class DynamicsCrmLookupService implements CrmLookupService {
+    /**
+     * The dynamics configuration
+     */
+    private final DynamicsConfiguration.Endpoint endpointConfiguration;
 
-    // The dynamics configuration
-    private DynamicsConfiguration dynamicsConfiguration;
+    /**
+     * The dynamics authentication token service
+     */
+    private final TokenService tokenService;
 
-    // The dynamics authentication token service
-    private TokenService tokenService;
-
-    // A CRM query to get the licence and contact details
+    /**
+     * A CRM query to get the licence and contact details
+     */
     private final CrmLicence.LicenceQuery licenceQuery = new CrmLicence.LicenceQuery();
 
-    // A CRM query to create the activity status
+    /**
+     * A CRM query to create the activity status
+     */
     private final CrmActivity.CreateActivity createActivity = new CrmActivity.CreateActivity();
 
-    // A CRM query to update the activity status
+    /**
+     * A CRM query to update the activity status
+     */
     private final CrmActivity.UpdateActivity updateActivity = new CrmActivity.UpdateActivity();
 
-    // A CRM query to get teh internal user identity
+    /**
+     * A CRM query to get teh internal user identity
+     */
     private final CrmIdentity.IdentityQuery identityQuery = new CrmIdentity.IdentityQuery();
-
-    @Inject
-    public DynamicsCrmLookupService(final DynamicsConfiguration dynamicsConfiguration, final TokenService tokenService) {
-        this.dynamicsConfiguration = dynamicsConfiguration;
-        this.tokenService = tokenService;
-        log.info("Creating dynamics lookup service");
-    }
 
     @Override
     public Licence getLicenceFromLicenceNumber(final String licenceNumber) {
@@ -96,21 +99,21 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         final String token = tokenService.getTokenForUserIdentity(username, password);
         if (token == null) {
             return null;
-        } else {
-            return callCRM(identityQuery, token);
         }
+        return callCRM(identityQuery, token);
     }
 
     /**
      * Generic CRM call method - uses the spring rest template
+     *
      * @param crmQuery - the instance of the CRM query
-     * @param <T> - The type of the returned entity
+     * @param <T>      - The type of the returned entity
      * @return - The returned entity object from the CRM
      */
     private <B extends CrmBaseEntity, T extends CrmCall<B>> B callCRM(final CrmCall.CRMQuery<T> crmQuery, final String token) {
         try {
-            final URL url = new URL(dynamicsConfiguration.getEndpoint(),
-                    dynamicsConfiguration.getApi().toString() + "/" + crmQuery.getCRMStoredProcedureName());
+            final URL url = new URL(endpointConfiguration.getUrl(),
+                    endpointConfiguration.getApiPath().toString() + "/" + crmQuery.getCRMStoredProcedureName());
 
             final String urlString = url.toString();
             log.debug("CRM Query: " + urlString);
@@ -118,25 +121,12 @@ public class DynamicsCrmLookupService implements CrmLookupService {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + token);
-            final HttpEntity<CrmCall.CRMQuery.Query> entity;
-
-            if (crmQuery.getQuery() != null) {
-                entity = new HttpEntity<>(crmQuery.getQuery(), headers);
-                log.debug("Payload: " + crmQuery.getQuery());
-            } else {
-                entity = new HttpEntity<>(headers);
-            }
-
+            final HttpEntity<CrmCall.CRMQuery.Query> entity = new HttpEntity<>(crmQuery.getQuery(), headers);
             final RestTemplate restTemplate = new RestTemplate();
 
-            final T result = restTemplate.postForObject(
-                    urlString,
-                    entity, crmQuery.getEntityClass());
-
-            return result.getBaseEntity();
-
-        } catch (final MalformedURLException e) {
-            e.printStackTrace();
+            return restTemplate.postForObject(urlString, entity, crmQuery.getEntityClass()).getBaseEntity();
+        } catch (final IOException e) {
+            log.error("Unable to call CRM", e);
             return null;
         }
     }

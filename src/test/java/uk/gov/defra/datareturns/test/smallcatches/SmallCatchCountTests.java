@@ -8,8 +8,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.method.Method;
 import uk.gov.defra.datareturns.data.model.method.MethodRepository;
 import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatchCount;
-import uk.gov.defra.datareturns.testcommons.framework.WebIntegrationTest;
+import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
 import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
+import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
@@ -20,7 +21,8 @@ import java.util.Set;
  * Integration tests catch object property validation
  */
 @RunWith(SpringRunner.class)
-@WebIntegrationTest
+@ApiContextTest
+@WithAdminUser
 @Slf4j
 public class SmallCatchCountTests {
     @Inject

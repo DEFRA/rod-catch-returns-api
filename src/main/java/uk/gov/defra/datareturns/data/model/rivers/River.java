@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
+import uk.gov.defra.datareturns.data.model.AbstractSecuredEntity;
 import uk.gov.defra.datareturns.data.model.catchments.Catchment;
 
 import javax.persistence.Entity;
@@ -26,7 +27,7 @@ import javax.persistence.ManyToOne;
 @Audited
 @Getter
 @Setter
-public class River extends AbstractBaseEntity {
+public class River extends AbstractSecuredEntity {
     /**
      * The river name
      */
