@@ -17,7 +17,7 @@
                        sum(act.days_fished_with_mandatory_release) as days_fished_with_mandatory_release,
                        sum(act.days_fished_other) as days_fished_other
                 from rcr_activity act
-                       inner join rcr_submission sub on act.submission_id = sub.id
+                            inner join rcr_submission sub on (act.submission_id = sub.id and not sub.reporting_exclude)
                 group by sub.season, act.river_id;
             ]]>
         </createView>
@@ -48,7 +48,7 @@
                      count(catches.released) filter (where catches.released is true)            as released,
                      coalesce(sum(catches.mass_kg) filter (where catches.released is true), 0)  as released_total_mass
               from rcr_catch catches
-                     inner join rcr_submission sub on (catches.submission_id = sub.id)
+                     inner join rcr_submission sub on (catches.submission_id = sub.id and not sub.reporting_exclude and not catches.reporting_exclude)
                      inner join rcr_activity act on catches.activity_id = act.id
               group by (sub.season,
                         extract(MONTH from catches.date_caught),
@@ -78,7 +78,7 @@
                      count(catches.released) filter (where catches.released is true)            as released,
                      coalesce(sum(catches.mass_kg) filter (where catches.released is true), 0)  as released_total_mass
               from rcr_catch catches
-                     inner join rcr_submission sub on (catches.submission_id = sub.id)
+                     inner join rcr_submission sub on (catches.submission_id = sub.id and not sub.reporting_exclude and not catches.reporting_exclude)
                      inner join rcr_activity act on catches.activity_id = act.id
               group by (sub.contact_id,
                         sub.season,
@@ -116,7 +116,7 @@
                       from rcr_small_catch_counts counts
                              inner join rcr_small_catch sc on (counts.small_catch_id = sc.id)
                              inner join rcr_activity act on (sc.activity_id = act.id)
-                             inner join rcr_submission sub on (sc.submission_id = sub.id)
+                             inner join rcr_submission sub on (sc.submission_id = sub.id and not sub.reporting_exclude and not sc.reporting_exclude)
                              inner join rcr_species sp on (sp.id = 2)
                       group by (season, month, river_id, species_id)) catches
                 natural join
@@ -128,7 +128,7 @@
                               sum(sc.released * sp.small_catch_mass) as released_total_mass
                        from rcr_small_catch sc
                               inner join rcr_activity act on sc.activity_id = act.id
-                              inner join rcr_submission sub on sc.submission_id = sub.id
+                              inner join rcr_submission sub on (sc.submission_id = sub.id and not sub.reporting_exclude and not sc.reporting_exclude)
                               inner join rcr_species sp on (sp.id = 2)
                        group by (season, month, river_id, species_id)) releases;
             ]]>
@@ -158,7 +158,7 @@
                       from rcr_small_catch_counts counts
                              inner join rcr_small_catch sc on (counts.small_catch_id = sc.id)
                              inner join rcr_activity act on (sc.activity_id = act.id)
-                             inner join rcr_submission sub on (sc.submission_id = sub.id)
+                             inner join rcr_submission sub on (sc.submission_id = sub.id and not sub.reporting_exclude and not sc.reporting_exclude)
                              inner join rcr_species sp on (sp.id = 2)
                       group by (contact_id, season, month, river_id, species_id)) catches
                 natural join
@@ -171,7 +171,7 @@
                               sum(sc.released * sp.small_catch_mass) as released_total_mass
                        from rcr_small_catch sc
                               inner join rcr_activity act on sc.activity_id = act.id
-                              inner join rcr_submission sub on sc.submission_id = sub.id
+                              inner join rcr_submission sub on (sc.submission_id = sub.id and not sub.reporting_exclude and not sc.reporting_exclude)
                               inner join rcr_species sp on (sp.id = 2)
                        group by (contact_id, season, month, river_id, species_id)) releases;
             ]]>

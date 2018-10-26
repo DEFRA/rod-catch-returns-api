@@ -14,6 +14,7 @@ import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.smallcatches.ValidSmallCatch;
 
 import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -75,5 +76,12 @@ public class SmallCatch extends AbstractBaseEntity implements HasSubmission {
     /**
      * The number released
      */
+    @Column
     private Short released;
+
+    /**
+     * Is this entry excluded from reporting
+     */
+    @Column
+    private boolean reportingExclude = false;
 }

@@ -82,5 +82,12 @@ public class Catch extends AbstractBaseEntity implements HasSubmission {
     /**
      * Was the catch released?
      */
+    @Column
     private boolean released;
+
+    /**
+     * Is this entry excluded from reporting
+     */
+    @Column
+    private boolean reportingExclude = false;
 }

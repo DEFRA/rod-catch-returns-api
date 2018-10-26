@@ -422,6 +422,9 @@
             <column name="source" type="varchar(12)">
                 <constraints nullable="false"/>
             </column>
+            <column name="reporting_exclude" type="boolean">
+                <constraints nullable="false"/>
+            </column>
             <column name="created" type="timestamp">
                 <constraints nullable="false"/>
             </column>
@@ -461,6 +464,7 @@
             <column name="season" type="smallint"/>
             <column name="status" type="varchar(12)"/>
             <column name="source" type="varchar(12)"/>
+            <column name="reporting_exclude" type="boolean"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_submission_aud" columnNames="id, rev"/>
@@ -586,6 +590,9 @@
             <column name="released" type="boolean">
                 <constraints nullable="false"/>
             </column>
+            <column name="reporting_exclude" type="boolean">
+                <constraints nullable="false"/>
+            </column>
             <column name="created" type="timestamp">
                 <constraints nullable="false"/>
             </column>
@@ -622,6 +629,7 @@
             <column name="mass_kg" type="numeric(12, 6)"/>
             <column name="mass_oz" type="numeric(12, 6)"/>
             <column name="method_id" type="bigint"/>
+            <column name="reporting_exclude" type="boolean"/>
             <column name="released" type="boolean"/>
         </createTable>
 
@@ -660,6 +668,9 @@
             <column name="released" type="smallint">
                 <constraints nullable="false"/>
             </column>
+            <column name="reporting_exclude" type="boolean">
+                <constraints nullable="false"/>
+            </column>
             <column name="created" type="timestamp">
                 <constraints nullable="false"/>
             </column>
@@ -695,6 +706,7 @@
             <column name="activity_id" type="bigint"/>
             <column name="month" type="int"/>
             <column name="released" type="smallint"/>
+            <column name="reporting_exclude" type="boolean"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_small_catch_aud" columnNames="id, rev"/>

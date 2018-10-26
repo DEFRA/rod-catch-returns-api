@@ -86,4 +86,10 @@ public class Submission extends AbstractBaseEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
     @Valid
     private List<SmallCatch> smallCatches;
+
+    /**
+     * Is this entry excluded from reporting
+     */
+    @Column
+    private boolean reportingExclude = false;
 }
