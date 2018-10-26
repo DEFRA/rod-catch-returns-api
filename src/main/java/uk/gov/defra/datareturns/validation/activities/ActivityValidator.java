@@ -64,20 +64,30 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
         final int maxDaysOther = 198;
         boolean valid = true;
 
-        if (activity.getDaysFishedWithMandatoryRelease() < 0) {
-            valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_NEGATIVE", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
+
+        if (activity.getDaysFishedWithMandatoryRelease() == null) {
+            valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_REQUIRED", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
         }
-        if (activity.getDaysFishedOther() < 0) {
-            valid = handleError(context, "DAYS_FISHED_OTHER_NEGATIVE", b -> b.addPropertyNode("daysFishedOther"));
+        if (activity.getDaysFishedOther() == null) {
+            valid = handleError(context, "DAYS_FISHED_OTHER_REQUIRED", b -> b.addPropertyNode("daysFishedOther"));
         }
-        if (activity.getDaysFishedWithMandatoryRelease() < 1 && activity.getDaysFishedOther() < 1) {
-            valid = handleError(context, "DAYS_FISHED_NOT_GREATER_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
-        }
-        if (activity.getDaysFishedWithMandatoryRelease() > maxDaysMandatory) {
-            valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
-        }
-        if (activity.getDaysFishedOther() > maxDaysOther) {
-            valid = handleError(context, "DAYS_FISHED_OTHER_MAX_EXCEEDED", b -> b.addPropertyNode("daysFishedOther"));
+        if (valid) {
+            if (activity.getDaysFishedWithMandatoryRelease() < 0) {
+                valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_NEGATIVE", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
+            }
+            if (activity.getDaysFishedOther() < 0) {
+                valid = handleError(context, "DAYS_FISHED_OTHER_NEGATIVE", b -> b.addPropertyNode("daysFishedOther"));
+            }
+            if (activity.getDaysFishedWithMandatoryRelease() < 1 && activity.getDaysFishedOther() < 1) {
+                valid = handleError(context, "DAYS_FISHED_NOT_GREATER_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
+            }
+            if (activity.getDaysFishedWithMandatoryRelease() > maxDaysMandatory) {
+                valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED",
+                        b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
+            }
+            if (activity.getDaysFishedOther() > maxDaysOther) {
+                valid = handleError(context, "DAYS_FISHED_OTHER_MAX_EXCEEDED", b -> b.addPropertyNode("daysFishedOther"));
+            }
         }
         return valid;
     }
