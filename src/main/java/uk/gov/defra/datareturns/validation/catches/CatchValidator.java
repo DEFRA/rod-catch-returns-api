@@ -27,7 +27,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     /**
      * Anything under this threshold should be recorded as a small catch return
      */
-    private static final BigDecimal MIN_FISH_MASS_KG = BigDecimal.valueOf(0.453592);
+    private static final BigDecimal MIN_FISH_MASS_KG = BigDecimal.valueOf(0);
 
     @Override
     public void initialize(final ValidCatch constraintAnnotation) {

@@ -143,7 +143,7 @@ public class CatchTests {
     @Test
     public void testCatchBelowMinWeightFails() {
         final Catch cat = createValidCatch();
-        cat.getMass().set(CatchMass.MeasurementType.METRIC, BigDecimal.valueOf(0.453591));
+        cat.getMass().set(CatchMass.MeasurementType.METRIC, BigDecimal.valueOf(-0.0001));
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_BELOW_MINIMUM"));
     }
