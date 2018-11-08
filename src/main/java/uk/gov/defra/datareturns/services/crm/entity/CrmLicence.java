@@ -10,6 +10,7 @@ import uk.gov.defra.datareturns.data.model.licences.Licence;
 
 @Getter
 @Setter
+@ToString
 public class CrmLicence implements CrmCall<Licence> {
     /**
      * the id associated with the contact
@@ -32,7 +33,7 @@ public class CrmLicence implements CrmCall<Licence> {
     @Override
     @JsonIgnore
     public Licence getBaseEntity() {
-        if (returnStatus.equals("error")) {
+        if ("error".equals(returnStatus)) {
             return null;
         }
         final Licence licence = new Licence();

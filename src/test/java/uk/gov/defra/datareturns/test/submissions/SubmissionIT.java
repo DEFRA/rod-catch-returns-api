@@ -1,7 +1,6 @@
 package uk.gov.defra.datareturns.test.submissions;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,6 +8,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
+import uk.gov.defra.datareturns.services.crm.DynamicsMockData;
 import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
 import uk.gov.defra.datareturns.testutils.WithEndUser;
 
@@ -45,7 +45,7 @@ public class SubmissionIT {
     @Test
     public void testSubmissionJourney() {
         // Create the submission
-        final String submissionJson = getSubmissionJson(RandomStringUtils.randomAlphanumeric(30),
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(1).getContactId(),
                 Calendar.getInstance().get(Calendar.YEAR));
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
@@ -94,7 +94,7 @@ public class SubmissionIT {
 
     @Test
     public void testCatchesDeletedWithActivity() {
-        final String submissionJson = getSubmissionJson(RandomStringUtils.randomAlphanumeric(30),
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(1).getContactId(),
                 Calendar.getInstance().get(Calendar.YEAR));
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
@@ -126,12 +126,13 @@ public class SubmissionIT {
         getEntity(smallCatchUrl).statusCode(HttpStatus.NOT_FOUND.value());
         getEntity(activityUrl).statusCode(HttpStatus.NOT_FOUND.value());
         getEntity(submissionUrl).statusCode(HttpStatus.OK.value());
+        deleteEntity(submissionUrl);
     }
 
 
     @Test
     public void testDuplicateActivityDetected() {
-        final String submissionJson = getSubmissionJson(RandomStringUtils.randomAlphanumeric(30),
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(1).getContactId(),
                 Calendar.getInstance().get(Calendar.YEAR));
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {

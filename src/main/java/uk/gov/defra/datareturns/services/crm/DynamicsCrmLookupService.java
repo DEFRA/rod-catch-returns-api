@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.services.crm;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -33,12 +32,14 @@ import java.net.URL;
 @ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @Slf4j
-@RequiredArgsConstructor
 public class DynamicsCrmLookupService implements CrmLookupService {
     /**
      * The dynamics configuration
      */
     private final DynamicsConfiguration.Endpoint endpointConfiguration;
+
+    private final RestTemplate dynamicsClientRestTemplate;
+    private final RestTemplate dynamicsIdentityRestTemplate;
 
     /**
      * The dynamics authentication token service
@@ -65,12 +66,24 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      */
     private final CrmIdentity.IdentityQuery identityQuery = new CrmIdentity.IdentityQuery();
 
+
+    public DynamicsCrmLookupService(final DynamicsConfiguration.Endpoint endpointConfiguration,
+                                    final RestTemplate dynamicsClientRestTemplate,
+                                    final RestTemplate dynamicsIdentityRestTemplate,
+                                    final TokenService tokenService) {
+        this.endpointConfiguration = endpointConfiguration;
+        this.dynamicsClientRestTemplate = dynamicsClientRestTemplate;
+        this.dynamicsIdentityRestTemplate = dynamicsIdentityRestTemplate;
+        this.tokenService = tokenService;
+    }
+
+
     @Override
     public Licence getLicenceFromLicenceNumber(final String licenceNumber) {
         final CrmLicence.LicenceQuery.Query query = new CrmLicence.LicenceQuery.Query();
         query.setPermissionNumber(licenceNumber);
         licenceQuery.setQuery(query);
-        return callCRM(licenceQuery, tokenService.getToken());
+        return callCRM(dynamicsClientRestTemplate, licenceQuery, null);
     }
 
     @Override
@@ -80,7 +93,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         query.setContactId(contactId);
         query.setSeason(season);
         createActivity.setQuery(query);
-        return callCRM(createActivity, tokenService.getToken());
+        return callCRM(dynamicsClientRestTemplate, createActivity, null);
     }
 
     @Override
@@ -90,17 +103,21 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         query.setContactId(contactId);
         query.setSeason(season);
         updateActivity.setQuery(query);
-        return callCRM(updateActivity, tokenService.getToken());
+        return callCRM(dynamicsClientRestTemplate, updateActivity, null);
     }
 
     @Override
     public Identity getAuthenticatedUserRoles(final String username, final String password) {
-        log.debug("Getting identity for user: " + username);
-        final String token = tokenService.getTokenForUserIdentity(username, password);
+        final String token = getIdentityToken(username, password);
         if (token == null) {
             return null;
         }
-        return callCRM(identityQuery, token);
+        return callCRM(dynamicsIdentityRestTemplate, identityQuery, token);
+    }
+
+    String getIdentityToken(final String username, final String password) {
+        log.debug("Getting access token using resource owner credentials flow for user: " + username);
+        return tokenService.getTokenForUserIdentity(username, password);
     }
 
     /**
@@ -110,7 +127,8 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * @param <T>      - The type of the returned entity
      * @return - The returned entity object from the CRM
      */
-    private <B extends CrmBaseEntity, T extends CrmCall<B>> B callCRM(final CrmCall.CRMQuery<T> crmQuery, final String token) {
+    private <B extends CrmBaseEntity, T extends CrmCall<B>> B callCRM(final RestTemplate restTemplate, final CrmCall.CRMQuery<T> crmQuery,
+                                                                      final String token) {
         try {
             final URL url = new URL(endpointConfiguration.getUrl(),
                     endpointConfiguration.getApiPath().toString() + "/" + crmQuery.getCRMStoredProcedureName());
@@ -120,11 +138,15 @@ public class DynamicsCrmLookupService implements CrmLookupService {
 
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + token);
+            if (token != null) {
+                headers.set("Authorization", "Bearer " + token);
+            }
             final HttpEntity<CrmCall.CRMQuery.Query> entity = new HttpEntity<>(crmQuery.getQuery(), headers);
-            final RestTemplate restTemplate = new RestTemplate();
-
-            return restTemplate.postForObject(urlString, entity, crmQuery.getEntityClass()).getBaseEntity();
+            final CrmCall<B> result = restTemplate.postForObject(urlString, entity, crmQuery.getEntityClass());
+            if (result == null) {
+                return null;
+            }
+            return result.getBaseEntity();
         } catch (final IOException e) {
             log.error("Unable to call CRM", e);
             return null;

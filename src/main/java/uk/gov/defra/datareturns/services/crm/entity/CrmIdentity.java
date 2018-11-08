@@ -7,14 +7,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 @Getter
 @Setter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CrmIdentity implements CrmCall<Identity> {
-
     @JsonProperty("Roles")
     private String roles;
 
@@ -26,12 +24,10 @@ public class CrmIdentity implements CrmCall<Identity> {
 
     @Override
     public Identity getBaseEntity() {
-        //if (returnStatus.equals("error")) {
-        //    return null;
-        //}
         final Identity identity = new Identity();
-
-        identity.setRoles(new HashSet<>(Arrays.asList(roles.split(","))));
+        if (roles != null) {
+            identity.getRoles().addAll(Arrays.asList(roles.split(",")));
+        }
         return identity;
     }
 

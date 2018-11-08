@@ -9,7 +9,7 @@
 ###############################################################################
 spring:
   application:
-    name: Data Returns Rod Catch Returns API
+    name: Rod Catch Returns API
   datasource:
     url: jdbc:postgresql://localhost:5432/rcr_api
     username: rcr_owner
@@ -25,6 +25,9 @@ server:
 
 dynamics:
   impl: mock
+  endpoint:
+    url: http://mock-dynamics.example.com/
+    api-path: api/data/v9.0
 
 active-directory:
   tenant:
