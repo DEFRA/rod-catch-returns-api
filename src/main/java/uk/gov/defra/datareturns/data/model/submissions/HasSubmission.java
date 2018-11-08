@@ -1,6 +1,4 @@
-package uk.gov.defra.datareturns.data.model;
-
-import uk.gov.defra.datareturns.data.model.submissions.Submission;
+package uk.gov.defra.datareturns.data.model.submissions;
 
 /**
  * Interface for entities with a relationship to the {@link Submission}

@@ -3,12 +3,14 @@ package uk.gov.defra.datareturns.config;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.spel.spi.EvaluationContextExtension;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
@@ -24,9 +26,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
-import uk.gov.defra.datareturns.data.BaseRepository;
-import uk.gov.defra.datareturns.data.model.HasAuthorities;
+import uk.gov.defra.datareturns.data.model.AbstractRestrictedEntity;
 import uk.gov.defra.datareturns.services.authentication.ActiveDirectoryAuthenticationProvider;
 import uk.gov.defra.datareturns.services.authentication.LicenceAuthenticationProvider;
 
@@ -35,7 +38,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+import java.util.Optional;
 
 /**
  * Spring security configuration
@@ -49,6 +52,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Validated
+@Slf4j
 public class SecurityConfiguration {
     @NotNull
     private Map<String, Collection<String>> roleAuthorities;
@@ -70,8 +74,7 @@ public class SecurityConfiguration {
         private final LicenceAuthenticationProvider licenceAuthentication;
 
         /**
-         * Attempt authentication by licence and postcode then by
-         * EA active directory credentials
+         * Attempt authentication by licence and postcode then by EA active directory credentials
          */
         @Override
         public void configure(final AuthenticationManagerBuilder builder) {
@@ -81,8 +84,8 @@ public class SecurityConfiguration {
         /**
          * Set up basic authentication on all routes except profile routes
          *
-         * @param http
-         * @throws Exception
+         * @param http the spring {@link HttpSecurity} builder
+         * @throws Exception if a problem occurred configuring the authentication handlers
          */
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
@@ -118,16 +121,23 @@ public class SecurityConfiguration {
         }
     }
 
+    /**
+     * Permission evaluator
+     */
     public static class RcrPermissionEvaluator implements PermissionEvaluator {
-        private static boolean hasAuthority(final Authentication auth, final String targetType, final String permission) {
-            if (auth == null) {
-                return false;
+        private static boolean hasAuthority(final Authentication auth, final String authority) {
+            return authority != null && auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(authority::equals);
+        }
+
+        private static boolean hasAuthority(final Authentication auth, final String targetType, final String authority) {
+            return hasAuthority(auth, StringUtils.upperCase(targetType + "_" + authority));
+        }
+
+        private static Object unwrapDomainObject(final Object entity) {
+            if (entity instanceof Optional) {
+                return ((Optional<?>) entity).orElse(null);
             }
-            final String defaultAuthority = StringUtils.upperCase("JPA_ENTITY_DEFAULT_" + permission);
-            final String targetAuthority = StringUtils.upperCase(targetType + "_" + permission);
-            return auth.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .anyMatch(a -> defaultAuthority.equals(a) || targetAuthority.equals(a));
+            return entity;
         }
 
         @Override
@@ -135,7 +145,12 @@ public class SecurityConfiguration {
             if (targetDomainObject == null) {
                 return false;
             }
-            return hasAuthority(auth, targetDomainObject.getClass().getSimpleName(), Objects.toString(permission));
+            final String permString = Objects.toString(permission);
+            final Object entity = unwrapDomainObject(targetDomainObject);
+            if ("USE_INTERNAL".equals(permString) && entity instanceof AbstractRestrictedEntity) {
+                return !((AbstractRestrictedEntity) entity).isInternal() || hasAuthority(auth, permString);
+            }
+            return hasAuthority(auth, entity.getClass().getSimpleName(), permString);
         }
 
         @Override
@@ -144,6 +159,11 @@ public class SecurityConfiguration {
         }
     }
 
+    /**
+     * Security expression root for RCR, allows additional expressions to be added
+     *
+     * @author Sam Gardner-Dell
+     */
     @Getter
     @Setter
     public static class RcrExpressionRoot extends SecurityExpressionRoot implements MethodSecurityExpressionOperations {
@@ -155,43 +175,27 @@ public class SecurityConfiguration {
             super(authentication);
         }
 
-        private BaseRepository<?, ?> getTargetRepository() {
-            if (!(this.target instanceof BaseRepository)) {
-                throw new RuntimeException("Target must extend BaseRepository");
-            }
-            return (BaseRepository) this.target;
-        }
-
-        public boolean hasWriteAccess() {
-            final String entityName = getTargetRepository().getEntityInformation().getJavaType().getSimpleName().toUpperCase();
-            return super.hasPermission(null, entityName, "WRITE");
-        }
-
-        public boolean hasReadAccess() {
-            final String entityName = getTargetRepository().getEntityInformation().getJavaType().getSimpleName().toUpperCase();
-            return super.hasPermission(null, entityName, "READ");
-        }
-
-        public boolean hasRecordAccess(final Object entity) {
-            boolean permitted = true;
-            if (entity instanceof HasAuthorities) {
-                final String entityName = entity.getClass().getSimpleName();
-                final Set<String> requireOneOf = ((HasAuthorities) entity).getRequiredAuthorities();
-                permitted = requireOneOf.isEmpty();
-
-                for (final String perm : requireOneOf) {
-                    if (permitted) {
-                        break;
-                    }
-                    permitted = super.hasPermission(null, entityName, perm);
-                }
-            }
-            return permitted;
-        }
-
         @Override
         public Object getThis() {
             return target;
+        }
+    }
+
+    /**
+     * Enable the use of security expressions in spring-data @{@link org.springframework.data.jpa.repository.Query}
+     *
+     * @author Sam Gardner-Dell
+     */
+    @Component
+    public static class SecurityEvaluationContextExtension implements EvaluationContextExtension {
+        @Override
+        public String getExtensionId() {
+            return "rcr";
+        }
+
+        @Override
+        public RcrExpressionRoot getRootObject() {
+            return new RcrExpressionRoot(SecurityContextHolder.getContext().getAuthentication());
         }
     }
 }

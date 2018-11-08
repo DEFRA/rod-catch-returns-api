@@ -1,14 +1,17 @@
 package uk.gov.defra.datareturns.data.model.species;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import java.math.BigDecimal;
 
 /**
@@ -17,16 +20,25 @@ import java.math.BigDecimal;
  * @author Sam Gardner-Dell
  */
 @Entity(name = "rcr_species")
-@GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
-                  strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
-                  parameters = {
-                          @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "rcr_species_id_seq")
-                  }
-)
 @Audited
 @Getter
 @Setter
-public class Species extends AbstractBaseEntity {
+public class Species extends AbstractBaseEntity<Long> {
+    /**
+     * Database sequence name for this entity
+     */
+    public static final String SEQUENCE = "rcr_species_id_seq";
+
+    /**
+     * Primary key
+     */
+    @Id
+    @Column(name = "id")
+    @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
+    @ApiModelProperty(readOnly = true)
+    private Long id;
+
     /**
      * The species name
      */

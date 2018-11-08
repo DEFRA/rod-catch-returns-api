@@ -1,0 +1,5 @@
+{
+  "name": "%NAME%",
+  "catchment": "%CATCHMENT_URI%",
+  "internal": %INTERNAL%
+}

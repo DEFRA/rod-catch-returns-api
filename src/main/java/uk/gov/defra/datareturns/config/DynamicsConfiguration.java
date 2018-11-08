@@ -40,9 +40,12 @@ public class DynamicsConfiguration {
     private DynamicsImpl impl;
 
     /**
-     * RestTemplate preconfigured for OAuth 2.0 client credentials grant flow
+     * Retrieve an {@link OAuth2RestTemplate} preconfigured for OAuth 2.0 client credentials grant flow
      *
-     * @return
+     * @param aadConfiguration the oauth2 configuration to use for client credentials flow
+     * @param endpoint         the dynamics endpoint configuration
+     * @return an {@link OAuth2RestTemplate} preconfigured for OAuth 2.0 client credentials grant flow
+     * @throws IOException if a configuration error prevents the template from being created
      */
     @Bean
     @ConditionalOnBean(AADConfiguration.class)
@@ -69,6 +72,9 @@ public class DynamicsConfiguration {
     }
 
 
+    /**
+     * Available dynamics implementations
+     */
     public enum DynamicsImpl {
         /**
          * the configured dynamics endpoint will be queried
@@ -80,6 +86,9 @@ public class DynamicsConfiguration {
         MOCK
     }
 
+    /**
+     * Dynamics endpoint configuration
+     */
     @Configuration
     @ConfigurationProperties(prefix = "dynamics.endpoint")
     @Getter
@@ -98,6 +107,10 @@ public class DynamicsConfiguration {
         @NotNull
         private URI apiPath;
 
+        /**
+         * @return the scope to use with OAuth2 client credentials flow
+         * @throws MalformedURLException on configuration error
+         */
         public String getDefaultOAuth2Scope() throws MalformedURLException {
             return new URL(url, ".default").toString();
         }

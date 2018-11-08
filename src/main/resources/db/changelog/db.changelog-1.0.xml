@@ -13,7 +13,7 @@
     -->
 
     <changeSet id="create-table: revinfo" author="Defra">
-        <createSequence sequenceName="revision_generator" startValue="1"/>
+        <createSequence sequenceName="revision_generator" startValue="1" incrementBy="1"/>
         <createTable tableName="revinfo">
             <column name="rev" type="integer" defaultValueSequenceNext="revision_generator">
                 <constraints primaryKey="true" nullable="false"/>
@@ -35,7 +35,8 @@
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_region" author="Defra">
-        <createSequence sequenceName="rcr_region_id_seq" startValue="1"/>
+        <!-- NOTE: startValue = incrementBy + records loaded when initial data inserted -->
+        <createSequence sequenceName="rcr_region_id_seq" startValue="10" incrementBy="1"/>
 
         <createTable tableName="rcr_region">
             <column name="id" type="bigint" defaultValueSequenceNext="rcr_region_id_seq">
@@ -50,7 +51,7 @@
             <column name="last_modified" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint">
+            <column name="version" type="timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -86,12 +87,12 @@
     <changeSet id="load-table: rcr_region" author="Defra">
         <loadData file="db/data/regions.csv"
                   tableName="rcr_region">
+            <column name="id" type="numeric" header="id"/>
             <column name="name" type="string" header="name"/>
             <column name="created" type="date" header="created"/>
             <column name="last_modified" type="date" header="last_modified"/>
-            <column name="version" type="numeric" header="version"/>
+            <column name="version" type="date" header="version"/>
         </loadData>
-
 
         <rollback>
             <delete tableName="rcr_region"/>
@@ -105,7 +106,8 @@
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_catchment" author="Defra">
-        <createSequence sequenceName="rcr_catchment_id_seq" startValue="1"/>
+        <!-- NOTE: startValue = incrementBy + records loaded when initial data inserted -->
+        <createSequence sequenceName="rcr_catchment_id_seq" startValue="154" incrementBy="1"/>
 
         <createTable tableName="rcr_catchment">
             <column name="id" type="bigint" defaultValueSequenceNext="rcr_catchment_id_seq">
@@ -125,7 +127,7 @@
             <column name="last_modified" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint">
+            <column name="version" type="timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -162,11 +164,12 @@
     <changeSet id="load-table: rcr_catchment" author="Defra">
         <loadData file="db/data/catchments.csv"
                   tableName="rcr_catchment">
+            <column name="id" type="numeric" header="id"/>
             <column name="name" type="string" header="name"/>
             <column name="region_id" type="numeric" header="region_id"/>
             <column name="created" type="date" header="created"/>
             <column name="last_modified" type="date" header="last_modified"/>
-            <column name="version" type="numeric" header="version"/>
+            <column name="version" type="date" header="created"/>
         </loadData>
 
         <rollback>
@@ -181,7 +184,8 @@
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_river" author="Defra">
-        <createSequence sequenceName="rcr_river_id_seq" startValue="1"/>
+        <!-- NOTE: startValue = incrementBy + records loaded when initial data inserted -->
+        <createSequence sequenceName="rcr_river_id_seq" startValue="260" incrementBy="1"/>
 
         <createTable tableName="rcr_river">
             <column name="id" type="bigint" defaultValueSequenceNext="rcr_river_id_seq">
@@ -190,7 +194,10 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="authorities" type="varchar(255)"/>
+            <column name="internal" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
             <column name="catchment_id" type="bigint">
                 <constraints nullable="false"
                              foreignKeyName="fk_river__catchment"
@@ -202,7 +209,7 @@
             <column name="last_modified" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint">
+            <column name="version" type="timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -227,7 +234,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="varchar"/>
-            <column name="authorities" type="varchar(255)"/>
+            <column name="internal" type="boolean"/>
             <column name="catchment_id" type="bigint"/>
         </createTable>
 
@@ -240,12 +247,13 @@
     <changeSet id="load-table: rcr_river" author="Defra">
         <loadData file="db/data/rivers.csv"
                   tableName="rcr_river">
+            <column name="id" type="numeric" header="id"/>
             <column name="name" type="string" header="name"/>
-            <column name="authorities" type="string" header="authorities"/>
+            <column name="internal" type="boolean" header="internal"/>
             <column name="catchment_id" type="numeric" header="catchment_id"/>
             <column name="created" type="date" header="created"/>
             <column name="last_modified" type="date" header="last_modified"/>
-            <column name="version" type="numeric" header="version"/>
+            <column name="version" type="timestamp" header="created"/>
         </loadData>
 
         <rollback>
@@ -260,7 +268,8 @@
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_method" author="Defra">
-        <createSequence sequenceName="rcr_method_id_seq" startValue="1"/>
+        <!-- NOTE: startValue = incrementBy + records loaded when initial data inserted -->
+        <createSequence sequenceName="rcr_method_id_seq" startValue="5" incrementBy="1"/>
 
         <createTable tableName="rcr_method">
             <column name="id" type="bigint" defaultValueSequenceNext="rcr_method_id_seq">
@@ -269,14 +278,16 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="authorities" type="varchar(255)"/>
+            <column name="internal" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
             <column name="created" type="timestamp">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint">
+            <column name="version" type="timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -301,7 +312,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="varchar(255)"/>
-            <column name="authorities" type="varchar(255)"/>
+            <column name="internal" type="boolean"/>
         </createTable>
 
         <addPrimaryKey tableName="rcr_method_aud" columnNames="id, rev"/>
@@ -313,11 +324,12 @@
     <changeSet id="load-table: rcr_method" author="Defra">
         <loadData file="db/data/methods.csv"
                   tableName="rcr_method">
+            <column name="id" type="numeric" header="id"/>
             <column name="name" type="string" header="name"/>
-            <column name="authorities" type="string" header="authorities"/>
+            <column name="internal" type="boolean" header="internal"/>
             <column name="created" type="date" header="created"/>
             <column name="last_modified" type="date" header="last_modified"/>
-            <column name="version" type="numeric" header="version"/>
+            <column name="version" type="timestamp" header="created"/>
         </loadData>
 
         <rollback>
@@ -332,7 +344,8 @@
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_species" author="Defra">
-        <createSequence sequenceName="rcr_species_id_seq" startValue="1"/>
+        <!-- NOTE: startValue = incrementBy + records loaded when initial data inserted -->
+        <createSequence sequenceName="rcr_species_id_seq" startValue="3" incrementBy="1"/>
 
         <createTable tableName="rcr_species">
             <column name="id" type="bigint" defaultValueSequenceNext="rcr_species_id_seq">
@@ -350,7 +363,7 @@
             <column name="last_modified" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint">
+            <column name="version" type="timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -387,10 +400,12 @@
     <changeSet id="load-table: rcr_species" author="Defra">
         <loadData file="db/data/species.csv"
                   tableName="rcr_species">
+            <column name="id" type="numeric" header="id"/>
             <column name="name" type="string" header="name"/>
+            <column name="small_catch_mass" type="numeric" header="small_catch_mass"/>
             <column name="created" type="date" header="created"/>
             <column name="last_modified" type="date" header="last_modified"/>
-            <column name="version" type="numeric" header="version"/>
+            <column name="version" type="timestamp" header="created"/>
         </loadData>
 
         <rollback>
@@ -404,7 +419,7 @@
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_submission" author="Defra">
-        <createSequence sequenceName="rcr_submission_id_seq" startValue="1"/>
+        <createSequence sequenceName="rcr_submission_id_seq" startValue="50" incrementBy="50"/>
 
         <createTable tableName="rcr_submission">
             <column name="id" type="bigint" defaultValueSequenceNext="rcr_submission_id_seq">
@@ -431,7 +446,7 @@
             <column name="last_modified" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint">
+            <column name="version" type="timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -479,7 +494,7 @@
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_activity" author="Defra">
-        <createSequence sequenceName="rcr_activity_id_seq" startValue="1"/>
+        <createSequence sequenceName="rcr_activity_id_seq" startValue="50" incrementBy="50"/>
 
         <createTable tableName="rcr_activity">
             <column name="id" type="bigint" defaultValueSequenceNext="rcr_activity_id_seq">
@@ -507,7 +522,7 @@
             <column name="last_modified" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint">
+            <column name="version" type="timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -549,7 +564,7 @@
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_catch" author="Defra">
-        <createSequence sequenceName="rcr_catch_id_seq" startValue="1"/>
+        <createSequence sequenceName="rcr_catch_id_seq" startValue="50" incrementBy="50"/>
 
         <createTable tableName="rcr_catch">
             <column name="id" type="bigint" defaultValueSequenceNext="rcr_catch_id_seq">
@@ -599,7 +614,7 @@
             <column name="last_modified" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint">
+            <column name="version" type="timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -646,7 +661,7 @@
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_small_catch" author="Defra">
-        <createSequence sequenceName="rcr_small_catch_id_seq" startValue="1"/>
+        <createSequence sequenceName="rcr_small_catch_id_seq" startValue="50" incrementBy="50"/>
 
         <createTable tableName="rcr_small_catch">
             <column name="id" type="bigint" defaultValueSequenceNext="rcr_small_catch_id_seq">
@@ -677,7 +692,7 @@
             <column name="last_modified" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint">
+            <column name="version" type="timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>

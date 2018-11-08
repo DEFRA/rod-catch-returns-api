@@ -19,12 +19,12 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.function.Consumer;
 
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.createEntity;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.deleteEntity;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getActivityJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getCatchJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getSmallCatchJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getSubmissionJson;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getActivityJson;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getCatchJson;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSmallCatchJson;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSubmissionJson;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.createEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.deleteEntity;
 
 /**
  * Integration tests submission-level property validation
@@ -63,9 +63,7 @@ public class MethodIT {
     @Test
     @WithAdminUser
     public void testSecuredMethodAccessibleByAdmin() {
-        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(1).getContactId(), (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-        });
+        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(1).getContactId(), (r) -> r.statusCode(HttpStatus.CREATED.value()));
     }
 
     @Test

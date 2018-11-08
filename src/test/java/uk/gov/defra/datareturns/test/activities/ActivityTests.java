@@ -12,13 +12,14 @@ import uk.gov.defra.datareturns.data.model.rivers.RiverRepository;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.test.submissions.SubmissionTests;
 import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
-import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.Set;
+
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.violationMessageMatching;
 
 /**
  * Integration tests catch object property validation
@@ -55,7 +56,7 @@ public class ActivityTests {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 5, 5);
         activity.setSubmission(null);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_SUBMISSION_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_SUBMISSION_REQUIRED"));
     }
 
     @Test
@@ -63,7 +64,7 @@ public class ActivityTests {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 10, 10);
         activity.setRiver(null);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("ACTIVITY_RIVER_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_RIVER_REQUIRED"));
     }
 
     @Test
@@ -71,8 +72,7 @@ public class ActivityTests {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 1, 1);
         activity.setDaysFishedWithMandatoryRelease(null);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(1,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_REQUIRED"));
     }
 
 
@@ -81,32 +81,28 @@ public class ActivityTests {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 1, 1);
         activity.setDaysFishedOther(null);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(1,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_REQUIRED"));
     }
 
     @Test
     public void testActivityWithNegativeDaysFishedWithManadatoryReleaseFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), -1, 1);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(1,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_NEGATIVE"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_NEGATIVE"));
     }
 
     @Test
     public void testActivityWithNegativeDaysFishedOtherFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 1, -1);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(1,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_NEGATIVE"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_NEGATIVE"));
     }
 
     @Test
     public void testActivityWithNonPositiveDaysFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 0);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(1,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_NOT_GREATER_THAN_ZERO"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_NOT_GREATER_THAN_ZERO"));
     }
 
     @Test
@@ -116,13 +112,11 @@ public class ActivityTests {
 
         final Activity activity = createValidActivity(sub, getRandomRiver(), 167, 0);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(0,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
+        Assertions.assertThat(violations).haveExactly(0, violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
 
         final Activity activity2 = createValidActivity(sub, getRandomRiver(), 168, 0);
         final Set<ConstraintViolation<Activity>> violations2 = validator.validate(activity2);
-        Assertions.assertThat(violations2).haveExactly(1,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
+        Assertions.assertThat(violations2).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
     }
 
     @Test
@@ -132,13 +126,11 @@ public class ActivityTests {
 
         final Activity activity = createValidActivity(sub, getRandomRiver(), 168, 0);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(0,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
+        Assertions.assertThat(violations).haveExactly(0, violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
 
         final Activity activity2 = createValidActivity(sub, getRandomRiver(), 169, 0);
         final Set<ConstraintViolation<Activity>> violations2 = validator.validate(activity2);
-        Assertions.assertThat(violations2).haveExactly(1,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
+        Assertions.assertThat(violations2).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
     }
 
 
@@ -146,14 +138,12 @@ public class ActivityTests {
     public void testActivityWithMaxDaysOtherExceeded() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 198);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
-        Assertions.assertThat(violations).haveExactly(0,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_MAX_EXCEEDED"));
+        Assertions.assertThat(violations).haveExactly(0, violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_MAX_EXCEEDED"));
 
 
         final Activity activity2 = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 199);
         final Set<ConstraintViolation<Activity>> violations2 = validator.validate(activity2);
-        Assertions.assertThat(violations2).haveExactly(1,
-                SubmissionTestUtils.violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_MAX_EXCEEDED"));
+        Assertions.assertThat(violations2).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_OTHER_MAX_EXCEEDED"));
     }
 
     private River getRandomRiver() {

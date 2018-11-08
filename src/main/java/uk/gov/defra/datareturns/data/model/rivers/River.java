@@ -1,16 +1,19 @@
 package uk.gov.defra.datareturns.data.model.rivers;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
-import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
-import uk.gov.defra.datareturns.data.model.AbstractSecuredEntity;
+import uk.gov.defra.datareturns.data.model.AbstractRestrictedEntity;
 import uk.gov.defra.datareturns.data.model.catchments.Catchment;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 
 /**
  * RCR River reference data
@@ -18,16 +21,25 @@ import javax.persistence.ManyToOne;
  * @author Sam Gardner-Dell
  */
 @Entity(name = "rcr_river")
-@GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
-                  strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
-                  parameters = {
-                          @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "rcr_river_id_seq")
-                  }
-)
 @Audited
 @Getter
 @Setter
-public class River extends AbstractSecuredEntity {
+public class River extends AbstractRestrictedEntity<Long> {
+    /**
+     * Database sequence name for this entity
+     */
+    public static final String SEQUENCE = "rcr_river_id_seq";
+
+    /**
+     * Primary key
+     */
+    @Id
+    @Column(name = "id")
+    @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
+    @ApiModelProperty(readOnly = true)
+    private Long id;
+
     /**
      * The river name
      */

@@ -3,7 +3,6 @@ package uk.gov.defra.datareturns.data.model.reporting.catches;
 import com.univocity.parsers.annotations.Headers;
 import com.univocity.parsers.annotations.Parsed;
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.persistence.Basic;
 import javax.persistence.Id;
@@ -17,7 +16,6 @@ import java.math.BigDecimal;
  */
 @MappedSuperclass
 @Getter
-@Setter
 @Headers
 public abstract class AbstractCatchSummary {
     @Id

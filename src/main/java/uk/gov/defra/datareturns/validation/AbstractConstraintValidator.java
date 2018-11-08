@@ -1,6 +1,6 @@
 package uk.gov.defra.datareturns.validation;
 
-import uk.gov.defra.datareturns.data.model.HasSubmission;
+import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
 import uk.gov.defra.datareturns.validation.util.ValidationUtil;
 
 import javax.validation.ConstraintValidator;
@@ -15,8 +15,8 @@ import java.util.function.Consumer;
 /**
  * Abstract implementation of the {@link ConstraintValidator} to simplify the validation logic of concrete subclasses
  *
- * @param <A>
- * @param <T>
+ * @param <A> the annotation type handled by an implementation
+ * @param <T> the target type supported by an implementation
  * @author Sam Gardner-Dell
  */
 public abstract class AbstractConstraintValidator<A extends Annotation, T> implements ConstraintValidator<A, T> {

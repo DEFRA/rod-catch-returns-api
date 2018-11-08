@@ -1,7 +1,7 @@
 package uk.gov.defra.datareturns.data.model.rivers;
 
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import uk.gov.defra.datareturns.data.model.SecuredRepository;
+import uk.gov.defra.datareturns.data.model.RestrictedEntityFilteringRepository;
 
 
 /**
@@ -10,5 +10,5 @@ import uk.gov.defra.datareturns.data.model.SecuredRepository;
  * @author Sam Gardner-Dell
  */
 @RepositoryRestResource
-public interface RiverRepository extends SecuredRepository<River, Long> {
+public interface RiverRepository extends RestrictedEntityFilteringRepository<River, Long> {
 }

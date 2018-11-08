@@ -1,7 +1,7 @@
 package uk.gov.defra.datareturns.data.model.regions;
 
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import uk.gov.defra.datareturns.data.BaseRepository;
+import uk.gov.defra.datareturns.data.model.ReferenceDataRepository;
 
 
 /**
@@ -10,5 +10,5 @@ import uk.gov.defra.datareturns.data.BaseRepository;
  * @author Sam Gardner-Dell
  */
 @RepositoryRestResource
-public interface RegionRepository extends BaseRepository<Region, Long> {
+public interface RegionRepository extends ReferenceDataRepository<Region, Long> {
 }

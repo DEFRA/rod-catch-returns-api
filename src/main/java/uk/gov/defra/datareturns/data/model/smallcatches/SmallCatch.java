@@ -1,14 +1,13 @@
 package uk.gov.defra.datareturns.data.model.smallcatches;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.conversion.MonthConverter;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
-import uk.gov.defra.datareturns.data.model.HasSubmission;
+import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.smallcatches.ValidSmallCatch;
@@ -18,8 +17,12 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
@@ -35,17 +38,25 @@ import java.util.List;
 @Table(uniqueConstraints = {
         @UniqueConstraint(name = "uniq_activity_and_month_per_submission", columnNames = {"submission_id", "activity_id", "month"})
 })
-@GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
-                  strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
-                  parameters = {
-                          @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "rcr_small_catch_id_seq")
-                  }
-)
 @Audited
 @Getter
 @Setter
 @ValidSmallCatch
-public class SmallCatch extends AbstractBaseEntity implements HasSubmission {
+public class SmallCatch extends AbstractBaseEntity<Long> implements HasSubmission {
+    /**
+     * Database sequence name for this entity
+     */
+    public static final String SEQUENCE = "rcr_small_catch_id_seq";
+
+    /**
+     * Primary key
+     */
+    @Id
+    @Column(name = "id")
+    @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
+    @ApiModelProperty(readOnly = true)
+    private Long id;
     /**
      * The parent submission
      */

@@ -17,7 +17,6 @@ import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.test.activities.ActivityTests;
 import uk.gov.defra.datareturns.test.submissions.SubmissionTests;
 import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
-import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
 import javax.inject.Inject;
@@ -28,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.violationMessageMatching;
 
 /**
  * Integration tests catch object property validation
@@ -67,7 +68,7 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         cat.setSubmission(null);
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_SUBMISSION_REQUIRED"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_SUBMISSION_REQUIRED"));
     }
 
     @Test
@@ -75,7 +76,7 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         cat.setActivity(null);
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_ACTIVITY_REQUIRED"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_ACTIVITY_REQUIRED"));
     }
 
     @Test
@@ -83,7 +84,7 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         cat.setMonth(null);
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_MONTH_REQUIRED"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_MONTH_REQUIRED"));
     }
 
     @Test
@@ -91,7 +92,7 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         cat.setCounts(null);
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_REQUIRED"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_COUNTS_REQUIRED"));
     }
 
     @Test
@@ -99,7 +100,7 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         cat.getCounts().clear();
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_REQUIRED"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_COUNTS_REQUIRED"));
     }
 
     @Test
@@ -107,8 +108,7 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         cat.getCounts().addAll(cat.getCounts());
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1)
-                .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_COUNTS_METHOD_DUPLICATE_FOUND"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_COUNTS_METHOD_DUPLICATE_FOUND"));
     }
 
 
@@ -117,7 +117,7 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         cat.setReleased(null);
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_RELEASED_REQUIRED"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_RELEASED_REQUIRED"));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         cat.setReleased((short) -1);
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_RELEASED_NEGATIVE"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_RELEASED_NEGATIVE"));
     }
 
     @Test
@@ -133,8 +133,7 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         cat.setReleased((short) (cat.getCounts().stream().mapToInt(c -> (int) c.getCount()).sum() + 1));
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1)
-                .haveAtLeastOne(SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_RELEASED_EXCEEDS_COUNTS"));
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_RELEASED_EXCEEDS_COUNTS"));
     }
 
     private SmallCatch createValidSmallCatch() {

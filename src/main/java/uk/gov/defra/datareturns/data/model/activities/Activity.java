@@ -1,23 +1,26 @@
 package uk.gov.defra.datareturns.data.model.activities;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
-import uk.gov.defra.datareturns.data.model.HasSubmission;
 import uk.gov.defra.datareturns.data.model.catches.Catch;
 import uk.gov.defra.datareturns.data.model.rivers.River;
 import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatch;
+import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.activities.ValidActivity;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.util.List;
@@ -31,17 +34,26 @@ import java.util.List;
 @Table(uniqueConstraints = {
         @UniqueConstraint(name = "uniq_activity_river_per_submission", columnNames = {"submission_id", "river_id"})
 })
-@GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
-                  strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
-                  parameters = {
-                          @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "rcr_activity_id_seq")
-                  }
-)
 @Audited
 @Getter
 @Setter
 @ValidActivity
-public class Activity extends AbstractBaseEntity implements HasSubmission {
+public class Activity extends AbstractBaseEntity<Long> implements HasSubmission {
+    /**
+     * Database sequence name for this entity
+     */
+    public static final String SEQUENCE = "rcr_activity_id_seq";
+
+    /**
+     * Primary key
+     */
+    @Id
+    @Column(name = "id")
+    @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
+    @ApiModelProperty(readOnly = true)
+    private Long id;
+
     /**
      * The parent submission
      */

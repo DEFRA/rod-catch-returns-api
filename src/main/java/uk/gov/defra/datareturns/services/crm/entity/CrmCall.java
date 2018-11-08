@@ -3,7 +3,8 @@ package uk.gov.defra.datareturns.services.crm.entity;
 /**
  * Bundles a CRM query with a response transfer object
  * and associates an API base entity class
- * @param <E>
+ *
+ * @param <E> crm entity type
  */
 public interface CrmCall<E extends CrmBaseEntity> {
     E getBaseEntity();
@@ -13,13 +14,18 @@ public interface CrmCall<E extends CrmBaseEntity> {
      * to call a stored procedure on the CRM, that is the query parameters
      * posted to the CRM in the payload, the stored procedure name and
      * the resulting type - a class extending CrmCall
-     * @param <T>
+     *
+     * @param <T> the CrmCall
      */
-    interface CRMQuery<T extends CrmCall> {
+    interface CRMQuery<T extends CrmCall<?>> {
         @SuppressWarnings("SameReturnValue")
         String getCRMStoredProcedureName();
+
         Query getQuery();
+
         Class<T> getEntityClass();
-        interface Query { }
+
+        interface Query {
+        }
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 
@@ -58,8 +59,8 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
 
     @Override
     public RepositoryLinksResource process(final RepositoryLinksResource resource) {
-        // TODO: Base path should be preprended to href
-        resource.add(new Link("/licences", "licences"));
+        final String base = ServletUriComponentsBuilder.fromCurrentRequest().toUriString();
+        resource.add(new Link(base + "licence/{licence}", "licences"));
         return resource;
     }
 }

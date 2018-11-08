@@ -21,18 +21,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.ActivityDef;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.createActivities;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.createCatches;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.createEntity;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.createSmallCatches;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.deleteEntity;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getActivityJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getCatchJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getEntity;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getSmallCatchJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getSubmissionJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.patchEntity;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.ActivityDef;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.createActivities;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.createCatches;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.createSmallCatches;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getActivityJson;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getCatchJson;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSmallCatchJson;
+import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSubmissionJson;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.createEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.deleteEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.patchEntity;
 
 /**
  * Integration tests submission-level property validation

@@ -1,31 +1,23 @@
 package uk.gov.defra.datareturns.testutils;
 
-import io.restassured.filter.log.LogDetail;
-import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
-import org.assertj.core.api.Condition;
 import org.hamcrest.Matchers;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 
-import javax.validation.ConstraintViolation;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static io.restassured.RestAssured.given;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.createEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.fromJson;
 
 
 /**
@@ -33,88 +25,9 @@ import static io.restassured.RestAssured.given;
  *
  * @author Sam Gardner-Dell
  */
-public final class SubmissionTestUtils {
+public final class SubmissionITUtils {
 
-    private SubmissionTestUtils() {
-    }
-
-    public static String fromJson(final String path) {
-        try {
-            return IOUtils.resourceToString(path, StandardCharsets.UTF_8);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static String fromJson(final String path, final Map<String, Object> templateValues) {
-        String json = fromJson(path);
-        for (final Map.Entry<String, Object> entry : templateValues.entrySet()) {
-            json = json.replaceAll("%" + entry.getKey() + "%", String.valueOf(entry.getValue()));
-        }
-        return json;
-    }
-
-    public static Condition<ConstraintViolation<?>> violationMessageMatching(final String expectedMessage) {
-        return new Condition<ConstraintViolation<?>>() {
-            @Override
-            public boolean matches(final ConstraintViolation<?> value) {
-                return expectedMessage.equals(value.getMessage());
-            }
-        };
-    }
-
-    public static ValidatableResponse getEntity(final String entityUrl) {
-        return given()
-                .when()
-                .get(entityUrl)
-                .then()
-                .log().ifValidationFails(LogDetail.ALL);
-    }
-
-    public static String createEntity(final String resourceUrl, final String entityJson, final Consumer<ValidatableResponse> responseAssertions) {
-        final ValidatableResponse response = given()
-                .contentType(ContentType.JSON)
-                .body(entityJson)
-                .when()
-                .post(resourceUrl)
-                .then()
-                .log().ifValidationFails(LogDetail.ALL);
-
-        responseAssertions.accept(response);
-
-        String entityUrl = null;
-        if (response != null) {
-            entityUrl = response.extract().header("Location");
-        }
-        return entityUrl;
-    }
-
-    public static String patchEntity(final String resourceUrl, final String entityJson, final Consumer<ValidatableResponse> responseAssertions) {
-        final ValidatableResponse response = given()
-                .contentType(ContentType.JSON)
-                .body(entityJson)
-                .when()
-                .patch(resourceUrl)
-                .then()
-                .log().ifValidationFails(LogDetail.ALL);
-
-        responseAssertions.accept(response);
-
-        String entityUrl = null;
-        if (response != null) {
-            entityUrl = response.extract().header("Location");
-        }
-        return entityUrl;
-    }
-
-    public static void deleteEntity(final String url) {
-        given()
-                .contentType(ContentType.JSON)
-                .when()
-                .delete(url)
-                .then()
-                .log().ifValidationFails(LogDetail.ALL)
-                .statusCode(HttpStatus.NO_CONTENT.value());
+    private SubmissionITUtils() {
     }
 
     public static String getSubmissionJson(final String contactId, final int season) {
@@ -178,7 +91,7 @@ public final class SubmissionTestUtils {
 
         final List<String> catches = new ArrayList<>();
         for (final Pair<CatchMass.MeasurementType, BigDecimal> catchEntry : catchEntries) {
-            final String catchJson = SubmissionTestUtils
+            final String catchJson = SubmissionITUtils
                     .getCatchJson(submissionUrl, activityUrl, species, method, catchEntry.getFirst(), catchEntry.getSecond(),
                             false);
             final String catchUrl = createEntity("/catches", catchJson, (r) -> {
@@ -198,7 +111,7 @@ public final class SubmissionTestUtils {
         final Map<String, Integer> counts = Arrays.stream(methodCounts).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 
         for (final Month month : Month.values()) {
-            final String smallCatchJson = SubmissionTestUtils
+            final String smallCatchJson = SubmissionITUtils
                     .getSmallCatchJson(submissionUrl, activityUrl, month, counts, released);
             final String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
                 r.statusCode(HttpStatus.CREATED.value());

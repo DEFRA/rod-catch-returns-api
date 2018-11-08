@@ -13,6 +13,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.defra.datareturns.data.model.reporting.catches.bycontact.CatchSummaryByContact;
 import uk.gov.defra.datareturns.data.model.reporting.catches.bycontact.CatchSummaryByContactRepository;
 import uk.gov.defra.datareturns.data.model.reporting.catches.summary.CatchSummary;
@@ -32,18 +34,19 @@ import java.util.List;
 @ConditionalOnWebApplication
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping("/reporting")
 public class ReportingController implements ResourceProcessor<RepositoryLinksResource> {
     private final CatchSummaryRepository catchSummaryRepository;
     private final CatchSummaryByContactRepository catchSummaryByContactRepository;
 
-    @GetMapping(value = "/reporting/catches/{season}")
+    @GetMapping(value = "/catches/{season}")
     @ApiOperation(value = "Retrieve reporting summary data for the given season", produces = "text/csv")
     public void catches(@PathVariable("season") final String season, final HttpServletResponse response) throws IOException {
         final List<CatchSummary> entries = catchSummaryRepository.findBySeason(Short.valueOf(season));
         writeCsv(CatchSummary.class, entries, "catches-" + season + ".csv", response);
     }
 
-    @GetMapping(value = "/reporting/catchesByContact/{season}")
+    @GetMapping(value = "/catchesByContact/{season}")
     @ApiOperation(value = "Retrieve reporting summary data by contact for the given season", produces = "text/csv")
     public void catchesByContact(@PathVariable("season") final String season, final HttpServletResponse response) throws IOException {
         final List<CatchSummaryByContact> entries = catchSummaryByContactRepository.findBySeason(Short.valueOf(season));
@@ -52,8 +55,9 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
 
     @Override
     public RepositoryLinksResource process(final RepositoryLinksResource resource) {
-        // TODO: Base path should be preprended to href
-        resource.add(new Link("/reporting", "reporting"));
+        final String base = ServletUriComponentsBuilder.fromCurrentRequest().toUriString();
+        resource.add(new Link(base + "reporting/catchesByContact/{season}", "reportingCatchesByContact"));
+        resource.add(new Link(base + "reporting/catches/{season}", "reportingCatches"));
         return resource;
     }
 

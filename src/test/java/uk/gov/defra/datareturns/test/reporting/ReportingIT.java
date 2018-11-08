@@ -15,7 +15,7 @@ import uk.gov.defra.datareturns.testutils.WithAdminUser;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static uk.gov.defra.datareturns.testutils.SubmissionTestUtils.getEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
 
 /**
  * Integration tests for reporting functionality

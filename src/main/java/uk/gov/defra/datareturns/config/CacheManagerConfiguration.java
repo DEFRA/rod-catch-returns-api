@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.config;
 
-import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,13 +7,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.guava.GuavaCacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Cache manager configuration for rod catch returns
@@ -47,24 +45,20 @@ public class CacheManagerConfiguration extends CachingConfigurerSupport {
     @Bean
     @Override
     public CacheManager cacheManager() {
-        return new GuavaCacheManager();
+        return new CaffeineCacheManager();
     }
 
     @Bean(name = AUTHENTICATION_CACHE_MANAGER)
     public CacheManager authenticationCacheManager() {
-        final GuavaCacheManager cacheManager = new GuavaCacheManager();
-        final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
-                .expireAfterWrite(activeDirectoryCacheManagerTtlHours, TimeUnit.HOURS);
-        cacheManager.setCacheBuilder(cacheBuilder);
+        final CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        cacheManager.setCacheSpecification("expireAfterWrite=" + activeDirectoryCacheManagerTtlHours + "h");
         return cacheManager;
     }
 
     @Bean(name = LICENCE_CACHE_MANAGER)
     public CacheManager licenceCacheManager() {
-        final GuavaCacheManager cacheManager = new GuavaCacheManager();
-        final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
-                .expireAfterWrite(licenceCacheManagerTtlHours, TimeUnit.HOURS);
-        cacheManager.setCacheBuilder(cacheBuilder);
+        final CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        cacheManager.setCacheSpecification("expireAfterWrite=" + licenceCacheManagerTtlHours + "h");
         return cacheManager;
     }
 }

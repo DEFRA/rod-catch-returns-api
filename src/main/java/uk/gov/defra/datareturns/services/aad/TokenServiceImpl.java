@@ -78,6 +78,7 @@ public class TokenServiceImpl implements TokenService {
      * Evict user identity tokens from the cache
      *
      * @param username - the stored username
+     * @param password- the stored password
      */
     @CacheEvict(cacheNames = "crm-auth-token-identity")
     public void evictIdentityToken(final String username, final String password) {

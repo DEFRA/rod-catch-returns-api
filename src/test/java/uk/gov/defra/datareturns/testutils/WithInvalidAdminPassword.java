@@ -16,9 +16,7 @@ import java.lang.annotation.Target;
 @Inherited
 @WithMockUser(
         username = "admin1@example.com",
-        password = "admin",
-        authorities = {
-                "USE_INTERNAL", "REFERENCE_DATA_WRITE"
-        })
-public @interface WithAdminUser {
+        password = "invalidpassword"
+)
+public @interface WithInvalidAdminPassword {
 }

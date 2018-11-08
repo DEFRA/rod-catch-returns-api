@@ -1,10 +1,9 @@
 package uk.gov.defra.datareturns.data.model.submissions;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.catches.Catch;
@@ -16,7 +15,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
@@ -31,17 +34,26 @@ import java.util.List;
 @Table(uniqueConstraints = {
         @UniqueConstraint(name = "uniq_contact_id_and_season", columnNames = {"contactId", "season"})
 })
-@GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
-                  strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
-                  parameters = {
-                          @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "rcr_submission_id_seq")
-                  }
-)
 @Audited
 @Getter
 @Setter
 @ValidSubmission
-public class Submission extends AbstractBaseEntity {
+public class Submission extends AbstractBaseEntity<Long> {
+    /**
+     * Database sequence name for this entity
+     */
+    public static final String SEQUENCE = "rcr_submission_id_seq";
+
+    /**
+     * Primary key
+     */
+    @Id
+    @Column(name = "id")
+    @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
+    @ApiModelProperty(readOnly = true)
+    private Long id;
+
     /**
      * The contact identifier
      */

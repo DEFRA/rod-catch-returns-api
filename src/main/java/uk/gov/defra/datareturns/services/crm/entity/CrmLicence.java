@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
 
 @Getter
 @Setter
-@ToString
 public class CrmLicence implements CrmCall<Licence> {
     /**
      * the id associated with the contact
@@ -63,7 +61,6 @@ public class CrmLicence implements CrmCall<Licence> {
 
         @Getter
         @Setter
-        @ToString
         public static class Query implements CRMQuery.Query {
             @JsonProperty("PermissionNumber")
             private String permissionNumber;

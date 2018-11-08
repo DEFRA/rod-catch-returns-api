@@ -20,7 +20,8 @@ spring:
 
 # Configuration for the web server
 server:
-  display-name: rcr_api
+  servlet:
+    application-display-name: rcr_api
   port: 9580
 
 dynamics:
@@ -49,13 +50,9 @@ validation:
 security:
   role-authorities:
     RcrAdminUser:
-    - JPA_ENTITY_DEFAULT_READ
-    - JPA_ENTITY_DEFAULT_WRITE
-    - JPA_ENTITY_DEFAULT_SUPER
+    - USE_INTERNAL
+    - REFERENCE_DATA_WRITE
     RcrFMTUser:
-    - JPA_ENTITY_DEFAULT_READ
-    - JPA_ENTITY_DEFAULT_SUPER
-    - RIVER_WRITE
+    - USE_INTERNAL
     RCR_END_USER:
-    - JPA_ENTITY_DEFAULT_READ
 ---

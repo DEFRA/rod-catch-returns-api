@@ -1,18 +1,22 @@
 package uk.gov.defra.datareturns.data.model.catchments;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.regions.Region;
 import uk.gov.defra.datareturns.data.model.rivers.River;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -22,16 +26,25 @@ import java.util.List;
  * @author Sam Gardner-Dell
  */
 @Entity(name = "rcr_catchment")
-@GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
-                  strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
-                  parameters = {
-                          @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "rcr_catchment_id_seq")
-                  }
-)
 @Audited
 @Getter
 @Setter
-public class Catchment extends AbstractBaseEntity {
+public class Catchment extends AbstractBaseEntity<Long> {
+    /**
+     * Database sequence name for this entity
+     */
+    public static final String SEQUENCE = "rcr_catchment_id_seq";
+
+    /**
+     * Primary key
+     */
+    @Id
+    @Column(name = "id")
+    @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
+    @ApiModelProperty(readOnly = true)
+    private Long id;
+
     /**
      * The catchment name
      */

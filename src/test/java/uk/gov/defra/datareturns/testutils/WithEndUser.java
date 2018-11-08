@@ -16,8 +16,7 @@ import java.lang.annotation.Target;
 @Inherited
 @WithMockUser(
         username = "B7A718",
-        password = "WA4 1HT",
-        authorities = {"JPA_ENTITY_DEFAULT_READ"}
+        password = "WA4 1HT"
 )
 public @interface WithEndUser {
 }

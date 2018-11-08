@@ -10,15 +10,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.catches.Catch;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
+import uk.gov.defra.datareturns.data.model.method.Method;
 import uk.gov.defra.datareturns.data.model.method.MethodRepository;
 import uk.gov.defra.datareturns.data.model.rivers.River;
 import uk.gov.defra.datareturns.data.model.rivers.RiverRepository;
+import uk.gov.defra.datareturns.data.model.species.Species;
 import uk.gov.defra.datareturns.data.model.species.SpeciesRepository;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.test.activities.ActivityTests;
 import uk.gov.defra.datareturns.test.submissions.SubmissionTests;
 import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
-import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
 import javax.inject.Inject;
@@ -28,6 +29,8 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
+
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.violationMessageMatching;
 
 /**
  * Integration tests catch object property validation
@@ -46,6 +49,19 @@ public class CatchTests {
     @Inject
     private Validator validator;
 
+    public static Catch createValidCatch(final Submission submission, final Activity activity, final Method method, final Species species,
+                                         final BigDecimal kg, final boolean released) {
+        final Catch cat = new Catch();
+        cat.setSubmission(submission);
+        cat.setActivity(activity);
+        cat.setDateCaught(new Date());
+        cat.setSpecies(species);
+        cat.setMethod(method);
+        cat.getMass().set(CatchMass.MeasurementType.METRIC, kg);
+        cat.setReleased(released);
+        return cat;
+    }
+
     @Test
     public void testValidCatch() {
         final Catch cat = createValidCatch();
@@ -58,7 +74,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setSubmission(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_SUBMISSION_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_SUBMISSION_REQUIRED"));
     }
 
     @Test
@@ -66,7 +82,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setDateCaught(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_DATE_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_DATE_REQUIRED"));
     }
 
     @Test
@@ -74,7 +90,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setDateCaught(DateUtils.addYears(cat.getDateCaught(), -1));
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_YEAR_MISMATCH"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_YEAR_MISMATCH"));
     }
 
     @Test
@@ -82,7 +98,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setActivity(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_ACTIVITY_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_ACTIVITY_REQUIRED"));
     }
 
     @Test
@@ -90,7 +106,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setSpecies(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_SPECIES_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_SPECIES_REQUIRED"));
     }
 
     @Test
@@ -98,16 +114,15 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setMass(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_REQUIRED"));
     }
-
 
     @Test
     public void testCatchWithoutMassTypeFails() {
         final Catch cat = createValidCatch();
         cat.getMass().setType(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_TYPE_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_TYPE_REQUIRED"));
     }
 
     @Test
@@ -118,7 +133,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setMass(catchMass);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_OZ_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_OZ_REQUIRED"));
     }
 
     @Test
@@ -129,7 +144,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setMass(catchMass);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_KG_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_KG_REQUIRED"));
     }
 
     @Test
@@ -137,7 +152,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.getMass().setKg(BigDecimal.valueOf(50.1));
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_MAX_EXCEEDED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_MAX_EXCEEDED"));
     }
 
     @Test
@@ -145,7 +160,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.getMass().set(CatchMass.MeasurementType.METRIC, BigDecimal.valueOf(-0.0001));
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_MASS_BELOW_MINIMUM"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_BELOW_MINIMUM"));
     }
 
     @Test
@@ -153,7 +168,7 @@ public class CatchTests {
         final Catch cat = createValidCatch();
         cat.setMethod(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("CATCH_METHOD_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_METHOD_REQUIRED"));
     }
 
     private Catch createValidCatch() {
@@ -161,19 +176,11 @@ public class CatchTests {
         return createValidCatch(SubmissionTests.createValidSubmission(), targetRiver);
     }
 
-
-    private Catch createValidCatch(final Submission submission, final River river) {
+    public Catch createValidCatch(final Submission submission, final River river) {
         final Activity activity = ActivityTests.createValidActivity(submission, river, 100, 100);
         submission.setActivities(Collections.singletonList(activity));
-
-        final Catch cat = new Catch();
-        cat.setSubmission(submission);
-        cat.setActivity(activity);
-        cat.setDateCaught(new Date());
-        cat.setSpecies(speciesRepository.getOne(RandomUtils.nextLong(1, speciesRepository.count())));
-        cat.setMethod(methodRepository.getOne(RandomUtils.nextLong(1, methodRepository.count())));
-        cat.getMass().set(CatchMass.MeasurementType.METRIC, BigDecimal.valueOf(0.98765432112));
-        cat.setReleased(false);
-        return cat;
+        final Species species = speciesRepository.getOne(RandomUtils.nextLong(1, speciesRepository.count()));
+        final Method method = methodRepository.getOne(RandomUtils.nextLong(1, methodRepository.count()));
+        return createValidCatch(submission, activity, method, species, BigDecimal.valueOf(0.98765432112), false);
     }
 }

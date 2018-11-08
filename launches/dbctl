@@ -58,6 +58,11 @@ set -e
 echo "Sourcing ${PROJECT_ROOT}/.env"
 export $(cat ${PROJECT_ROOT}/.env | xargs)
 
+cd ${PROJECT_ROOT}
+
+# Compile and copy resources
+${PROJECT_ROOT}/mvnw -Dcheckstyle.skip=true -Ddependency-check.skip=true -DskipTests=true compile ${QUIET}
+
 case "${ACTION}" in
     "update")
         ${PROJECT_ROOT}/mvnw resources:resources liquibase:update ${QUIET}

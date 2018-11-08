@@ -1,6 +1,7 @@
 package uk.gov.defra.datareturns.test.submissions;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,22 +12,24 @@ import uk.gov.defra.datareturns.data.model.rivers.RiverRepository;
 import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatch;
 import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatchCount;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
+import uk.gov.defra.datareturns.data.model.submissions.SubmissionSource;
 import uk.gov.defra.datareturns.data.model.submissions.SubmissionStatus;
 import uk.gov.defra.datareturns.test.activities.ActivityTests;
 import uk.gov.defra.datareturns.test.smallcatches.SmallCatchCountTests;
 import uk.gov.defra.datareturns.test.smallcatches.SmallCatchTests;
 import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
-import uk.gov.defra.datareturns.testutils.SubmissionTestUtils;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.time.Year;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.violationMessageMatching;
 
 /**
  * Integration tests submission-level property validation
@@ -44,10 +47,17 @@ public class SubmissionTests {
     private Validator validator;
 
     public static Submission createValidSubmission() {
+        return createValidSubmission(RandomStringUtils.randomAlphanumeric(5), Year.now().getValue(),
+                SubmissionStatus.INCOMPLETE, SubmissionSource.WEB);
+    }
+
+    public static Submission createValidSubmission(final String contactId, final Integer year, final SubmissionStatus status,
+                                                   final SubmissionSource source) {
         final Submission sub = new Submission();
-        sub.setContactId("123");
-        sub.setSeason(getYear(0));
-        sub.setStatus(SubmissionStatus.INCOMPLETE);
+        sub.setContactId(contactId);
+        sub.setSeason(year.shortValue());
+        sub.setStatus(status);
+        sub.setSource(source);
         return sub;
     }
 
@@ -58,7 +68,7 @@ public class SubmissionTests {
      * @return the year value calculated using the given offset
      */
     private static short getYear(final int offset) {
-        return Integer.valueOf(Calendar.getInstance().get(Calendar.YEAR) + offset).shortValue();
+        return Integer.valueOf(Year.now().getValue() + offset).shortValue();
     }
 
     @Test
@@ -66,7 +76,7 @@ public class SubmissionTests {
         final Submission sub = createValidSubmission();
         sub.setContactId(null);
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_CONTACT_ID_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("SUBMISSION_CONTACT_ID_REQUIRED"));
     }
 
     @Test
@@ -74,7 +84,7 @@ public class SubmissionTests {
         final Submission sub = createValidSubmission();
         sub.setStatus(null);
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_STATUS_REQUIRED"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("SUBMISSION_STATUS_REQUIRED"));
     }
 
     @Test
@@ -82,7 +92,7 @@ public class SubmissionTests {
         final Submission sub = createValidSubmission();
         sub.setSeason(null);
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_SEASON_INVALID"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("SUBMISSION_SEASON_INVALID"));
     }
 
     @Test
@@ -105,7 +115,7 @@ public class SubmissionTests {
         final Submission sub = createValidSubmission();
         sub.setSeason(getYear(-2));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_SEASON_INVALID"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("SUBMISSION_SEASON_INVALID"));
     }
 
     @Test
@@ -113,7 +123,7 @@ public class SubmissionTests {
         final Submission sub = createValidSubmission();
         sub.setSeason(getYear(1));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).haveExactly(1, SubmissionTestUtils.violationMessageMatching("SUBMISSION_SEASON_INVALID"));
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("SUBMISSION_SEASON_INVALID"));
     }
 
 
@@ -124,7 +134,7 @@ public class SubmissionTests {
         final Activity activity2 = ActivityTests.createValidActivity(sub, riverRepository.getOne(1L), 5, 5);
         sub.setActivities(Arrays.asList(activity1, activity2));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).haveExactly(2, SubmissionTestUtils.violationMessageMatching("ACTIVITY_RIVER_DUPLICATE_FOUND"));
+        Assertions.assertThat(violations).haveExactly(2, violationMessageMatching("ACTIVITY_RIVER_DUPLICATE_FOUND"));
     }
 
     @Test
@@ -141,6 +151,6 @@ public class SubmissionTests {
 
         sub.setSmallCatches(Arrays.asList(smallCatch1, smallCatch2));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).haveExactly(2, SubmissionTestUtils.violationMessageMatching("SMALL_CATCH_DUPLICATE_FOUND"));
+        Assertions.assertThat(violations).haveExactly(2, violationMessageMatching("SMALL_CATCH_DUPLICATE_FOUND"));
     }
 }

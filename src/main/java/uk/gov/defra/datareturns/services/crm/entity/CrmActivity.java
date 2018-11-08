@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.defra.datareturns.data.model.licences.Activity;
 
@@ -12,14 +11,10 @@ import uk.gov.defra.datareturns.data.model.licences.Activity;
 @Setter
 @Slf4j
 public class CrmActivity implements CrmCall<Activity> {
-    public enum Status { submitted, started }
-
     @JsonProperty("RCRActivityId")
     private String id;
-
     @JsonProperty("ReturnStatus")
     private String returnStatus;
-
     @JsonProperty("ErrorMessage")
     private String errorMessage;
 
@@ -34,6 +29,10 @@ public class CrmActivity implements CrmCall<Activity> {
         final Activity activity = new Activity();
         activity.setId(id);
         return activity;
+    }
+
+    public enum Status {
+        STARTED, SUBMITTED
     }
 
     /**
@@ -56,14 +55,11 @@ public class CrmActivity implements CrmCall<Activity> {
 
         @Getter
         @Setter
-        @ToString
         public static class Query implements CRMQuery.Query {
+            @JsonProperty("ActivityStatus")
+            private final Status status = Status.STARTED;
             @JsonProperty("ContactId")
             private String contactId;
-
-            @JsonProperty("ActivityStatus")
-            private final Status status = Status.started;
-
             @JsonProperty("Season")
             private int season;
         }
@@ -89,14 +85,11 @@ public class CrmActivity implements CrmCall<Activity> {
 
         @Getter
         @Setter
-        @ToString
         public static class Query implements CRMQuery.Query {
+            @JsonProperty("ActivityStatus")
+            private final Status status = Status.SUBMITTED;
             @JsonProperty("ContactId")
             private String contactId;
-
-            @JsonProperty("ActivityStatus")
-            private final Status status = Status.submitted;
-
             @JsonProperty("Season")
             private int season;
         }

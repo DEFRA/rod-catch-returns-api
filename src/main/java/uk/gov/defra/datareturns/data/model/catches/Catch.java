@@ -1,13 +1,12 @@
 package uk.gov.defra.datareturns.data.model.catches;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
-import uk.gov.defra.datareturns.data.model.HasSubmission;
+import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.method.Method;
 import uk.gov.defra.datareturns.data.model.species.Species;
@@ -17,7 +16,11 @@ import uk.gov.defra.datareturns.validation.catches.ValidCatch;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.Valid;
@@ -29,17 +32,26 @@ import java.util.Date;
  * @author Sam Gardner-Dell
  */
 @Entity(name = "rcr_catch")
-@GenericGenerator(name = AbstractBaseEntity.DEFINITIONS_ID_GENERATOR,
-                  strategy = AbstractBaseEntity.DEFINITIONS_ID_SEQUENCE_STRATEGY,
-                  parameters = {
-                          @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "rcr_catch_id_seq")
-                  }
-)
 @Audited
 @Getter
 @Setter
 @ValidCatch
-public class Catch extends AbstractBaseEntity implements HasSubmission {
+public class Catch extends AbstractBaseEntity<Long> implements HasSubmission {
+    /**
+     * Database sequence name for this entity
+     */
+    public static final String SEQUENCE = "rcr_catch_id_seq";
+
+    /**
+     * Primary key
+     */
+    @Id
+    @Column(name = "id")
+    @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
+    @ApiModelProperty(readOnly = true)
+    private Long id;
+
     /**
      * The parent submission
      */

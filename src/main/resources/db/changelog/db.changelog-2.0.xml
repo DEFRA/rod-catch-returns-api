@@ -193,7 +193,7 @@
             <![CDATA[
                 select concat(agg.season, agg.month, agg.river_id, agg.species_id) as id,
                        agg.season                                                                  as season,
-                       to_char(to_timestamp(agg.month :: text, 'MM'), 'Month')                     as month,
+                       trim(to_char(to_timestamp(agg.month :: text, 'MM'), 'Month'))               as month,
                        reg.name                                                                    as region,
                        ctm.name                                                                    as catchment,
                        riv.name                                                                    as river,
@@ -225,7 +225,7 @@
                 select concat(agg.contact_id, agg.season, agg.month, agg.river_id, agg.species_id) as id,
                        agg.contact_id                                                              as contact_id,
                        agg.season                                                                  as season,
-                       to_char(to_timestamp(agg.month :: text, 'MM'), 'Month')                     as month,
+                       trim(to_char(to_timestamp(agg.month :: text, 'MM'), 'Month'))               as month,
                        reg.name                                                                    as region,
                        ctm.name                                                                    as catchment,
                        riv.name                                                                    as river,
