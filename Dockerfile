@@ -1,4 +1,4 @@
-FROM frolvlad/alpine-oraclejre8:slim
+FROM openjdk:11.0.1-jre-slim-sid
 
 # Arguments supplied by maven dockerfile plugin
 ARG JAR_FILE
