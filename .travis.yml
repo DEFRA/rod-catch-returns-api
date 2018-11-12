@@ -7,7 +7,7 @@ jobs:
   include:
   - stage: test
     script:
-    - "./mvnw -B -o verify site"
+    - "./mvnw -B verify"
 jdk:
 - openjdk11
 
