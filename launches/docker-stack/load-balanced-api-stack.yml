@@ -1,0 +1,34 @@
+#######################################################
+# Load balanced api docker stack
+#######################################################
+
+version: '3.5'
+services:
+  #######################################################
+  # API
+  #######################################################
+  rcr_api:
+    image: drp/rcr_api
+    ports:
+    - "9580:9580"
+    networks:
+    - rcr_local_services
+    environment:
+    - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresdb:5432/rcr_api
+#    - SPRING_PROFILES_ACTIVE=debug
+#    - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=false
+    deploy:
+      mode: replicated
+      replicas: 2
+      endpoint_mode: vip
+      update_config:
+        parallelism: 2
+        delay: 15s
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        window: 120s
+
+networks:
+  rcr_local_services:
+    external: true
