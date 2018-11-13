@@ -6,6 +6,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -40,17 +41,22 @@ public class ActiveDirectoryAuthentication implements ActiveDirectoryAuthenticat
 
         log.debug("Authenticating user: " + username);
 
-        final Identity identity = crmLookupService.getAuthenticatedUserRoles(username, password);
-        if (identity == null) {
-            throw new BadCredentialsException("AAD authentication failed - no identity was found for given credentials.");
+        try {
+            final Identity identity = crmLookupService.getAuthenticatedUserRoles(username, password);
+            if (identity == null) {
+                throw new BadCredentialsException("AAD authentication failed - no identity was found for given credentials.");
+            }
+
+            final List<GrantedAuthority> authorities = identity.getRoles().stream()
+                    .flatMap(crmRole -> securityConfiguration.getRoleAuthorities().get(crmRole).stream())
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
+
+            return new UsernamePasswordAuthenticationToken(username, password, authorities);
+        } catch (AuthenticationServiceException e) {
+            log.error("Authentication service error", e);
+            throw e;
         }
-
-        final List<GrantedAuthority> authorities = identity.getRoles().stream()
-                .flatMap(crmRole -> securityConfiguration.getRoleAuthorities().get(crmRole).stream())
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
-        return new UsernamePasswordAuthenticationToken(username, password, authorities);
     }
 
     @Override

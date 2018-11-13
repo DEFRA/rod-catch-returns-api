@@ -9,8 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
 /**
@@ -27,26 +25,9 @@ import java.net.URL;
 @Validated
 public class AADConfiguration {
     @NotNull
-    private URI tenant;
-
-    @NotNull
     private URL authority;
 
     @NotNull
-    private String clientId;
-
-    @NotNull
-    private String clientSecret;
-
-    @NotNull
     private String identityClientId;
-
-    public URL getTenantedLoginUrl() {
-        try {
-            return new URL(authority, tenant.toString());
-        } catch (final MalformedURLException e) {
-            throw new RuntimeException("Invalid configuration, failed to create tenanted login url", e);
-        }
-    }
 }
 

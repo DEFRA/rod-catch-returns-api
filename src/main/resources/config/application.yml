@@ -11,7 +11,7 @@ spring:
   application:
     name: Rod Catch Returns API
   datasource:
-    url: jdbc:postgresql://localhost:5432/rcr_api
+    url: jdbc:postgresql://0.0.0.0:5432/rcr_api
     username: rcr_owner
     password: rcr_owner
     driver-class-name: org.postgresql.Driver
@@ -31,10 +31,7 @@ dynamics:
     api-path: api/data/v9.0
 
 active-directory:
-  tenant:
   authority:
-  client-id:
-  client-secret:
   identity-client-id:
 
 cache:
@@ -48,6 +45,15 @@ validation:
   submission-year-allowed-range-offset: -1
 
 security:
+  oauth2:
+      client:
+        id: dynamics
+        client-id:
+        client-secret:
+        scope:
+        client-authentication-scheme: form
+        grant-type: client_credentials
+
   role-authorities:
     RcrAdminUser:
     - USE_INTERNAL
@@ -55,4 +61,10 @@ security:
     RcrFMTUser:
     - USE_INTERNAL
     RCR_END_USER:
+
+
+logging:
+  level:
+    # Exceptions/errors are converted to spring exceptions as req'd - don't let the adal4j library log anything.
+    com.microsoft.aad.adal4j: off
 ---

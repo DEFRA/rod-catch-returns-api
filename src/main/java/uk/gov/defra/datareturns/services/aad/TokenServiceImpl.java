@@ -1,26 +1,22 @@
 package uk.gov.defra.datareturns.services.aad;
 
-import com.microsoft.aad.adal4j.AuthenticationCallback;
 import com.microsoft.aad.adal4j.AuthenticationContext;
+import com.microsoft.aad.adal4j.AuthenticationException;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
-import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 import uk.gov.defra.datareturns.config.AADConfiguration;
+import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.ExecutionException;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Service to retrieve access token from Azure active directory
@@ -29,92 +25,63 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 @ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
 public class TokenServiceImpl implements TokenService {
-
-    @Inject
-    private final TokenServiceImpl proxy = null;
-
-    private final AADConfiguration aadConfiguration;
-    private final URL resource;
-    private final URL tokenPath;
-
-    @Inject
-    public TokenServiceImpl(final AADConfiguration aadConfiguration, final DynamicsConfiguration.Endpoint endpoint) {
-        this.aadConfiguration = aadConfiguration;
-        this.resource = endpoint.getUrl();
-        this.tokenPath = aadConfiguration.getTenantedLoginUrl();
-    }
+    /**
+     * how early should a cached access token be refreshed
+     */
+    private static final long PREEMPTIVE_REFRESH = 10000;
+    /**
+     * cache service
+     */
+    private final TokenServiceCache cache;
 
     @Override
-    @Cacheable(cacheNames = "crm-auth-token-identity")
     public String getTokenForUserIdentity(final String username, final String password) {
-        final ExecutorService service = Executors.newSingleThreadExecutor();
-        try {
-            log.debug("Attempting to fetch user identity AAD token from " + tokenPath);
-
-            final String clientId = aadConfiguration.getIdentityClientId();
-            final AuthenticationContext context = new AuthenticationContext(tokenPath.toString(), true, service);
-
-            // Attempt to acquire a token and fire the callback defined below
-            final Future<AuthenticationResult> future = context.acquireToken(resource.toString(), clientId, username, password,
-                    new IdentityTokenCallback(username, password));
-
-            // Return the token as a string
-            final AuthenticationResult result = future.get();
-
-            if (result != null) {
-                return result.getAccessToken();
-            }
-        } catch (final IOException | InterruptedException | ExecutionException e) {
-            log.error("Error fetching identity token", e);
-        } finally {
-            service.shutdown();
+        AuthenticationResult result = cache.getToken(username, password);
+        if (result == null || new Date(System.currentTimeMillis() - PREEMPTIVE_REFRESH).after(result.getExpiresOnDate())) {
+            result = cache.updateToken(username, password);
         }
-        return null;
+        return result != null ? result.getAccessToken() : null;
     }
 
-    /**
-     * Evict user identity tokens from the cache
-     *
-     * @param username - the stored username
-     * @param password- the stored password
-     */
-    @CacheEvict(cacheNames = "crm-auth-token-identity")
-    public void evictIdentityToken(final String username, final String password) {
-        log.debug("Evicting AAD token from cache for user: " + username);
-    }
-
-    /**
-     * Token acquire callback
-     */
+    @Service
     @RequiredArgsConstructor
-    private class IdentityTokenCallback implements AuthenticationCallback<AuthenticationResult> {
-        private final String username;
-        private final String password;
+    @ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
+    public static class TokenServiceCache {
+        private final AADConfiguration aadConfiguration;
+        private final DynamicsConfiguration.Endpoint endpoint;
 
-        public void onSuccess(final AuthenticationResult result) {
-
-            // Success: execute a timer to evict the token from the cache before it expires
-            final long seconds = result.getExpiresAfter();
-            log.debug("AAD identity token acquired successfully: expires in " + seconds + " seconds");
-
-            // Log the token in debug mode
-            log.debug("Bearer " + result.getAccessToken());
-            final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-            // Remove the token 1 minute before it is due to expire
-            final long delay = Math.max(seconds - 60, 0);
-            executor.schedule(() -> proxy.evictIdentityToken(username, password), delay, TimeUnit.SECONDS);
-            executor.shutdown();
+        @CachePut(cacheNames = "crm-auth-token-identity")
+        public AuthenticationResult updateToken(final String username, final String password) {
+            final ExecutorService service = Executors.newSingleThreadExecutor();
+            try {
+                final AuthenticationContext context = new AuthenticationContext(aadConfiguration.getAuthority().toString(), true, service);
+                return context.acquireToken(endpoint.getUrl().toString(), aadConfiguration.getIdentityClientId(), username, password, null).get();
+            } catch (final Throwable throwable) {
+                // handle adal4j AuthenticationExceptions and convert to spring authentication exceptions as required.
+                // sadly the only way to do this is by looking at the exception message itself.
+                if (throwable.getCause() instanceof AuthenticationException) {
+                    final AuthenticationException e = (AuthenticationException) throwable.getCause();
+                    if (e.getMessage().contains("ID3242: The security token could not be authenticated or authorized")) {
+                        // adfs returns a 500 response (?!) with a soap envelope on authentication failure with a valid domain
+                        throw new BadCredentialsException("AAD authentication failed - no identity was found for given credentials.", e);
+                    } else if (e.getMessage().contains("AADSTS90002: Tenant not found.")) { // domain specified but not recognised.
+                        throw new BadCredentialsException("AAD authentication failed - invalid domain", e);
+                    } else if (e.getMessage().contains("AADSTS50034: The user account does not exist")) { // no domain specified in username
+                        throw new BadCredentialsException("AAD authentication failed - the user account does not exist in the directory.", e);
+                    }
+                }
+                throw new AuthenticationServiceException("Error fetching identity token", throwable);
+            } finally {
+                service.shutdown();
+            }
         }
 
-        public void onFailure(final Throwable throwable) {
-            // Don't log authentication failures
-            if (throwable.getMessage().contains("\"error\":\"invalid_grant\"")) {
-                return;
-            }
-            log.error("AAD identity token acquisition failed", throwable);
+        @Cacheable(cacheNames = "crm-auth-token-identity")
+        public AuthenticationResult getToken(final String username, final String password) {
+            return null;
         }
     }
 }
