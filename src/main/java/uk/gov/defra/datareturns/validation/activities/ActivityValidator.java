@@ -60,37 +60,56 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
      * @return true if valid, false otherwise
      */
     private boolean checkDays(final Activity activity, final ConstraintValidatorContext context) {
-        final int maxDaysMandatory = activity.getSubmission() != null && activity.getSubmission().getSeason() % 4 == 0 ? 168 : 167;
-        final int maxDaysOther = 198;
-        boolean valid = true;
-
-
-        if (activity.getDaysFishedWithMandatoryRelease() == null) {
-            valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_REQUIRED", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
-        }
-        if (activity.getDaysFishedOther() == null) {
-            valid = handleError(context, "DAYS_FISHED_OTHER_REQUIRED", b -> b.addPropertyNode("daysFishedOther"));
-        }
+        boolean valid = checkDaysMandatoryRelease(activity, context) && checkDaysOther(activity, context);
         if (valid) {
-            if (activity.getDaysFishedWithMandatoryRelease() < 0) {
-                valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_NEGATIVE", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
-            }
-            if (activity.getDaysFishedOther() < 0) {
-                valid = handleError(context, "DAYS_FISHED_OTHER_NEGATIVE", b -> b.addPropertyNode("daysFishedOther"));
-            }
             if (activity.getDaysFishedWithMandatoryRelease() < 1 && activity.getDaysFishedOther() < 1) {
                 valid = handleError(context, "DAYS_FISHED_NOT_GREATER_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
-            }
-            if (activity.getDaysFishedWithMandatoryRelease() > maxDaysMandatory) {
-                valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED",
-                        b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
-            }
-            if (activity.getDaysFishedOther() > maxDaysOther) {
-                valid = handleError(context, "DAYS_FISHED_OTHER_MAX_EXCEEDED", b -> b.addPropertyNode("daysFishedOther"));
             }
         }
         return valid;
     }
+
+    /**
+     * Check that the count of days spent on the river while mandatory release imposed is defined and within range
+     *
+     * @param activity the activity to be validated
+     * @param context  the validator context
+     * @return true if valid, false otherwise
+     */
+    private boolean checkDaysMandatoryRelease(final Activity activity, final ConstraintValidatorContext context) {
+        final int maxDaysMandatory = activity.getSubmission() != null && activity.getSubmission().getSeason() % 4 == 0 ? 168 : 167;
+        boolean valid = true;
+        if (activity.getDaysFishedWithMandatoryRelease() == null) {
+            valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_REQUIRED", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
+        } else if (activity.getDaysFishedWithMandatoryRelease() < 0) {
+            valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_NEGATIVE", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
+        } else if (activity.getDaysFishedWithMandatoryRelease() > maxDaysMandatory) {
+            valid = handleError(context, "DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED", b -> b.addPropertyNode("daysFishedWithMandatoryRelease"));
+        }
+        return valid;
+    }
+
+    /**
+     * Check that the count of days spent on the river at other times is defined and within range
+     *
+     * @param activity the activity to be validated
+     * @param context  the validator context
+     * @return true if valid, false otherwise
+     */
+    private boolean checkDaysOther(final Activity activity, final ConstraintValidatorContext context) {
+        final int maxDaysOther = 198;
+        boolean valid = true;
+
+        if (activity.getDaysFishedOther() == null) {
+            valid = handleError(context, "DAYS_FISHED_OTHER_REQUIRED", b -> b.addPropertyNode("daysFishedOther"));
+        } else if (activity.getDaysFishedOther() < 0) {
+            valid = handleError(context, "DAYS_FISHED_OTHER_NEGATIVE", b -> b.addPropertyNode("daysFishedOther"));
+        } else if (activity.getDaysFishedOther() > maxDaysOther) {
+            valid = handleError(context, "DAYS_FISHED_OTHER_MAX_EXCEEDED", b -> b.addPropertyNode("daysFishedOther"));
+        }
+        return valid;
+    }
+
 
     @Override
     public String getErrorPrefix() {
