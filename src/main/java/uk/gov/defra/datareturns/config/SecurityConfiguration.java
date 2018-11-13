@@ -63,12 +63,17 @@ public class SecurityConfiguration {
     public static class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         private static final String[] AUTH_WHITELIST = {
-                // -- swagger ui
+                // landing page
                 "/",
+                // swagger ui
                 "/swagger-resources/**",
                 "/swagger-ui.html",
                 "/v2/api-docs",
-                "/webjars/**"
+                "/webjars/**",
+                // hal browser
+                "/api/profile",
+                "/api/",
+                "/api/browser/**"
         };
         private final ActiveDirectoryAuthenticationProvider activeDirectoryAuthentication;
         private final LicenceAuthenticationProvider licenceAuthentication;
