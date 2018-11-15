@@ -91,7 +91,7 @@ fi
 
 # If port option is not specified, or nothing is listening on the specified port, execute the command
 if [ ! -n "${PORT}" ] || ! nc -z localhost ${PORT} ; then
-    eval "${PROJECT_ROOT}/mvnw -Dcheckstyle.skip=true -Ddependency-check.skip=true -DskipTests=true -Drun.arguments="${RUN_ARGS}" ${MVN_ARGS} compile spring-boot:${ACTION} ${QUIET}"
+    eval "${PROJECT_ROOT}/mvnw -Dcheckstyle.skip=true -Ddependency-check.skip=true -DskipTests=true -Dspring-boot.run.arguments="${RUN_ARGS}" ${MVN_ARGS} compile spring-boot:${ACTION} ${QUIET}"
 else
     echo "Port ${PORT} already in use, skipping service startup."
 fi
