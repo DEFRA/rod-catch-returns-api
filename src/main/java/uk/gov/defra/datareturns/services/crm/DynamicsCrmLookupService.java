@@ -1,5 +1,6 @@
 package uk.gov.defra.datareturns.services.crm;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -29,6 +30,7 @@ import java.net.URI;
  */
 @Service
 @ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
+@RequiredArgsConstructor
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @Slf4j
 public class DynamicsCrmLookupService implements CrmLookupService {
@@ -36,7 +38,6 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * The dynamics configuration
      */
     private final DynamicsConfiguration.Endpoint endpointConfiguration;
-
     private final RestTemplate dynamicsClientRestTemplate;
     private final RestTemplate dynamicsIdentityRestTemplate;
 
@@ -45,40 +46,9 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      */
     private final TokenService tokenService;
 
-    /**
-     * A CRM query to get the licence and contact details
-     */
-    private final CrmLicence.LicenceQuery licenceQuery = new CrmLicence.LicenceQuery();
-
-    /**
-     * A CRM query to create the activity status
-     */
-    private final CrmActivity.CreateActivity createActivity = new CrmActivity.CreateActivity();
-
-    /**
-     * A CRM query to update the activity status
-     */
-    private final CrmActivity.UpdateActivity updateActivity = new CrmActivity.UpdateActivity();
-
-    /**
-     * A CRM query to get teh internal user identity
-     */
-    private final CrmIdentity.IdentityQuery identityQuery = new CrmIdentity.IdentityQuery();
-
-
-    public DynamicsCrmLookupService(final DynamicsConfiguration.Endpoint endpointConfiguration,
-                                    final RestTemplate dynamicsClientRestTemplate,
-                                    final RestTemplate dynamicsIdentityRestTemplate,
-                                    final TokenService tokenService) {
-        this.endpointConfiguration = endpointConfiguration;
-        this.dynamicsClientRestTemplate = dynamicsClientRestTemplate;
-        this.dynamicsIdentityRestTemplate = dynamicsIdentityRestTemplate;
-        this.tokenService = tokenService;
-    }
-
-
     @Override
     public Licence getLicenceFromLicenceNumber(final String licenceNumber) {
+        final CrmLicence.LicenceQuery licenceQuery = new CrmLicence.LicenceQuery();
         final CrmLicence.LicenceQuery.Query query = new CrmLicence.LicenceQuery.Query();
         query.setPermissionNumber(licenceNumber);
         licenceQuery.setQuery(query);
@@ -87,6 +57,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
 
     @Override
     public Activity createActivity(final String contactId, final short season) {
+        final CrmActivity.CreateActivity createActivity = new CrmActivity.CreateActivity();
         log.debug("Creating activity on contact: " + contactId);
         final CrmActivity.CreateActivity.Query query = new CrmActivity.CreateActivity.Query();
         query.setContactId(contactId);
@@ -97,6 +68,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
 
     @Override
     public Activity updateActivity(final String contactId, final short season) {
+        final CrmActivity.UpdateActivity updateActivity = new CrmActivity.UpdateActivity();
         log.debug("Updating activity on contact: " + contactId);
         final CrmActivity.UpdateActivity.Query query = new CrmActivity.UpdateActivity.Query();
         query.setContactId(contactId);
@@ -107,6 +79,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
 
     @Override
     public Identity getAuthenticatedUserRoles(final String username, final String password) {
+        final CrmIdentity.IdentityQuery identityQuery = new CrmIdentity.IdentityQuery();
         final String token = getIdentityToken(username, password);
         if (token == null) {
             return null;
