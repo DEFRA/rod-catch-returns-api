@@ -10,10 +10,10 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.constraints.NotNull;
 import java.net.URI;
-import java.net.URL;
 
 /**
  * Configuration options for Microsoft Dynamics integration
@@ -83,12 +83,23 @@ public class DynamicsConfiguration {
          * The dynamics endpoint url
          */
         @NotNull
-        private URL url;
+        private URI url;
 
         /**
          * The dynamics api path
          */
         @NotNull
-        private URI apiPath;
+        private String apiPath;
+
+
+        /**
+         * Retrieve the URI for the given dynamics stored procedure
+         *
+         * @param storedProcedureName the stored procedure name
+         * @return the request URI for the stored procedure
+         */
+        public URI getApiStoredProcedureEndpoint(final String storedProcedureName) {
+            return UriComponentsBuilder.fromUri(url).path(apiPath).path("/").path(storedProcedureName).build().toUri();
+        }
     }
 }

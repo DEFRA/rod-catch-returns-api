@@ -20,8 +20,7 @@ import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
 import uk.gov.defra.datareturns.services.crm.entity.Identity;
 
-import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * CRM lookup service
@@ -129,28 +128,17 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      */
     private <B extends CrmBaseEntity, T extends CrmCall<B>> B callCRM(final RestTemplate restTemplate, final CrmCall.CRMQuery<T> crmQuery,
                                                                       final String token) {
-        try {
-            final URL url = new URL(endpointConfiguration.getUrl(),
-                    endpointConfiguration.getApiPath().toString() + "/" + crmQuery.getCRMStoredProcedureName());
-
-            final String urlString = url.toString();
-            log.debug("CRM Query: " + urlString);
-
-            final HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            if (token != null) {
-                headers.set("Authorization", "Bearer " + token);
-            }
-            final HttpEntity<CrmCall.CRMQuery.Query> entity = new HttpEntity<>(crmQuery.getQuery(), headers);
-            final CrmCall<B> result = restTemplate.postForObject(urlString, entity, crmQuery.getEntityClass());
-            if (result == null) {
-                return null;
-            }
-            return result.getBaseEntity();
-        } catch (final IOException e) {
-            log.error("Unable to call CRM", e);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        if (token != null) {
+            headers.set("Authorization", "Bearer " + token);
+        }
+        final HttpEntity<CrmCall.CRMQuery.Query> entity = new HttpEntity<>(crmQuery.getQuery(), headers);
+        final URI storedProcedure = endpointConfiguration.getApiStoredProcedureEndpoint(crmQuery.getCRMStoredProcedureName());
+        final CrmCall<B> result = restTemplate.postForObject(storedProcedure, entity, crmQuery.getEntityClass());
+        if (result == null) {
             return null;
         }
+        return result.getBaseEntity();
     }
-
 }
