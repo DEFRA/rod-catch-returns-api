@@ -2,6 +2,7 @@ package uk.gov.defra.datareturns.services.authentication;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -32,21 +33,18 @@ public class LicenceAuthentication implements LicenceAuthenticationProvider {
     private final CrmLookupService crmLookupService;
 
     @Override
-    @Cacheable(cacheNames = "crm-licence-auth",
-               key = "{ #authentication.name, #authentication.credentials }")
+    @Cacheable(cacheNames = "crm-licence-auth", key = "{ #authentication.name, #authentication.credentials }")
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
         final String licenceStr = authentication.getName();
         final String postcode = authentication.getCredentials().toString();
-
-        log.debug("Authenticating licence: " + licenceStr);
 
         final Licence licence = crmLookupService.getLicenceFromLicenceNumber(licenceStr);
         if (licence == null) {
             throw new BadCredentialsException("licence authentication failed - no identity was found for given credentials.");
         }
 
-        final String contactPostcode = licence.getContact().getPostcode().replace(" ", "");
-        final String authPostcode = postcode.replace(" ", "");
+        final String contactPostcode = StringUtils.deleteWhitespace(licence.getContact().getPostcode());
+        final String authPostcode = StringUtils.deleteWhitespace(postcode);
         if (contactPostcode.equalsIgnoreCase(authPostcode)) {
             final List<GrantedAuthority> authorities = securityConfiguration.getRoleAuthorities().get("RCR_END_USER").stream()
                     .map(SimpleGrantedAuthority::new)
