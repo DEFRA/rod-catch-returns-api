@@ -21,6 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.createEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.deleteEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.patchEntity;
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.ActivityDef;
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.createActivities;
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.createCatches;
@@ -29,10 +33,6 @@ import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getActivityJs
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getCatchJson;
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSmallCatchJson;
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSubmissionJson;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.createEntity;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.deleteEntity;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.patchEntity;
 
 /**
  * Integration tests submission-level property validation
@@ -45,7 +45,7 @@ public class SubmissionIT {
     @Test
     public void testSubmissionJourney() {
         // Create the submission
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(1).getContactId(),
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(),
                 Calendar.getInstance().get(Calendar.YEAR));
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
@@ -94,7 +94,7 @@ public class SubmissionIT {
 
     @Test
     public void testCatchesDeletedWithActivity() {
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(1).getContactId(),
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(),
                 Calendar.getInstance().get(Calendar.YEAR));
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
@@ -132,7 +132,7 @@ public class SubmissionIT {
 
     @Test
     public void testDuplicateActivityDetected() {
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(1).getContactId(),
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(),
                 Calendar.getInstance().get(Calendar.YEAR));
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {

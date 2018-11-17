@@ -19,12 +19,12 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.function.Consumer;
 
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.createEntity;
+import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.deleteEntity;
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getActivityJson;
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getCatchJson;
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSmallCatchJson;
 import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSubmissionJson;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.createEntity;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.deleteEntity;
 
 /**
  * Integration tests submission-level property validation
@@ -63,13 +63,14 @@ public class MethodIT {
     @Test
     @WithAdminUser
     public void testSecuredMethodAccessibleByAdmin() {
-        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(1).getContactId(), (r) -> r.statusCode(HttpStatus.CREATED.value()));
+        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(),
+                (r) -> r.statusCode(HttpStatus.CREATED.value()));
     }
 
     @Test
     @WithEndUser
     public void testSecuredMethodInaccessibleByEndUser() {
-        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(1).getContactId(), (r) -> {
+        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(), (r) -> {
             r.statusCode(HttpStatus.FORBIDDEN.value());
             r.body("error", Matchers.equalTo("Access to associated resource denied"));
             r.body("cause", Matchers.startsWith("JSON parse error: Access is denied; nested exception is"));

@@ -29,7 +29,7 @@ public class LicenceLookupTests {
 
     @Test
     public void testLicenceLookupFails() {
-        final Licence licence = crmLookupService.getLicenceFromLicenceNumber("B9A72D8");
+        final Licence licence = crmLookupService.getLicenceFromLicenceNumber("B9A72DD");
         Assertions.assertThat(licence).isNull();
     }
 }

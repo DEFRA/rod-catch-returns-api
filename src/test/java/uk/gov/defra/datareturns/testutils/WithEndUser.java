@@ -15,8 +15,10 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited
 @WithMockUser(
-        username = "B7A718",
-        password = "WA4 1HT"
+        username = WithEndUser.LICENCE,
+        password = WithEndUser.POSTCODE
 )
 public @interface WithEndUser {
+    String LICENCE = "B7A718";
+    String POSTCODE = "WA4 8HT";
 }

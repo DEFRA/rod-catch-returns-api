@@ -49,12 +49,9 @@ public final class DynamicsMockServer {
     private static void setupGetContactByLicenceNumberMock(final MockRestServiceServer restServiceServer) {
         setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetContactByLicenseNumber", (request) -> {
             final CrmLicence.LicenceQuery.Query requestBody = readRequestBody(request, CrmLicence.LicenceQuery.Query.class);
-            final Matcher licenceMatcher = DynamicsMockData.LICENCE_PATTERN.matcher(requestBody.getPermissionNumber());
             final CrmLicence responseBody = new CrmLicence();
-
-            if (licenceMatcher.matches()) {
-                final int licenceNumberIndex = Integer.parseInt(licenceMatcher.group(1));
-                final DynamicsMockData.Entry entry = DynamicsMockData.get(licenceNumberIndex);
+            final DynamicsMockData.Entry entry = DynamicsMockData.get(requestBody.getPermissionNumber());
+            if (entry != null) {
                 responseBody.setId(entry.getContactId());
                 responseBody.setPermissionNumber(entry.getPermission());
                 responseBody.setPostcode(entry.getPostcode());

@@ -8,6 +8,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.access.prepost.PostAuthorize;
 
+import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -26,6 +27,7 @@ public interface RestrictedEntityFilteringRepository<E extends AbstractRestricte
     List<E> findAll();
 
     @RestResource(exported = false)
+    @Transactional
     @QueryWithInternalFilter
     Page<E> findBy(Pageable pageable);
 

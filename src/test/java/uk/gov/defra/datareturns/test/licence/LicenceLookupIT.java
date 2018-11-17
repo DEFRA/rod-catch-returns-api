@@ -20,12 +20,21 @@ import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
 @Slf4j
 public class LicenceLookupIT {
     @Test
-    public void testLicenceLookup() {
+    public void testLicenceLookupB7A111() {
+        getEntity("/licence/B7A111")
+                .body("licenceNumber", Matchers.endsWith("B7A111"))
+                .body("contact", Matchers.notNullValue())
+                .body("contact.id", Matchers.equalTo("contact-identifier-111"))
+                .body("contact.postcode", Matchers.equalTo("WA4 1HT"));
+    }
+
+    @Test
+    public void testLicenceLookupB7A718() {
         getEntity("/licence/B7A718")
                 .body("licenceNumber", Matchers.endsWith("B7A718"))
                 .body("contact", Matchers.notNullValue())
-                .body("contact.id", Matchers.equalTo("contact-identifier-1"))
-                .body("contact.postcode", Matchers.equalTo("WA4 1HT"));
+                .body("contact.id", Matchers.equalTo("contact-identifier-718"))
+                .body("contact.postcode", Matchers.equalTo("WA4 8HT"));
     }
 
     @Test

@@ -1,7 +1,6 @@
 package uk.gov.defra.datareturns.services.crm;
 
-import org.hibernate.validator.constraints.Range;
-
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -15,11 +14,11 @@ public final class DynamicsMockData {
     /**
      * pattern to match valid mock licence numbers
      */
-    static final Pattern LICENCE_PATTERN = Pattern.compile("B7A7([1-9])8$");
+    public static final Pattern LICENCE_PATTERN = Pattern.compile("(?<suffix>.*\\D(?<index>\\d+))$");
     /**
      * pattern to match valid mock contact identifiers
      */
-    static final Pattern CONTACT_ID_PATTERN = Pattern.compile("^contact-identifier-([1-9])$");
+    public static final Pattern CONTACT_ID_PATTERN = Pattern.compile("^contact-identifier-(\\d+)$");
 
     /**
      * Utility class constructor
@@ -28,32 +27,35 @@ public final class DynamicsMockData {
     }
 
     /**
-     * Retrieve a mock data for the given user index
+     * Retrieve a mock data for the given 6 digit licence suffix
      *
-     * @param index a user index - should be between 1 and 9
+     * @param permissionNumber the 6 digit licence suffix
      * @return an {@link Entry} representing the mock data for the given user
      */
-    public static Entry get(@Range(min = 1, max = 9) final int index) {
-        if (index < 1 || index > 9) {
-            throw new RuntimeException("Dynamics test user index must be between 1-9");
+    public static Entry get(final String permissionNumber) {
+        final Matcher licenceMatcher = DynamicsMockData.LICENCE_PATTERN.matcher(permissionNumber);
+        Entry result = null;
+        if (licenceMatcher.matches()) {
+            final String suffix = licenceMatcher.group("suffix");
+            final int index = Integer.parseInt(licenceMatcher.group("index"));
+            result = new Entry() {
+                @Override
+                public String getContactId() {
+                    return "contact-identifier-" + index;
+                }
+
+                @Override
+                public String getPostcode() {
+                    return "WA4 " + (index % 10) + "HT";
+                }
+
+                @Override
+                public String getPermission() {
+                    return "00081019-1WS3JP4-" + suffix;
+                }
+            };
         }
-
-        return new Entry() {
-            @Override
-            public String getContactId() {
-                return "contact-identifier-" + index;
-            }
-
-            @Override
-            public String getPostcode() {
-                return "WA4 " + index + "HT";
-            }
-
-            @Override
-            public String getPermission() {
-                return "00081019-1WS3JP4-B7A7" + index + "8";
-            }
-        };
+        return result;
     }
 
 

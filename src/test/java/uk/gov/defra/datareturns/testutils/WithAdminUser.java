@@ -15,10 +15,12 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited
 @WithMockUser(
-        username = "admin1@example.com",
-        password = "admin",
+        username = WithAdminUser.USERNAME,
+        password = WithAdminUser.PASSWORD,
         authorities = {
                 "USE_INTERNAL", "REFERENCE_DATA_WRITE"
         })
 public @interface WithAdminUser {
+    String USERNAME = "admin1@example.com";
+    String PASSWORD = "admin";
 }
