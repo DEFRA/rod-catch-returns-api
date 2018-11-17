@@ -53,7 +53,7 @@ public class ActiveDirectoryAuthentication implements ActiveDirectoryAuthenticat
                     .collect(Collectors.toList());
 
             return new UsernamePasswordAuthenticationToken(username, password, authorities);
-        } catch (AuthenticationServiceException e) {
+        } catch (final AuthenticationServiceException e) {
             log.error("Authentication service error", e);
             throw e;
         }

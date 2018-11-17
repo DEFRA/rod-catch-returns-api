@@ -61,7 +61,7 @@ public class CrmLicence implements CrmCall<Licence> {
 
         @Getter
         @Setter
-        public static class Query implements CRMQuery.Query {
+        public static class Query {
             @JsonProperty("PermissionNumber")
             private String permissionNumber;
         }

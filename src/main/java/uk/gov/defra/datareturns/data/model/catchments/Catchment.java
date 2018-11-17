@@ -17,7 +17,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -60,6 +59,5 @@ public class Catchment extends AbstractBaseEntity<Long> {
      * The rivers associated with this {@link Catchment}
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "catchment")
-    @Valid
     private List<River> rivers;
 }

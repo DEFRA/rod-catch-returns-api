@@ -51,14 +51,14 @@ public class CacheManagerConfiguration extends CachingConfigurerSupport {
     @Bean(name = AUTHENTICATION_CACHE_MANAGER)
     public CacheManager authenticationCacheManager() {
         final CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        cacheManager.setCacheSpecification("expireAfterWrite=" + activeDirectoryCacheManagerTtlHours + "h");
+        cacheManager.setCacheSpecification("expireAfterWrite=" + getActiveDirectoryCacheManagerTtlHours() + "h");
         return cacheManager;
     }
 
     @Bean(name = LICENCE_CACHE_MANAGER)
     public CacheManager licenceCacheManager() {
         final CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        cacheManager.setCacheSpecification("expireAfterWrite=" + licenceCacheManagerTtlHours + "h");
+        cacheManager.setCacheSpecification("expireAfterWrite=" + getLicenceCacheManagerTtlHours() + "h");
         return cacheManager;
     }
 }

@@ -26,7 +26,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * RCR Submission
+ * An angler's catch return for a given season.
  *
  * @author Sam Gardner-Dell
  */

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -23,19 +24,18 @@ public class CrmIdentity implements CrmCall<Identity> {
     @Override
     public Identity getBaseEntity() {
         final Identity identity = new Identity();
-        if (roles != null) {
-            identity.getRoles().addAll(Arrays.asList(roles.split(",")));
-        }
+        identity.getRoles().addAll(Arrays.asList(Objects.toString(roles, "").split(",")));
         return identity;
     }
 
     /**
      * This Query is used to get the user roles for an ADD entry in teh CRM
      */
-    @Getter
-    @Setter
     public static class IdentityQuery implements CRMQuery<CrmIdentity> {
-        private CrmIdentity.IdentityQuery.Query query;
+        @Override
+        public Object getQuery() {
+            return null;
+        }
 
         public Class<CrmIdentity> getEntityClass() {
             return CrmIdentity.class;

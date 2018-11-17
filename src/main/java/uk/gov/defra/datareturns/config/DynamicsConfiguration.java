@@ -99,7 +99,7 @@ public class DynamicsConfiguration {
          * @return the request URI for the stored procedure
          */
         public URI getApiStoredProcedureEndpoint(final String storedProcedureName) {
-            return UriComponentsBuilder.fromUri(url).path(apiPath).path("/").path(storedProcedureName).build().toUri();
+            return UriComponentsBuilder.fromUri(getUrl()).path(getApiPath()).path("/").path(storedProcedureName).build().toUri();
         }
     }
 }

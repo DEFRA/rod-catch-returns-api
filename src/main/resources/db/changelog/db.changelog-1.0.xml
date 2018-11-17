@@ -677,7 +677,7 @@
                              foreignKeyName="fk_small_catch__activity"
                              references="rcr_activity(id)"/>
             </column>
-            <column name="month" type="int">
+            <column name="month" type="smallint">
                 <constraints nullable="false"/>
             </column>
             <column name="released" type="smallint">
@@ -719,7 +719,7 @@
             </column>
             <column name="submission_id" type="bigint"/>
             <column name="activity_id" type="bigint"/>
-            <column name="month" type="int"/>
+            <column name="month" type="smallint"/>
             <column name="released" type="smallint"/>
             <column name="reporting_exclude" type="boolean"/>
         </createTable>

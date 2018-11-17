@@ -106,12 +106,13 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         if (token != null) {
             headers.set("Authorization", "Bearer " + token);
         }
-        final HttpEntity<CrmCall.CRMQuery.Query> entity = new HttpEntity<>(crmQuery.getQuery(), headers);
+        final HttpEntity<?> requestEntity = new HttpEntity<>(crmQuery.getQuery(), headers);
         final URI storedProcedure = endpointConfiguration.getApiStoredProcedureEndpoint(crmQuery.getCRMStoredProcedureName());
-        final CrmCall<B> result = restTemplate.postForObject(storedProcedure, entity, crmQuery.getEntityClass());
-        if (result == null) {
-            return null;
+        final CrmCall<B> result = restTemplate.postForObject(storedProcedure, requestEntity, crmQuery.getEntityClass());
+        B entity = null;
+        if (result != null) {
+            entity = result.getBaseEntity();
         }
-        return result.getBaseEntity();
+        return entity;
     }
 }

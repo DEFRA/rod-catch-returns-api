@@ -14,12 +14,14 @@ import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
+import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.services.crm.entity.CrmActivity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
 
 import java.io.IOException;
+import java.time.Year;
 import java.util.UUID;
 import java.util.regex.Matcher;
 
@@ -69,7 +71,7 @@ public final class DynamicsMockServer {
             final Matcher contactMatcher = DynamicsMockData.CONTACT_ID_PATTERN.matcher(requestBody.getContactId());
             final CrmActivity responseBody = new CrmActivity();
 
-            if (contactMatcher.matches() && requestBody.getSeason() >= 2018 && requestBody.getStatus() != null) {
+            if (contactMatcher.matches() && requestBody.getSeason() >= Year.now().minusYears(1).getValue() && requestBody.getStatus() != null) {
                 responseBody.setId(requestBody.getContactId() + UUID.randomUUID().toString());
             } else {
                 responseBody.setReturnStatus("error");
@@ -85,7 +87,7 @@ public final class DynamicsMockServer {
             final Matcher contactMatcher = DynamicsMockData.CONTACT_ID_PATTERN.matcher(requestBody.getContactId());
             final CrmActivity responseBody = new CrmActivity();
 
-            if (contactMatcher.matches() && requestBody.getSeason() >= 2018 && requestBody.getStatus() != null) {
+            if (contactMatcher.matches() && requestBody.getSeason() >= Year.now().minusYears(1).getValue() && requestBody.getStatus() != null) {
                 responseBody.setId(requestBody.getContactId() + UUID.randomUUID().toString());
             } else {
                 responseBody.setReturnStatus("error");
@@ -97,6 +99,7 @@ public final class DynamicsMockServer {
 
     private static void setupGetRcrRolesByUserMock(final MockRestServiceServer restServiceServer) {
         setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetRcrRolesByUser", (request) -> {
+            Assert.notNull(request, "request should not be null");
             final String expected = "Bearer " + MockCrmLookupService.MOCK_BEARER_TOKEN;
             final String authHeader = request.getHeaders().getFirst("Authorization");
             final CrmIdentity responseBody = new CrmIdentity();

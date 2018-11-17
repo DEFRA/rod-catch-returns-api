@@ -7,8 +7,8 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import uk.gov.defra.datareturns.data.conversion.MonthConverter;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
-import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
+import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.smallcatches.ValidSmallCatch;
 
@@ -30,7 +30,7 @@ import java.time.Month;
 import java.util.List;
 
 /**
- * RCR Small Catch
+ * Records an anglers small catches against an given {@link Submission} and {@link Activity}
  *
  * @author Sam Gardner-Dell
  */

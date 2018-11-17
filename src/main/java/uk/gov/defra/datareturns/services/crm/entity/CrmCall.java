@@ -21,11 +21,8 @@ public interface CrmCall<E extends CrmBaseEntity> {
         @SuppressWarnings("SameReturnValue")
         String getCRMStoredProcedureName();
 
-        Query getQuery();
+        Object getQuery();
 
         Class<T> getEntityClass();
-
-        interface Query {
-        }
     }
 }

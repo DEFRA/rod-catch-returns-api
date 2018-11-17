@@ -31,8 +31,8 @@ dynamics:
     api-path: api/data/v9.0
 
 active-directory:
-  authority:
-  identity-client-id:
+  authority: http://mock-ad.example.com/
+  identity-client-id: example
 
 cache:
   active-directory-cache-manager-ttl-hours: 24
@@ -46,13 +46,13 @@ validation:
 
 security:
   oauth2:
-      client:
-        id: dynamics
-        client-id:
-        client-secret:
-        scope:
-        client-authentication-scheme: form
-        grant-type: client_credentials
+    client:
+      id: dynamics
+      client-id:
+      client-secret:
+      scope:
+      client-authentication-scheme: form
+      grant-type: client_credentials
 
   role-authorities:
     RcrAdminUser:

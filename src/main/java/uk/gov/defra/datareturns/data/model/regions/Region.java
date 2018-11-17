@@ -15,7 +15,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -52,6 +51,5 @@ public class Region extends AbstractBaseEntity<Long> {
      * The catchments associated with this Region
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "region")
-    @Valid
     private List<Catchment> catchments;
 }

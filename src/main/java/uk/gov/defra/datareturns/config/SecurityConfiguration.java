@@ -10,9 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.spel.spi.EvaluationContextExtension;
 import org.springframework.security.access.PermissionEvaluator;
-import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
@@ -26,10 +24,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.defra.datareturns.data.model.AbstractRestrictedEntity;
+import uk.gov.defra.datareturns.security.DefaultExpressionRoot;
 import uk.gov.defra.datareturns.services.authentication.ActiveDirectoryAuthenticationProvider;
 import uk.gov.defra.datareturns.services.authentication.LicenceAuthenticationProvider;
 
@@ -61,20 +58,6 @@ public class SecurityConfiguration {
     @EnableWebSecurity
     @ConditionalOnWebApplication
     public static class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-        private static final String[] AUTH_WHITELIST = {
-                // landing page
-                "/",
-                // swagger ui
-                "/swagger-resources/**",
-                "/swagger-ui.html",
-                "/v2/api-docs",
-                "/webjars/**",
-                // hal browser
-                "/api/profile",
-                "/api/",
-                "/api/browser/**"
-        };
         private final ActiveDirectoryAuthenticationProvider activeDirectoryAuthentication;
         private final LicenceAuthenticationProvider licenceAuthentication;
 
@@ -98,7 +81,7 @@ public class SecurityConfiguration {
                     .and()
                     .csrf().disable()
                     .authorizeRequests()
-                    .antMatchers(AUTH_WHITELIST).permitAll()
+                    .antMatchers(PlatformSecurityConfiguration.WebSecurityConfiguration.WHITELIST).permitAll()
                     .antMatchers("/api/**").fullyAuthenticated();
         }
     }
@@ -113,7 +96,7 @@ public class SecurityConfiguration {
                 @Override
                 protected MethodSecurityExpressionOperations createSecurityExpressionRoot(final Authentication authentication,
                                                                                           final MethodInvocation invocation) {
-                    final RcrExpressionRoot root = new RcrExpressionRoot(authentication);
+                    final DefaultExpressionRoot root = new DefaultExpressionRoot(authentication);
                     root.setTarget(invocation.getThis());
                     root.setPermissionEvaluator(getPermissionEvaluator());
                     root.setTrustResolver(this.trustResolver);
@@ -161,46 +144,6 @@ public class SecurityConfiguration {
         @Override
         public boolean hasPermission(final Authentication auth, final Serializable targetId, final String targetType, final Object permission) {
             return hasAuthority(auth, targetType, Objects.toString(permission));
-        }
-    }
-
-    /**
-     * Security expression root for RCR, allows additional expressions to be added
-     *
-     * @author Sam Gardner-Dell
-     */
-    @Getter
-    @Setter
-    public static class RcrExpressionRoot extends SecurityExpressionRoot implements MethodSecurityExpressionOperations {
-        private Object filterObject;
-        private Object returnObject;
-        private Object target;
-
-        public RcrExpressionRoot(final Authentication authentication) {
-            super(authentication);
-        }
-
-        @Override
-        public Object getThis() {
-            return target;
-        }
-    }
-
-    /**
-     * Enable the use of security expressions in spring-data @{@link org.springframework.data.jpa.repository.Query}
-     *
-     * @author Sam Gardner-Dell
-     */
-    @Component
-    public static class SecurityEvaluationContextExtension implements EvaluationContextExtension {
-        @Override
-        public String getExtensionId() {
-            return "rcr";
-        }
-
-        @Override
-        public RcrExpressionRoot getRootObject() {
-            return new RcrExpressionRoot(SecurityContextHolder.getContext().getAuthentication());
         }
     }
 }

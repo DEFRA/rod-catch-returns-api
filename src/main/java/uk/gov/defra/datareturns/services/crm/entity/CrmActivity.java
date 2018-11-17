@@ -41,9 +41,7 @@ public class CrmActivity implements CrmCall<Activity> {
     @Getter
     @Setter
     public static class CreateActivity implements CRMQuery<CrmActivity> {
-
         private Query query;
-        private Status status;
 
         public Class<CrmActivity> getEntityClass() {
             return CrmActivity.class;
@@ -55,7 +53,7 @@ public class CrmActivity implements CrmCall<Activity> {
 
         @Getter
         @Setter
-        public static class Query implements CRMQuery.Query {
+        public static class Query {
             @JsonProperty("ActivityStatus")
             private final Status status = Status.STARTED;
             @JsonProperty("ContactId")
@@ -71,9 +69,7 @@ public class CrmActivity implements CrmCall<Activity> {
     @Getter
     @Setter
     public static class UpdateActivity implements CRMQuery<CrmActivity> {
-
         private Query query;
-        private Status status;
 
         public Class<CrmActivity> getEntityClass() {
             return CrmActivity.class;
@@ -85,7 +81,7 @@ public class CrmActivity implements CrmCall<Activity> {
 
         @Getter
         @Setter
-        public static class Query implements CRMQuery.Query {
+        public static class Query {
             @JsonProperty("ActivityStatus")
             private final Status status = Status.SUBMITTED;
             @JsonProperty("ContactId")

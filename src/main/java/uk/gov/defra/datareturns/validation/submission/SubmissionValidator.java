@@ -2,6 +2,7 @@ package uk.gov.defra.datareturns.validation.submission;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
@@ -29,8 +30,7 @@ public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmis
      * @return true if valid, false otherwise
      */
     private boolean checkContact(final Submission submission, final ConstraintValidatorContext context) {
-        return submission.getContactId() != null || handleError(context, "CONTACT_ID_REQUIRED", b -> b.addPropertyNode("contactId"));
-        // FIXME: Lookup contact id in CRM. // return handleError(context, "CONTACT_ID_INVALID", b -> b.addPropertyNode("contactId"));
+        return StringUtils.isNotBlank(submission.getContactId()) || handleError(context, "CONTACT_ID_REQUIRED", b -> b.addPropertyNode("contactId"));
     }
 
     /**

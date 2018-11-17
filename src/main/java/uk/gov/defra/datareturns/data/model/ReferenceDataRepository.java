@@ -1,6 +1,7 @@
 package uk.gov.defra.datareturns.data.model;
 
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import uk.gov.defra.datareturns.data.BaseRepository;
 
@@ -25,27 +26,30 @@ import java.util.List;
 public interface ReferenceDataRepository<E extends AbstractBaseEntity, ID extends Serializable> extends BaseRepository<E, ID> {
     @Override
     @HasReferenceDataWrite
-    void deleteAll(Iterable<? extends E> entities);
+    void deleteAll(@NonNull Iterable<? extends E> entities);
+
+    @Override
+    @NonNull
+    @HasReferenceDataWrite
+    <S extends E> S saveAndFlush(@NonNull S entity);
+
+    @Override
+    @NonNull
+    @HasReferenceDataWrite
+    <S extends E> S save(@NonNull S entity);
+
+    @Override
+    @NonNull
+    @HasReferenceDataWrite
+    <S extends E> List<S> saveAll(@NonNull Iterable<S> entities);
 
     @Override
     @HasReferenceDataWrite
-    <S extends E> S saveAndFlush(S entity);
+    void deleteById(@NonNull ID id);
 
     @Override
     @HasReferenceDataWrite
-    <S extends E> S save(S entity);
-
-    @Override
-    @HasReferenceDataWrite
-    <S extends E> List<S> saveAll(Iterable<S> entities);
-
-    @Override
-    @HasReferenceDataWrite
-    void deleteById(ID id);
-
-    @Override
-    @HasReferenceDataWrite
-    void delete(E entity);
+    void delete(@NonNull E entity);
 
     @Override
     @HasReferenceDataWrite
@@ -53,7 +57,7 @@ public interface ReferenceDataRepository<E extends AbstractBaseEntity, ID extend
 
     @Override
     @HasReferenceDataWrite
-    void deleteInBatch(Iterable<E> entities);
+    void deleteInBatch(@NonNull Iterable<E> entities);
 
     @Override
     @HasReferenceDataWrite

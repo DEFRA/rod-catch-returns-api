@@ -26,7 +26,7 @@ import javax.persistence.UniqueConstraint;
 import java.util.List;
 
 /**
- * RCR Catch
+ * An {@link Activity} is used to record how long and angler has spent fishing on a given river.
  *
  * @author Sam Gardner-Dell
  */

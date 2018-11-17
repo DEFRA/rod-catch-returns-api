@@ -27,7 +27,7 @@ import javax.validation.Valid;
 import java.util.Date;
 
 /**
- * RCR Catch
+ * Records an anglers catches against an given {@link Submission} and {@link Activity}
  *
  * @author Sam Gardner-Dell
  */
