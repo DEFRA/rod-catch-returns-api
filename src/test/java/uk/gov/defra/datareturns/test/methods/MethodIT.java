@@ -10,8 +10,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 import uk.gov.defra.datareturns.services.crm.DynamicsMockData;
 import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
+import uk.gov.defra.datareturns.testutils.TestLicences;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
-import uk.gov.defra.datareturns.testutils.WithEndUser;
 
 import java.math.BigDecimal;
 import java.time.Month;
@@ -63,14 +63,13 @@ public class MethodIT {
     @Test
     @WithAdminUser
     public void testSecuredMethodAccessibleByAdmin() {
-        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(),
+        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(),
                 (r) -> r.statusCode(HttpStatus.CREATED.value()));
     }
 
     @Test
-    @WithEndUser
     public void testSecuredMethodInaccessibleByEndUser() {
-        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(), (r) -> {
+        verifyMethodAccessiblityFromSubmission(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(), (r) -> {
             r.statusCode(HttpStatus.FORBIDDEN.value());
             r.body("error", Matchers.equalTo("Access to associated resource denied"));
             r.body("cause", Matchers.startsWith("JSON parse error: Access is denied; nested exception is"));

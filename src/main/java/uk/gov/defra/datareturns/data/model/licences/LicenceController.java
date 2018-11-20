@@ -13,9 +13,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
+
+import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 
 /**
@@ -40,12 +44,18 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
      * @return a {@link ResponseEntity} containing the target {@link Licence} or a 404 status if not found
      */
     @GetMapping(value = "/licence/{licence}")
-    public ResponseEntity<Licence> getContact(@PathVariable("licence") final String licenceNumber) {
+    public ResponseEntity<Licence> getContact(@PathVariable("licence") final String licenceNumber,
+                                              @RequestParam(value = "verification", required = false) final String verification) {
+        ResponseEntity<Licence> responseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
         final Licence licence = lookupService.getLicenceFromLicenceNumber(licenceNumber);
-        if (licence == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (licence != null) {
+            responseEntity = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+            if (equalsIgnoreCase(deleteWhitespace(verification), deleteWhitespace(licence.getContact().getPostcode()))) {
+                responseEntity = new ResponseEntity<>(licence, HttpStatus.OK);
+            }
         }
-        return new ResponseEntity<>(licence, HttpStatus.OK);
+        return responseEntity;
     }
 
     /**
