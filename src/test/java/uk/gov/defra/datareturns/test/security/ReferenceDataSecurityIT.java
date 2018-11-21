@@ -10,9 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
 import uk.gov.defra.datareturns.testutils.IntegrationTestUtils;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
-import uk.gov.defra.datareturns.testutils.WithEndUser;
 import uk.gov.defra.datareturns.testutils.WithInvalidAdminPassword;
-import uk.gov.defra.datareturns.testutils.WithInvalidEndUserPassword;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -60,14 +58,7 @@ public class ReferenceDataSecurityIT {
     }
 
     @Test
-    @WithEndUser
     public void testEndUserCannotWriteReferenceData() {
-        testReferenceDataWriteAccess((r) -> r.statusCode(HttpStatus.FORBIDDEN.value()));
-    }
-
-    @Test
-    @WithInvalidEndUserPassword
-    public void testUnauthorisedEndUserBlocked() {
         testReferenceDataWriteAccess((r) -> r.statusCode(HttpStatus.UNAUTHORIZED.value()));
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 import uk.gov.defra.datareturns.services.crm.DynamicsMockData;
 import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
-import uk.gov.defra.datareturns.testutils.WithEndUser;
+import uk.gov.defra.datareturns.testutils.TestLicences;
 
 import java.math.BigDecimal;
 import java.time.Month;
@@ -39,13 +39,12 @@ import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSubmission
  */
 @RunWith(SpringRunner.class)
 @RestAssuredTest
-@WithEndUser
 @Slf4j
 public class SubmissionIT {
     @Test
     public void testSubmissionJourney() {
         // Create the submission
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(),
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(),
                 Calendar.getInstance().get(Calendar.YEAR));
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
@@ -94,7 +93,7 @@ public class SubmissionIT {
 
     @Test
     public void testCatchesDeletedWithActivity() {
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(),
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(2)).getContactId(),
                 Calendar.getInstance().get(Calendar.YEAR));
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
@@ -132,7 +131,7 @@ public class SubmissionIT {
 
     @Test
     public void testDuplicateActivityDetected() {
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(WithEndUser.LICENCE).getContactId(),
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(3)).getContactId(),
                 Calendar.getInstance().get(Calendar.YEAR));
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {

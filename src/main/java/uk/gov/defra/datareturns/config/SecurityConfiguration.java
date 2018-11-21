@@ -28,7 +28,6 @@ import org.springframework.validation.annotation.Validated;
 import uk.gov.defra.datareturns.data.model.AbstractRestrictedEntity;
 import uk.gov.defra.datareturns.security.DefaultExpressionRoot;
 import uk.gov.defra.datareturns.services.authentication.ActiveDirectoryAuthenticationProvider;
-import uk.gov.defra.datareturns.services.authentication.LicenceAuthenticationProvider;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -59,14 +58,13 @@ public class SecurityConfiguration {
     @ConditionalOnWebApplication
     public static class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         private final ActiveDirectoryAuthenticationProvider activeDirectoryAuthentication;
-        private final LicenceAuthenticationProvider licenceAuthentication;
 
         /**
          * Attempt authentication by licence and postcode then by EA active directory credentials
          */
         @Override
         public void configure(final AuthenticationManagerBuilder builder) {
-            builder.authenticationProvider(licenceAuthentication).authenticationProvider(activeDirectoryAuthentication);
+            builder.authenticationProvider(activeDirectoryAuthentication);
         }
 
         /**
@@ -82,7 +80,7 @@ public class SecurityConfiguration {
                     .csrf().disable()
                     .authorizeRequests()
                     .antMatchers(PlatformSecurityConfiguration.WebSecurityConfiguration.WHITELIST).permitAll()
-                    .antMatchers("/api/**").fullyAuthenticated();
+                    .antMatchers("/api/**").permitAll();
         }
     }
 
