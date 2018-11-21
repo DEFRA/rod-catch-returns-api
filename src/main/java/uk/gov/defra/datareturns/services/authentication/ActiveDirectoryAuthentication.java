@@ -35,12 +35,8 @@ public class ActiveDirectoryAuthentication implements ActiveDirectoryAuthenticat
     @Cacheable(cacheNames = "crm-aad-auth",
                key = "{ #authentication.name, #authentication.credentials }")
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-
         final String username = authentication.getName();
         final String password = authentication.getCredentials().toString();
-
-        log.debug("Authenticating user: " + username);
-
         try {
             final Identity identity = crmLookupService.getAuthenticatedUserRoles(username, password);
             if (identity == null) {

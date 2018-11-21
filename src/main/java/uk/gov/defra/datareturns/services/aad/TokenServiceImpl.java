@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
@@ -38,12 +39,13 @@ public class TokenServiceImpl implements TokenService {
     private final TokenServiceCache cache;
 
     @Override
+    @NonNull
     public String getTokenForUserIdentity(final String username, final String password) {
         AuthenticationResult result = cache.getToken(username, password);
         if (result == null || new Date(System.currentTimeMillis() - PREEMPTIVE_REFRESH).after(result.getExpiresOnDate())) {
             result = cache.updateToken(username, password);
         }
-        return result != null ? result.getAccessToken() : null;
+        return result.getAccessToken();
     }
 
     @Service
@@ -66,7 +68,7 @@ public class TokenServiceImpl implements TokenService {
                     final AuthenticationException e = (AuthenticationException) throwable.getCause();
                     if (e.getMessage().contains("ID3242: The security token could not be authenticated or authorized")) {
                         // adfs returns a 500 response (?!) with a soap envelope on authentication failure with a valid domain
-                        throw new BadCredentialsException("AAD authentication failed - no identity was found for given credentials.", e);
+                        throw new BadCredentialsException("AAD authentication failed - no identity was found for the given credentials.", e);
                     } else if (e.getMessage().contains("AADSTS90002: Tenant not found.")) { // domain specified but not recognised.
                         throw new BadCredentialsException("AAD authentication failed - invalid domain", e);
                     } else if (e.getMessage().contains("AADSTS50034: The user account does not exist")) { // no domain specified in username

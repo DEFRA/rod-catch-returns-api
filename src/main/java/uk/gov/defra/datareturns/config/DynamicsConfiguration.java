@@ -4,13 +4,20 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.gov.defra.datareturns.services.crm.DynamicsMockServer;
+import uk.gov.defra.datareturns.services.crm.rest.ClientRestTemplateErrorHandler;
+import uk.gov.defra.datareturns.services.crm.rest.ClientRestTemplateOAuth2ErrorHandler;
+import uk.gov.defra.datareturns.services.crm.rest.IdentityRestTemplateErrorHandler;
 
 import javax.validation.constraints.NotNull;
 import java.net.URI;
@@ -41,18 +48,41 @@ public class DynamicsConfiguration {
      */
     @Bean
     protected RestTemplate dynamicsClientRestTemplate(final OAuth2ProtectedResourceDetails details) {
+        RestTemplate template = buildClientCredentialsTemplate(details);
         if (DynamicsImpl.MOCK.equals(this.getImpl())) {
-            return new RestTemplate();
+            template = new RestTemplate();
+            DynamicsMockServer.bindTo(template);
         }
-        return new OAuth2RestTemplate(details);
+        template.setErrorHandler(new ClientRestTemplateErrorHandler());
+        return template;
+    }
+
+    /**
+     * Builds an {@link OAuth2RestTemplate} configured for client credentials flow.
+     * Maps any OAuth2 request failure to an internal server error ensuring that these are properly logged.
+     */
+    private OAuth2RestTemplate buildClientCredentialsTemplate(final OAuth2ProtectedResourceDetails details) {
+        final ClientCredentialsAccessTokenProvider provider = new ClientCredentialsAccessTokenProvider() {
+            @Override
+            protected ResponseErrorHandler getResponseErrorHandler() {
+                return new ClientRestTemplateOAuth2ErrorHandler();
+            }
+        };
+        final OAuth2RestTemplate template = new OAuth2RestTemplate(details);
+        template.setAccessTokenProvider(provider);
+        return template;
     }
 
     /**
      * @return RestTemplate for dynamics "identity" calls
      */
     @Bean
-    protected RestTemplate dynamicsIdentityRestTemplate() {
-        return new RestTemplate();
+    protected RestTemplate dynamicsIdentityRestTemplate(final RestTemplateBuilder builder) {
+        final RestTemplate template = builder.errorHandler(new IdentityRestTemplateErrorHandler()).build();
+        if (DynamicsImpl.MOCK.equals(this.getImpl())) {
+            DynamicsMockServer.bindTo(template);
+        }
+        return template;
     }
 
 

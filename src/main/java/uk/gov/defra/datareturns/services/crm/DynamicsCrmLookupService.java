@@ -3,7 +3,6 @@ package uk.gov.defra.datareturns.services.crm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -29,7 +28,6 @@ import java.net.URI;
  * @author Graham Willis
  */
 @Service
-@ConditionalOnProperty(name = "dynamics.impl", havingValue = "dynamics")
 @RequiredArgsConstructor
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @Slf4j
@@ -80,16 +78,8 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     @Override
     public Identity getAuthenticatedUserRoles(final String username, final String password) {
         final CrmIdentity.IdentityQuery identityQuery = new CrmIdentity.IdentityQuery();
-        final String token = getIdentityToken(username, password);
-        if (token == null) {
-            return null;
-        }
+        final String token = tokenService.getTokenForUserIdentity(username, password);
         return callCRM(dynamicsIdentityRestTemplate, identityQuery, token);
-    }
-
-    String getIdentityToken(final String username, final String password) {
-        log.debug("Getting access token using resource owner credentials flow for user: " + username);
-        return tokenService.getTokenForUserIdentity(username, password);
     }
 
     /**

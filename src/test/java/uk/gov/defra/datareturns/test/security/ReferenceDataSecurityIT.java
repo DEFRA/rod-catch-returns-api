@@ -6,11 +6,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
 import uk.gov.defra.datareturns.testutils.IntegrationTestUtils;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
-import uk.gov.defra.datareturns.testutils.WithInvalidAdminPassword;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -52,8 +52,29 @@ public class ReferenceDataSecurityIT {
     }
 
     @Test
-    @WithInvalidAdminPassword
+    @WithMockUser(
+            username = "admin1@example.com",
+            password = "invalidpassword"
+    )
+    public void testUnrecognisedAdminBlocked() {
+        testReferenceDataWriteAccess((r) -> r.statusCode(HttpStatus.UNAUTHORIZED.value()));
+    }
+
+    @Test
+    @WithMockUser(
+            username = "admin1@example.com",
+            password = "admin403"
+    )
     public void testUnauthorisedAdminBlocked() {
+        testReferenceDataWriteAccess((r) -> r.statusCode(HttpStatus.UNAUTHORIZED.value()));
+    }
+
+    @Test
+    @WithMockUser(
+            username = "admin1@example.com",
+            password = "admin500"
+    )
+    public void testServerError() {
         testReferenceDataWriteAccess((r) -> r.statusCode(HttpStatus.UNAUTHORIZED.value()));
     }
 

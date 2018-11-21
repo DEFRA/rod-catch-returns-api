@@ -16,14 +16,17 @@ import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.defra.datareturns.services.aad.MockTokenServiceImpl;
 import uk.gov.defra.datareturns.services.crm.entity.CrmActivity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
 
 import java.io.IOException;
 import java.time.Year;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Mock dynamics server
@@ -36,6 +39,8 @@ import java.util.regex.Matcher;
  */
 @Slf4j
 public final class DynamicsMockServer {
+    private static final Pattern BEARER_TOKEN_PATTERN = Pattern
+            .compile("^Bearer " + MockTokenServiceImpl.MOCK_BEARER_TOKEN + "(?<responseCode>\\d{3})$");
     private static final ObjectMapper MAPPER = Jackson2ObjectMapperBuilder.json().build();
 
     private DynamicsMockServer() {
@@ -100,14 +105,17 @@ public final class DynamicsMockServer {
     private static void setupGetRcrRolesByUserMock(final MockRestServiceServer restServiceServer) {
         setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetRcrRolesByUser", (request) -> {
             Assert.notNull(request, "request should not be null");
-            final String expected = "Bearer " + MockCrmLookupService.MOCK_BEARER_TOKEN;
-            final String authHeader = request.getHeaders().getFirst("Authorization");
-            final CrmIdentity responseBody = new CrmIdentity();
-            if (expected.equals(authHeader)) {
-                responseBody.setRoles("RcrAdminUser");
-                return respond(HttpStatus.OK, responseBody);
+            final Matcher tokenMatcher = BEARER_TOKEN_PATTERN.matcher(Objects.toString(request.getHeaders().getFirst("Authorization")));
+            CrmIdentity responseBody = null;
+            HttpStatus responseStatus = HttpStatus.FORBIDDEN;
+            if (tokenMatcher.matches()) {
+                responseStatus = HttpStatus.valueOf(Integer.parseInt(tokenMatcher.group("responseCode")));
+                if (responseStatus.is2xxSuccessful()) {
+                    responseBody = new CrmIdentity();
+                    responseBody.setRoles("RcrAdminUser");
+                }
             }
-            return respond(HttpStatus.FORBIDDEN, null);
+            return respond(responseStatus, responseBody);
         });
     }
 

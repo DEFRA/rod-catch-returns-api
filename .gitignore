@@ -7,4 +7,4 @@
 .project
 .classpath
 .env
-**/log/*.log
+**/log/*
