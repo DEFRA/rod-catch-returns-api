@@ -1,7 +1,7 @@
 package uk.gov.defra.datareturns.data.model.method;
 
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import uk.gov.defra.datareturns.data.model.RestrictedEntityFilteringRepository;
+import uk.gov.defra.datareturns.data.model.ReferenceDataRepository;
 
 
 /**
@@ -10,5 +10,5 @@ import uk.gov.defra.datareturns.data.model.RestrictedEntityFilteringRepository;
  * @author Sam Gardner-Dell
  */
 @RepositoryRestResource
-public interface MethodRepository extends RestrictedEntityFilteringRepository<Method, Long> {
+public interface MethodRepository extends ReferenceDataRepository<Method, Long> {
 }

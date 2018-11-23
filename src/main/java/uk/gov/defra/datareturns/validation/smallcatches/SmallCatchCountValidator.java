@@ -17,7 +17,7 @@ import javax.validation.ConstraintValidatorContext;
 public class SmallCatchCountValidator extends AbstractConstraintValidator<ValidSmallCatchCount, SmallCatchCount> {
     @Override
     public void initialize(final ValidSmallCatchCount constraintAnnotation) {
-        super.addChecks(this::checkCountMethod, this::checkCountGreaterThanZero);
+        super.addChecks(this::checkMethod, this::checkMethodPermissions, this::checkCountGreaterThanZero);
     }
 
     /**
@@ -27,8 +27,19 @@ public class SmallCatchCountValidator extends AbstractConstraintValidator<ValidS
      * @param context the validator context
      * @return true if valid, false otherwise
      */
-    private boolean checkCountMethod(final SmallCatchCount count, final ConstraintValidatorContext context) {
+    private boolean checkMethod(final SmallCatchCount count, final ConstraintValidatorContext context) {
         return count.getMethod() != null || handleError(context, "METHOD_REQUIRED", b -> b.addPropertyNode("method"));
+    }
+
+    /**
+     * Check that the user has sufficient authority to use the given method
+     *
+     * @param count   the {@link SmallCatchCount} to be validated
+     * @param context the validator context
+     * @return true if valid, false otherwise
+     */
+    private boolean checkMethodPermissions(final SmallCatchCount count, final ConstraintValidatorContext context) {
+        return checkRestrictedEntity(count.getMethod(), "method", context);
     }
 
     /**

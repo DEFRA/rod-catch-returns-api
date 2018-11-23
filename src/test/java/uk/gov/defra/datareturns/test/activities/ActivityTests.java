@@ -133,7 +133,6 @@ public class ActivityTests {
         Assertions.assertThat(violations2).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_MAX_EXCEEDED"));
     }
 
-
     @Test
     public void testActivityWithMaxDaysOtherExceeded() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 198);

@@ -1,5 +1,6 @@
 package uk.gov.defra.datareturns.data.model.regions;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,5 +52,6 @@ public class Region extends AbstractBaseEntity<Long> {
      * The catchments associated with this Region
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "region")
+    @JsonIgnore
     private List<Catchment> catchments;
 }

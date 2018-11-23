@@ -1,5 +1,6 @@
 package uk.gov.defra.datareturns.data.model.catchments;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -59,5 +60,6 @@ public class Catchment extends AbstractBaseEntity<Long> {
      * The rivers associated with this {@link Catchment}
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "catchment")
+    @JsonIgnore
     private List<River> rivers;
 }

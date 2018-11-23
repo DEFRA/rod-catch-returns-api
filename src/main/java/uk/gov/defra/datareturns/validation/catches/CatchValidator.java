@@ -32,7 +32,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     @Override
     public void initialize(final ValidCatch constraintAnnotation) {
         super.addChecks(this::checkSubmission, this::checkActivity, this::checkDate, this::checkSpecies,
-                this::checkMass, this::checkMassValue, this::checkMassLimits, this::checkMethod);
+                this::checkMass, this::checkMassValue, this::checkMassLimits, this::checkMethod, this::checkMethodPermissions);
     }
 
     /**
@@ -145,6 +145,18 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     private boolean checkMethod(final Catch catchEntry, final ConstraintValidatorContext context) {
         return catchEntry.getMethod() != null || handleError(context, "METHOD_REQUIRED", b -> b.addPropertyNode("method"));
     }
+
+    /**
+     * Check that the user has sufficient authority to use the given method
+     *
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
+    private boolean checkMethodPermissions(final Catch catchEntry, final ConstraintValidatorContext context) {
+        return checkRestrictedEntity(catchEntry.getMethod(), "method", context);
+    }
+
 
     @Override
     public String getErrorPrefix() {

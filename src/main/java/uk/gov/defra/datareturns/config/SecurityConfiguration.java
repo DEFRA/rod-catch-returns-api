@@ -111,7 +111,12 @@ public class SecurityConfiguration {
      * Permission evaluator
      */
     public static class RcrPermissionEvaluator implements PermissionEvaluator {
-        private static boolean hasAuthority(final Authentication auth, final String authority) {
+        /**
+         * Permits access to use reference data marked as internal in a submission
+         */
+        public static final String USE_INTERNAL = "USE_INTERNAL";
+
+        public static boolean hasAuthority(final Authentication auth, final String authority) {
             return authority != null && auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(authority::equals);
         }
 
@@ -133,7 +138,7 @@ public class SecurityConfiguration {
             }
             final String permString = Objects.toString(permission);
             final Object entity = unwrapDomainObject(targetDomainObject);
-            if ("USE_INTERNAL".equals(permString) && entity instanceof AbstractRestrictedEntity) {
+            if (USE_INTERNAL.equals(permString) && entity instanceof AbstractRestrictedEntity) {
                 return !((AbstractRestrictedEntity) entity).isInternal() || hasAuthority(auth, permString);
             }
             return hasAuthority(auth, entity.getClass().getSimpleName(), permString);

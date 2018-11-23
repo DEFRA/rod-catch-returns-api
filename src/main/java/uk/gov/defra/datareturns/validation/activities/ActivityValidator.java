@@ -17,7 +17,7 @@ import javax.validation.ConstraintValidatorContext;
 public class ActivityValidator extends AbstractConstraintValidator<ValidActivity, Activity> {
     @Override
     public void initialize(final ValidActivity constraintAnnotation) {
-        super.addChecks(this::checkSubmission, this::checkRiver, this::checkUniqueRiverPerSubmission, this::checkDays);
+        super.addChecks(this::checkSubmission, this::checkRiver, this::checkRiverPermissions, this::checkUniqueRiverPerSubmission, this::checkDays);
     }
 
     /**
@@ -29,6 +29,17 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
      */
     private boolean checkRiver(final Activity activity, final ConstraintValidatorContext context) {
         return activity.getRiver() != null || handleError(context, "RIVER_REQUIRED", b -> b.addPropertyNode("river"));
+    }
+
+    /**
+     * Check that the user has sufficient authority to use the given river
+     *
+     * @param activity the activity to be validated
+     * @param context  the validator context
+     * @return true if valid, false otherwise
+     */
+    private boolean checkRiverPermissions(final Activity activity, final ConstraintValidatorContext context) {
+        return checkRestrictedEntity(activity.getRiver(), "river", context);
     }
 
 

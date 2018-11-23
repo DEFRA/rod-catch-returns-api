@@ -2,16 +2,19 @@ package uk.gov.defra.datareturns.test.submissions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
+import uk.gov.defra.datareturns.data.model.submissions.SubmissionRepository;
 import uk.gov.defra.datareturns.services.crm.DynamicsMockData;
 import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
 import uk.gov.defra.datareturns.testutils.TestLicences;
 
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.Month;
 import java.util.ArrayList;
@@ -41,6 +44,14 @@ import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSubmission
 @RestAssuredTest
 @Slf4j
 public class SubmissionIT {
+    @Inject
+    private SubmissionRepository submissionRepository;
+
+    @Before
+    public void setup() {
+        submissionRepository.deleteAll();
+    }
+
     @Test
     public void testSubmissionJourney() {
         // Create the submission
@@ -82,7 +93,6 @@ public class SubmissionIT {
             r.statusCode(HttpStatus.OK.value());
             r.body("errors", Matchers.nullValue());
         });
-
 
         deleteEntity(submissionUrl);
         activities.forEach(url -> getEntity(url).statusCode(HttpStatus.NOT_FOUND.value()));
