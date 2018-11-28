@@ -5,14 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.defra.datareturns.data.model.licences.Activity;
 
 @Getter
 @Setter
 @Slf4j
-public class CrmActivity implements CrmCall<Activity> {
-    @JsonProperty("RCRActivityId")
-    private String id;
+public class CrmActivity implements CrmCall<Void> {
     @JsonProperty("ReturnStatus")
     private String returnStatus;
     @JsonProperty("ErrorMessage")
@@ -20,19 +17,23 @@ public class CrmActivity implements CrmCall<Activity> {
 
     @Override
     @JsonIgnore
-    public Activity getBaseEntity() {
-        if ("error".equals(returnStatus)) {
-            // This is a warning because the activity can be create and removed by the CRM
-            log.warn("Error retrieving activity response from CRM - " + errorMessage);
-            return null;
-        }
-        final Activity activity = new Activity();
-        activity.setId(id);
-        return activity;
+    public Void getBaseEntity() {
+        return null;
     }
 
     public enum Status {
         STARTED, SUBMITTED
+    }
+
+    @Getter
+    @Setter
+    public static class Query {
+        @JsonProperty("ActivityStatus")
+        private Status status;
+        @JsonProperty("ContactId")
+        private String contactId;
+        @JsonProperty("Season")
+        private int season;
     }
 
     /**
@@ -51,16 +52,6 @@ public class CrmActivity implements CrmCall<Activity> {
             return "defra_CreateRCRActivity";
         }
 
-        @Getter
-        @Setter
-        public static class Query {
-            @JsonProperty("ActivityStatus")
-            private final Status status = Status.STARTED;
-            @JsonProperty("ContactId")
-            private String contactId;
-            @JsonProperty("Season")
-            private int season;
-        }
     }
 
     /**
@@ -78,17 +69,5 @@ public class CrmActivity implements CrmCall<Activity> {
         public String getCRMStoredProcedureName() {
             return "defra_UpdateRCRActivity";
         }
-
-        @Getter
-        @Setter
-        public static class Query {
-            @JsonProperty("ActivityStatus")
-            private final Status status = Status.SUBMITTED;
-            @JsonProperty("ContactId")
-            private String contactId;
-            @JsonProperty("Season")
-            private int season;
-        }
     }
-
 }

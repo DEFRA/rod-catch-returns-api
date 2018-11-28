@@ -10,11 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.config.DynamicsConfiguration;
-import uk.gov.defra.datareturns.data.model.licences.Activity;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.aad.TokenService;
 import uk.gov.defra.datareturns.services.crm.entity.CrmActivity;
-import uk.gov.defra.datareturns.services.crm.entity.CrmBaseEntity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmCall;
 import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
@@ -54,25 +52,25 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     }
 
     @Override
-    public Activity createActivity(final String contactId, final short season) {
+    public void createActivity(final String contactId, final short season) {
         final CrmActivity.CreateActivity createActivity = new CrmActivity.CreateActivity();
-        log.debug("Creating activity on contact: " + contactId);
-        final CrmActivity.CreateActivity.Query query = new CrmActivity.CreateActivity.Query();
+        final CrmActivity.Query query = new CrmActivity.Query();
+        query.setStatus(CrmActivity.Status.STARTED);
         query.setContactId(contactId);
         query.setSeason(season);
         createActivity.setQuery(query);
-        return callCRM(dynamicsClientRestTemplate, createActivity, null);
+        callCRM(dynamicsClientRestTemplate, createActivity, null);
     }
 
     @Override
-    public Activity updateActivity(final String contactId, final short season) {
+    public void updateActivity(final String contactId, final short season) {
         final CrmActivity.UpdateActivity updateActivity = new CrmActivity.UpdateActivity();
-        log.debug("Updating activity on contact: " + contactId);
-        final CrmActivity.UpdateActivity.Query query = new CrmActivity.UpdateActivity.Query();
+        final CrmActivity.Query query = new CrmActivity.Query();
+        query.setStatus(CrmActivity.Status.SUBMITTED);
         query.setContactId(contactId);
         query.setSeason(season);
         updateActivity.setQuery(query);
-        return callCRM(dynamicsClientRestTemplate, updateActivity, null);
+        callCRM(dynamicsClientRestTemplate, updateActivity, null);
     }
 
     @Override
@@ -89,8 +87,8 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * @param <T>      - The type of the returned entity
      * @return - The returned entity object from the CRM
      */
-    private <B extends CrmBaseEntity, T extends CrmCall<B>> B callCRM(final RestTemplate restTemplate, final CrmCall.CRMQuery<T> crmQuery,
-                                                                      final String token) {
+    private <B, T extends CrmCall<B>> B callCRM(final RestTemplate restTemplate, final CrmCall.CRMQuery<T> crmQuery,
+                                                final String token) {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         if (token != null) {

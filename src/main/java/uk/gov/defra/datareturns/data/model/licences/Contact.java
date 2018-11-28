@@ -2,7 +2,6 @@ package uk.gov.defra.datareturns.data.model.licences;
 
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.defra.datareturns.services.crm.entity.CrmBaseEntity;
 
 /**
  * Represents a contact entry within the CRM
@@ -11,7 +10,7 @@ import uk.gov.defra.datareturns.services.crm.entity.CrmBaseEntity;
  */
 @Getter
 @Setter
-public class Contact implements CrmBaseEntity {
+public class Contact {
     /**
      * the id associated with the contact
      */

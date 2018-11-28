@@ -6,7 +6,7 @@ package uk.gov.defra.datareturns.services.crm.entity;
  *
  * @param <E> crm entity type
  */
-public interface CrmCall<E extends CrmBaseEntity> {
+public interface CrmCall<E> {
     E getBaseEntity();
 
     /**

@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.services.crm;
 
-import uk.gov.defra.datareturns.data.model.licences.Activity;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.crm.entity.Identity;
 
@@ -24,9 +23,8 @@ public interface CrmLookupService {
      *
      * @param contactId The CRM contact id
      * @param season    The season (year) of the return
-     * @return An activity entity object
      */
-    Activity createActivity(String contactId, short season);
+    void createActivity(String contactId, short season);
 
 
     /**
@@ -34,9 +32,8 @@ public interface CrmLookupService {
      *
      * @param contactId The CRM contact id
      * @param season    The season (year) of the return
-     * @return An activity entity object
      */
-    Activity updateActivity(String contactId, short season);
+    void updateActivity(String contactId, short season);
 
     /**
      * Get the roles associated with an AD user in the CRM

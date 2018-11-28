@@ -8,6 +8,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class Identity implements CrmBaseEntity {
+public class Identity {
     private final Set<String> roles = new HashSet<>();
 }
