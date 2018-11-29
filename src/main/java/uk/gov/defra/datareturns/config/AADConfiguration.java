@@ -16,7 +16,6 @@ import java.net.URL;
  * @author Sam Gardner-Dell
  */
 @Configuration
-@EnableConfigurationProperties
 @ConfigurationProperties(prefix = "active-directory")
 @Getter
 @Setter

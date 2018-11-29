@@ -71,7 +71,7 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
      * @param <T>       the generic type of the beans to be written
      * @throws IOException if an IO error occurs
      */
-    private <T> void writeCsv(final Class<T> beanClass, final List<T> entries, final String filename, final HttpServletResponse response)
+    private static <T> void writeCsv(final Class<T> beanClass, final List<T> entries, final String filename, final HttpServletResponse response)
             throws IOException {
         final CsvWriterSettings settings = new CsvWriterSettings();
         settings.setAutoConfigurationEnabled(true);

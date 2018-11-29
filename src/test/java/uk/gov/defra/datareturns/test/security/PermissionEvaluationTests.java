@@ -24,11 +24,9 @@ public class PermissionEvaluationTests {
         final Region test = new Region();
         final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Assertions.assertThat(EVALUATOR.hasPermission(auth, test, "READ")).isTrue();
-        Assertions.assertThat(EVALUATOR.hasPermission(auth, null, Region.class.getSimpleName(), "READ"))
-                .isTrue();
+        Assertions.assertThat(EVALUATOR.hasPermission(auth, null, Region.class.getSimpleName(), "READ")).isTrue();
         Assertions.assertThat(EVALUATOR.hasPermission(auth, test, "WRITE")).isFalse();
-        Assertions.assertThat(EVALUATOR.hasPermission(auth, null, Region.class.getSimpleName(), "WRITE"))
-                .isFalse();
+        Assertions.assertThat(EVALUATOR.hasPermission(auth, null, Region.class.getSimpleName(), "WRITE")).isFalse();
     }
 
     @Test
@@ -37,11 +35,9 @@ public class PermissionEvaluationTests {
         final Region test = new Region();
         final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Assertions.assertThat(EVALUATOR.hasPermission(auth, test, "READ")).isFalse();
-        Assertions.assertThat(EVALUATOR.hasPermission(auth, null, Region.class.getSimpleName(), "READ"))
-                .isFalse();
+        Assertions.assertThat(EVALUATOR.hasPermission(auth, null, Region.class.getSimpleName(), "READ")).isFalse();
         Assertions.assertThat(EVALUATOR.hasPermission(auth, test, "WRITE")).isTrue();
-        Assertions.assertThat(EVALUATOR.hasPermission(auth, null, Region.class.getSimpleName(), "WRITE"))
-                .isTrue();
+        Assertions.assertThat(EVALUATOR.hasPermission(auth, null, Region.class.getSimpleName(), "WRITE")).isTrue();
     }
 
     @Test

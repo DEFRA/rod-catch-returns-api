@@ -28,7 +28,6 @@ import java.net.URI;
  * @author Sam Gardner-Dell
  */
 @Configuration
-@EnableConfigurationProperties
 @ConfigurationProperties(prefix = "dynamics")
 @Getter
 @Setter

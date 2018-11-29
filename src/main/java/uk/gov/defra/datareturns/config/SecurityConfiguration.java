@@ -25,7 +25,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.annotation.Validated;
-import uk.gov.defra.datareturns.data.model.AbstractRestrictedEntity;
 import uk.gov.defra.datareturns.security.DefaultExpressionRoot;
 import uk.gov.defra.datareturns.services.authentication.ActiveDirectoryAuthenticationProvider;
 
@@ -34,7 +33,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Spring security configuration
@@ -43,7 +41,6 @@ import java.util.Optional;
  */
 @SuppressWarnings({"NonFinalUtilityClass", "HideUtilityClassConstructor"})
 @Configuration
-@EnableConfigurationProperties
 @ConfigurationProperties(prefix = "security")
 @Getter
 @Setter
@@ -124,24 +121,9 @@ public class SecurityConfiguration {
             return hasAuthority(auth, StringUtils.upperCase(targetType + "_" + authority));
         }
 
-        private static Object unwrapDomainObject(final Object entity) {
-            if (entity instanceof Optional) {
-                return ((Optional<?>) entity).orElse(null);
-            }
-            return entity;
-        }
-
         @Override
         public boolean hasPermission(final Authentication auth, final Object targetDomainObject, final Object permission) {
-            if (targetDomainObject == null) {
-                return false;
-            }
-            final String permString = Objects.toString(permission);
-            final Object entity = unwrapDomainObject(targetDomainObject);
-            if (USE_INTERNAL.equals(permString) && entity instanceof AbstractRestrictedEntity) {
-                return !((AbstractRestrictedEntity) entity).isInternal() || hasAuthority(auth, permString);
-            }
-            return hasAuthority(auth, entity.getClass().getSimpleName(), permString);
+            return targetDomainObject != null && hasAuthority(auth, targetDomainObject.getClass().getSimpleName(), Objects.toString(permission));
         }
 
         @Override

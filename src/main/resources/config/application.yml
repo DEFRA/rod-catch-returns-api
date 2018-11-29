@@ -60,4 +60,5 @@ logging:
   level:
     # Exceptions/errors are converted to spring exceptions as req'd - don't let the adal4j library log anything.
     com.microsoft.aad.adal4j: off
+#    sun.net.www.protocol.http.HttpURLConnection: trace
 ---

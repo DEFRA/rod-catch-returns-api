@@ -21,6 +21,7 @@ public class LicenceLookupIT {
     @Test
     public void testLicenceLookupB7A111() {
         getEntity("/licence/B7A111?verification=WA4 1HT")
+                .statusCode(HttpStatus.OK.value())
                 .body("licenceNumber", Matchers.endsWith("B7A111"))
                 .body("contact", Matchers.notNullValue())
                 .body("contact.id", Matchers.equalTo("contact-identifier-111"))
@@ -30,6 +31,7 @@ public class LicenceLookupIT {
     @Test
     public void testLicenceLookupB7A718() {
         getEntity("/licence/B7A718?verification=WA4 8HT")
+                .statusCode(HttpStatus.OK.value())
                 .body("licenceNumber", Matchers.endsWith("B7A718"))
                 .body("contact", Matchers.notNullValue())
                 .body("contact.id", Matchers.equalTo("contact-identifier-718"))
@@ -38,12 +40,12 @@ public class LicenceLookupIT {
 
     @Test
     public void testLicenceLookupVerificationFailure() {
-        getEntity("/licence/B7A718?verification=WA4 1HT").statusCode(HttpStatus.FORBIDDEN.value()).log().all();
+        getEntity("/licence/B7A718?verification=WA4 1HT").statusCode(HttpStatus.FORBIDDEN.value());
     }
 
     @Test
     public void testLicenceLookupNotFound() {
-        getEntity("/licence/notfound?verification=blah").statusCode(HttpStatus.NOT_FOUND.value());
+        getEntity("/licence/notfound?verification=blah").statusCode(HttpStatus.FORBIDDEN.value());
     }
 
     @Test

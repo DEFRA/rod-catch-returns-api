@@ -23,13 +23,19 @@ public class LicenceLookupTests {
 
     @Test
     public void testLicenceLookupSucceeds() {
-        final Licence licence = crmLookupService.getLicenceFromLicenceNumber("B7A728");
+        final Licence licence = crmLookupService.getLicence("B7A728", "WA4 8HT");
         Assertions.assertThat(licence).isNotNull();
     }
 
     @Test
-    public void testLicenceLookupFails() {
-        final Licence licence = crmLookupService.getLicenceFromLicenceNumber("B9A72DD");
+    public void testLicenceLookupFailsPostcodeMismatch() {
+        final Licence licence = crmLookupService.getLicence("B91235", "WA4 0HT");
+        Assertions.assertThat(licence).isNull();
+    }
+
+    @Test
+    public void testLicenceLookupFailsUnknownLicence() {
+        final Licence licence = crmLookupService.getLicence("B9A72DD", "WA4 1HT");
         Assertions.assertThat(licence).isNull();
     }
 }

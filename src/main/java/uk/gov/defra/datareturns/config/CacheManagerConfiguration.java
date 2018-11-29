@@ -21,7 +21,6 @@ import javax.validation.constraints.NotNull;
  */
 @Configuration
 @EnableCaching
-@EnableConfigurationProperties
 @ConfigurationProperties(prefix = "cache")
 @Getter
 @Setter

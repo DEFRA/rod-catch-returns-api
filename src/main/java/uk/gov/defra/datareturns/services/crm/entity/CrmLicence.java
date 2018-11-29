@@ -2,7 +2,9 @@ package uk.gov.defra.datareturns.services.crm.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
@@ -44,26 +46,30 @@ public class CrmLicence implements CrmCall<Licence> {
     }
 
     /**
-     * This Query is used to get the contact details from the licence number
+     * This query is used to get the contact details from the licence number
      */
     @Getter
     @Setter
     public static class LicenceQuery implements CRMQuery<CrmLicence> {
-        private Query query;
+        private QueryParams queryParams;
 
         public Class<CrmLicence> getEntityClass() {
             return CrmLicence.class;
         }
 
         public String getCRMStoredProcedureName() {
-            return "defra_GetContactByLicenseNumber";
+            return "defra_GetContactByLicenceAndPostcode";
         }
+    }
 
-        @Getter
-        @Setter
-        public static class Query {
-            @JsonProperty("PermissionNumber")
-            private String permissionNumber;
-        }
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor(staticName = "of")
+    public static class QueryParams {
+        @JsonProperty("PermissionNumber")
+        private String permissionNumber;
+        @JsonProperty("InputPostCode")
+        private String postcode;
     }
 }

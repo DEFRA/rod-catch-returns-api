@@ -1,5 +1,6 @@
 package uk.gov.defra.datareturns.data.model.licences;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -18,10 +19,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 
-import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
-import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
-
-
 /**
  * Controller to enable the lookup of licence information from the CRM
  *
@@ -31,6 +28,7 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 @ConditionalOnWebApplication
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping("/licence")
 public class LicenceController implements ResourceProcessor<RepositoryLinksResource> {
     /**
      * the service used to lookup licence data
@@ -38,22 +36,20 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
     private final CrmLookupService lookupService;
 
     /**
-     * Retrieve a contact based on the given (partial) licence number
+     * Retrieve a licence and its associated contact based on the given licence and postcode
      *
      * @param licenceNumber the licence number used to retrieve licence information
+     * @param verification  used to verify the licence number
      * @return a {@link ResponseEntity} containing the target {@link Licence} or a 404 status if not found
      */
-    @GetMapping(value = "/licence/{licence}")
+    @GetMapping(value = "/{licence}")
+    @ApiOperation(value = "Retrieve a licence and its associated contact based on the given licence and postcode")
     public ResponseEntity<Licence> getContact(@PathVariable("licence") final String licenceNumber,
                                               @RequestParam(value = "verification", required = false) final String verification) {
-        ResponseEntity<Licence> responseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        final Licence licence = lookupService.getLicenceFromLicenceNumber(licenceNumber);
+        ResponseEntity<Licence> responseEntity = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        final Licence licence = lookupService.getLicence(licenceNumber, verification);
         if (licence != null) {
-            responseEntity = new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
-            if (equalsIgnoreCase(deleteWhitespace(verification), deleteWhitespace(licence.getContact().getPostcode()))) {
-                responseEntity = new ResponseEntity<>(licence, HttpStatus.OK);
-            }
+            responseEntity = new ResponseEntity<>(licence, HttpStatus.OK);
         }
         return responseEntity;
     }
@@ -61,7 +57,7 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
     /**
      * @return 405, "Method Not Allowed"
      */
-    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST, RequestMethod.DELETE}, value = "/licence/*")
+    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST, RequestMethod.DELETE}, value = "/*")
     @ApiIgnore
     public ResponseEntity<Licence> disabledMethods() {
         return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);

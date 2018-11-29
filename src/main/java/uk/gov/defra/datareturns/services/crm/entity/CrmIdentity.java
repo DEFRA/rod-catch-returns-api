@@ -29,11 +29,11 @@ public class CrmIdentity implements CrmCall<Identity> {
     }
 
     /**
-     * This Query is used to get the user roles for an ADD entry in teh CRM
+     * This query is used to get the user roles for an ADD entry in teh CRM
      */
     public static class IdentityQuery implements CRMQuery<CrmIdentity> {
         @Override
-        public Object getQuery() {
+        public Object getQueryParams() {
             return null;
         }
 

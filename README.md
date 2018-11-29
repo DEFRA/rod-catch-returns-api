@@ -21,8 +21,8 @@ git clone ssh://git@ssh.github.com:443/DEFRA/rod-catch-returns-api
 
 ## Prerequisites
 
-- Java 1.8
-- (Optional) Maven 3.52 or greater (or use the supplied mvnw wrapper)
+- Java 11
+- (Optional) Maven 3.54 or greater (or use the supplied mvnw wrapper)
 
 
 ## Launching via the spring-boot maven plugin (development use)
@@ -94,23 +94,6 @@ In addition to the reports listed above, this includes:
 ./mvnw dockerfile:build
 ```
 The new image will be installed into the local docker repository under drp/rcr_api:latest
-
-
-## Maven settings reference
-Example maven settings to use a local postgres database:
-```xml
-<!-- Configuration file values for database access -->
-<db.rcr_api.mgt.url>jdbc:postgresql://localhost:5432/postgres</db.rcr_api.mgt.url>
-<db.rcr_api.url>jdbc:postgresql://localhost:5432/rcr_api</db.rcr_api.url>
-<!-- DB name (as per url above) -->
-<db.rcr_api.name>rcr_api</db.rcr_api.name>
-<db.rcr_api.type>postgresql</db.rcr_api.type>
-<db.rcr_api.driver>org.postgresql.Driver</db.rcr_api.driver>
-<db.rcr_api.dialect>org.hibernate.dialect.PostgreSQL94Dialect</db.rcr_api.dialect>
-<db.rcr_api.username>a username</db.rcr_api.username>
-<db.rcr_api.password>a password</db.rcr_api.password>
-<db.rcr_api.schema>public</db.rcr_api.schema>
-```
 
 ## Contributing to this project
 

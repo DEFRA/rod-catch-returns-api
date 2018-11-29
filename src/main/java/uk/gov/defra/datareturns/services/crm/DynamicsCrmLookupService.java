@@ -18,7 +18,11 @@ import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
 import uk.gov.defra.datareturns.services.crm.entity.Identity;
 
+import javax.inject.Provider;
 import java.net.URI;
+
+import static uk.gov.defra.datareturns.services.crm.entity.CrmActivity.Status.STARTED;
+import static uk.gov.defra.datareturns.services.crm.entity.CrmActivity.Status.SUBMITTED;
 
 /**
  * CRM lookup service
@@ -34,8 +38,16 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * The dynamics configuration
      */
     private final DynamicsConfiguration.Endpoint endpointConfiguration;
-    private final RestTemplate dynamicsClientRestTemplate;
-    private final RestTemplate dynamicsIdentityRestTemplate;
+
+    /**
+     * Rest template provider for CRM calls using client-credentials flow.
+     */
+    private final Provider<RestTemplate> dynamicsClientRestTemplate;
+
+    /**
+     * Rest template provider for CRM calls using a token retrieved via resource owner credentials flow.
+     */
+    private final Provider<RestTemplate> dynamicsIdentityRestTemplate;
 
     /**
      * The dynamics authentication token service
@@ -43,41 +55,31 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     private final TokenService tokenService;
 
     @Override
-    public Licence getLicenceFromLicenceNumber(final String licenceNumber) {
+    public Licence getLicence(final String licenceNumber, final String postcode) {
         final CrmLicence.LicenceQuery licenceQuery = new CrmLicence.LicenceQuery();
-        final CrmLicence.LicenceQuery.Query query = new CrmLicence.LicenceQuery.Query();
-        query.setPermissionNumber(licenceNumber);
-        licenceQuery.setQuery(query);
-        return callCRM(dynamicsClientRestTemplate, licenceQuery, null);
+        licenceQuery.setQueryParams(CrmLicence.QueryParams.of(licenceNumber, postcode));
+        return callCRM(dynamicsClientRestTemplate.get(), licenceQuery, null);
     }
 
     @Override
     public void createActivity(final String contactId, final short season) {
         final CrmActivity.CreateActivity createActivity = new CrmActivity.CreateActivity();
-        final CrmActivity.Query query = new CrmActivity.Query();
-        query.setStatus(CrmActivity.Status.STARTED);
-        query.setContactId(contactId);
-        query.setSeason(season);
-        createActivity.setQuery(query);
-        callCRM(dynamicsClientRestTemplate, createActivity, null);
+        createActivity.setQueryParams(CrmActivity.QueryParams.of(STARTED, contactId, season));
+        callCRM(dynamicsClientRestTemplate.get(), createActivity, null);
     }
 
     @Override
     public void updateActivity(final String contactId, final short season) {
         final CrmActivity.UpdateActivity updateActivity = new CrmActivity.UpdateActivity();
-        final CrmActivity.Query query = new CrmActivity.Query();
-        query.setStatus(CrmActivity.Status.SUBMITTED);
-        query.setContactId(contactId);
-        query.setSeason(season);
-        updateActivity.setQuery(query);
-        callCRM(dynamicsClientRestTemplate, updateActivity, null);
+        updateActivity.setQueryParams(CrmActivity.QueryParams.of(SUBMITTED, contactId, season));
+        callCRM(dynamicsClientRestTemplate.get(), updateActivity, null);
     }
 
     @Override
     public Identity getAuthenticatedUserRoles(final String username, final String password) {
         final CrmIdentity.IdentityQuery identityQuery = new CrmIdentity.IdentityQuery();
         final String token = tokenService.getTokenForUserIdentity(username, password);
-        return callCRM(dynamicsIdentityRestTemplate, identityQuery, token);
+        return callCRM(dynamicsIdentityRestTemplate.get(), identityQuery, token);
     }
 
     /**
@@ -92,9 +94,9 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         if (token != null) {
-            headers.set("Authorization", "Bearer " + token);
+            headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         }
-        final HttpEntity<?> requestEntity = new HttpEntity<>(crmQuery.getQuery(), headers);
+        final HttpEntity<?> requestEntity = new HttpEntity<>(crmQuery.getQueryParams(), headers);
         final URI storedProcedure = endpointConfiguration.getApiStoredProcedureEndpoint(crmQuery.getCRMStoredProcedureName());
         final CrmCall<B> result = restTemplate.postForObject(storedProcedure, requestEntity, crmQuery.getEntityClass());
         B entity = null;

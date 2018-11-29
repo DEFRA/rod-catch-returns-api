@@ -14,9 +14,10 @@ public interface CrmLookupService {
      * Retrieve the Licence and contact details using the last 6 digits of the licence number
      *
      * @param licenceNumber The last 6 digits of the licence number
+     * @param postcode the postcode to cross-check against the licence number
      * @return Licence Returns a licence entity object
      */
-    Licence getLicenceFromLicenceNumber(String licenceNumber);
+    Licence getLicence(final String licenceNumber, final String postcode);
 
     /**
      * Create an activity for a given contact and season and set status to started

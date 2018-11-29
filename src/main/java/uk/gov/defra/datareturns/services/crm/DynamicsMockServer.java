@@ -17,15 +17,16 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.services.aad.MockTokenServiceImpl;
-import uk.gov.defra.datareturns.services.crm.entity.CrmActivity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
 
 import java.io.IOException;
-import java.time.Year;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 /**
  * Mock dynamics server
@@ -53,11 +54,11 @@ public final class DynamicsMockServer {
     }
 
     private static void setupGetContactByLicenceNumberMock(final MockRestServiceServer restServiceServer) {
-        setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetContactByLicenseNumber", (request) -> {
-            final CrmLicence.LicenceQuery.Query requestBody = readRequestBody(request, CrmLicence.LicenceQuery.Query.class);
+        setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetContactByLicenceAndPostcode", (request) -> {
+            final CrmLicence.QueryParams requestBody = readRequestBody(request, CrmLicence.QueryParams.class);
             final CrmLicence responseBody = new CrmLicence();
             final DynamicsMockData.Entry entry = DynamicsMockData.get(requestBody.getPermissionNumber());
-            if (entry != null) {
+            if (entry != null && equalsIgnoreCase(deleteWhitespace(requestBody.getPostcode()), deleteWhitespace(entry.getPostcode()))) {
                 responseBody.setId(entry.getContactId());
                 responseBody.setPermissionNumber(entry.getPermission());
                 responseBody.setPostcode(entry.getPostcode());
@@ -71,24 +72,12 @@ public final class DynamicsMockServer {
 
     private static void setupCreateRCRActivityMock(final MockRestServiceServer restServiceServer) {
         setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_CreateRCRActivity",
-                (request) -> respond(HttpStatus.CREATED, createActivityResponse(request, CrmActivity.Status.STARTED)));
+                (request) -> new MockClientHttpResponse(new byte[] {}, HttpStatus.CREATED));
     }
 
     private static void setupUpdateRCRActivityMock(final MockRestServiceServer restServiceServer) {
         setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_UpdateRCRActivity",
-                (request) -> respond(HttpStatus.OK, createActivityResponse(request, CrmActivity.Status.SUBMITTED)));
-    }
-
-    private static CrmActivity createActivityResponse(final ClientHttpRequest request, final CrmActivity.Status expectedStatus) throws IOException {
-        final CrmActivity.Query requestBody = readRequestBody(request, CrmActivity.Query.class);
-        final Matcher contactMatcher = DynamicsMockData.CONTACT_ID_PATTERN.matcher(requestBody.getContactId());
-        final CrmActivity responseBody = new CrmActivity();
-
-        if (!contactMatcher.matches() || requestBody.getSeason() < Year.now().minusYears(1).getValue() || requestBody.getStatus() != expectedStatus) {
-            responseBody.setReturnStatus("error");
-            responseBody.setErrorMessage("Invalid contact id, season or status");
-        }
-        return responseBody;
+                (request) -> new MockClientHttpResponse(new byte[] {}, HttpStatus.CREATED));
     }
 
     private static void setupGetRcrRolesByUserMock(final MockRestServiceServer restServiceServer) {

@@ -2,7 +2,9 @@ package uk.gov.defra.datareturns.services.crm.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,11 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @Slf4j
 public class CrmActivity implements CrmCall<Void> {
-    @JsonProperty("ReturnStatus")
-    private String returnStatus;
-    @JsonProperty("ErrorMessage")
-    private String errorMessage;
-
     @Override
     @JsonIgnore
     public Void getBaseEntity() {
@@ -27,7 +24,9 @@ public class CrmActivity implements CrmCall<Void> {
 
     @Getter
     @Setter
-    public static class Query {
+    @NoArgsConstructor
+    @AllArgsConstructor(staticName = "of")
+    public static class QueryParams {
         @JsonProperty("ActivityStatus")
         private Status status;
         @JsonProperty("ContactId")
@@ -37,12 +36,12 @@ public class CrmActivity implements CrmCall<Void> {
     }
 
     /**
-     * This Query is used to get the contact details from the licence number
+     * This query is used to get the contact details from the licence number
      */
     @Getter
     @Setter
     public static class CreateActivity implements CRMQuery<CrmActivity> {
-        private Query query;
+        private QueryParams queryParams;
 
         public Class<CrmActivity> getEntityClass() {
             return CrmActivity.class;
@@ -55,12 +54,12 @@ public class CrmActivity implements CrmCall<Void> {
     }
 
     /**
-     * This Query is used to get the contact details from the licence number
+     * This query is used to get the contact details from the licence number
      */
     @Getter
     @Setter
     public static class UpdateActivity implements CRMQuery<CrmActivity> {
-        private Query query;
+        private QueryParams queryParams;
 
         public Class<CrmActivity> getEntityClass() {
             return CrmActivity.class;
