@@ -63,16 +63,14 @@ public class DynamicsCrmLookupService implements CrmLookupService {
 
     @Override
     public void createActivity(final String contactId, final short season) {
-        final CrmActivity.CreateActivity createActivity = new CrmActivity.CreateActivity();
-        createActivity.setQueryParams(CrmActivity.QueryParams.of(STARTED, contactId, season));
-        callCRM(dynamicsClientRestTemplate.get(), createActivity, null);
+        final CrmActivity.CrmActivityQuery query = new CrmActivity.CrmActivityQuery(STARTED, contactId, season);
+        callCRM(dynamicsClientRestTemplate.get(), query, null);
     }
 
     @Override
     public void updateActivity(final String contactId, final short season) {
-        final CrmActivity.UpdateActivity updateActivity = new CrmActivity.UpdateActivity();
-        updateActivity.setQueryParams(CrmActivity.QueryParams.of(SUBMITTED, contactId, season));
-        callCRM(dynamicsClientRestTemplate.get(), updateActivity, null);
+        final CrmActivity.CrmActivityQuery query = new CrmActivity.CrmActivityQuery(SUBMITTED, contactId, season);
+        callCRM(dynamicsClientRestTemplate.get(), query, null);
     }
 
     @Override
@@ -97,7 +95,7 @@ public class DynamicsCrmLookupService implements CrmLookupService {
             headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         }
         final HttpEntity<?> requestEntity = new HttpEntity<>(crmQuery.getQueryParams(), headers);
-        final URI storedProcedure = endpointConfiguration.getApiStoredProcedureEndpoint(crmQuery.getCRMStoredProcedureName());
+        final URI storedProcedure = endpointConfiguration.getApiStoredProcedureEndpoint(crmQuery.getQueryName());
         final CrmCall<B> result = restTemplate.postForObject(storedProcedure, requestEntity, crmQuery.getEntityClass());
         B entity = null;
         if (result != null) {

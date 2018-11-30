@@ -41,7 +41,7 @@ public class CrmIdentity implements CrmCall<Identity> {
             return CrmIdentity.class;
         }
 
-        public String getCRMStoredProcedureName() {
+        public String getQueryName() {
             return "defra_GetRcrRolesByUser";
         }
     }

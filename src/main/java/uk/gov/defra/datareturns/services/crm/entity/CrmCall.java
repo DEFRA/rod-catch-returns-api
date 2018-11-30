@@ -19,7 +19,7 @@ public interface CrmCall<E> {
      */
     interface CRMQuery<T extends CrmCall<?>> {
         @SuppressWarnings("SameReturnValue")
-        String getCRMStoredProcedureName();
+        String getQueryName();
 
         Object getQueryParams();
 

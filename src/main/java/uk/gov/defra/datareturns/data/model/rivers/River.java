@@ -1,6 +1,7 @@
 package uk.gov.defra.datareturns.data.model.rivers;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
@@ -38,6 +39,7 @@ public class River extends AbstractRestrictedEntity<Long> {
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
     @ApiModelProperty(readOnly = true)
+    @Setter(AccessLevel.NONE)
     private Long id;
 
     /**

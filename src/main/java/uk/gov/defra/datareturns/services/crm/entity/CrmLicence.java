@@ -57,7 +57,7 @@ public class CrmLicence implements CrmCall<Licence> {
             return CrmLicence.class;
         }
 
-        public String getCRMStoredProcedureName() {
+        public String getQueryName() {
             return "defra_GetContactByLicenceAndPostcode";
         }
     }

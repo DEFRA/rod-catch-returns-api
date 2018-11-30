@@ -2,6 +2,7 @@ package uk.gov.defra.datareturns.data.model.catches;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
@@ -50,6 +51,7 @@ public class Catch extends AbstractBaseEntity<Long> implements HasSubmission {
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
     @ApiModelProperty(readOnly = true)
+    @Setter(AccessLevel.NONE)
     private Long id;
 
     /**
