@@ -1,5 +1,7 @@
 package uk.gov.defra.datareturns.services.crm.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Bundles a CRM query with a response transfer object
  * and associates an API base entity class
@@ -7,6 +9,7 @@ package uk.gov.defra.datareturns.services.crm.entity;
  * @param <E> crm entity type
  */
 public interface CrmCall<E> {
+    @JsonIgnore
     E getBaseEntity();
 
     /**

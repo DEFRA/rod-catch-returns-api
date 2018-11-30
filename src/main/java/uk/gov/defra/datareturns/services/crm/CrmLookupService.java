@@ -1,7 +1,10 @@
 package uk.gov.defra.datareturns.services.crm;
 
+import org.springframework.lang.NonNull;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
-import uk.gov.defra.datareturns.services.crm.entity.Identity;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Service to retrieve contact details from the CRM
@@ -14,10 +17,10 @@ public interface CrmLookupService {
      * Retrieve the Licence and contact details using the last 6 digits of the licence number
      *
      * @param licenceNumber The last 6 digits of the licence number
-     * @param postcode the postcode to cross-check against the licence number
+     * @param postcode      the postcode to cross-check against the licence number
      * @return Licence Returns a licence entity object
      */
-    Licence getLicence(final String licenceNumber, final String postcode);
+    Optional<Licence> getLicence(final String licenceNumber, final String postcode);
 
     /**
      * Create an activity for a given contact and season and set status to started
@@ -41,7 +44,8 @@ public interface CrmLookupService {
      *
      * @param username An AAD username
      * @param password An AAD password
-     * @return An AAD identity
+     * @return List<String> the user's roles (if any)
      */
-    Identity getAuthenticatedUserRoles(String username, String password);
+    @NonNull
+    List<String> getAuthenticatedUserRoles(String username, String password);
 }

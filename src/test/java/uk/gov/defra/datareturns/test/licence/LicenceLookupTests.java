@@ -10,6 +10,7 @@ import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
 
 import javax.inject.Inject;
+import java.util.Optional;
 
 /**
  * Integration tests licence lookup
@@ -23,19 +24,19 @@ public class LicenceLookupTests {
 
     @Test
     public void testLicenceLookupSucceeds() {
-        final Licence licence = crmLookupService.getLicence("B7A728", "WA4 8HT");
-        Assertions.assertThat(licence).isNotNull();
+        final Optional<Licence> licence = crmLookupService.getLicence("B7A728", "WA4 8HT");
+        Assertions.assertThat(licence).isPresent();
     }
 
     @Test
     public void testLicenceLookupFailsPostcodeMismatch() {
-        final Licence licence = crmLookupService.getLicence("B91235", "WA4 0HT");
-        Assertions.assertThat(licence).isNull();
+        final Optional<Licence> licence = crmLookupService.getLicence("B91235", "WA4 0HT");
+        Assertions.assertThat(licence).isNotPresent();
     }
 
     @Test
     public void testLicenceLookupFailsUnknownLicence() {
-        final Licence licence = crmLookupService.getLicence("B9A72DD", "WA4 1HT");
-        Assertions.assertThat(licence).isNull();
+        final Optional<Licence> licence = crmLookupService.getLicence("B9A72DD", "WA4 1HT");
+        Assertions.assertThat(licence).isNotPresent();
     }
 }

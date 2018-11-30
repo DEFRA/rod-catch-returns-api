@@ -19,6 +19,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 
+import java.util.Optional;
+
 /**
  * Controller to enable the lookup of licence information from the CRM
  *
@@ -44,12 +46,12 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
      */
     @GetMapping(value = "/{licence}")
     @ApiOperation(value = "Retrieve a licence and its associated contact based on the given licence and postcode")
-    public ResponseEntity<Licence> getContact(@PathVariable("licence") final String licenceNumber,
+    public ResponseEntity<Licence> getLicence(@PathVariable("licence") final String licenceNumber,
                                               @RequestParam(value = "verification", required = false) final String verification) {
         ResponseEntity<Licence> responseEntity = new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        final Licence licence = lookupService.getLicence(licenceNumber, verification);
-        if (licence != null) {
-            responseEntity = new ResponseEntity<>(licence, HttpStatus.OK);
+        final Optional<Licence> licence = lookupService.getLicence(licenceNumber, verification);
+        if (licence.isPresent()) {
+            responseEntity = new ResponseEntity<>(licence.get(), HttpStatus.OK);
         }
         return responseEntity;
     }

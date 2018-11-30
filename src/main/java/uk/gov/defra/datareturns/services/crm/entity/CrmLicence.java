@@ -6,8 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
+
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -16,26 +19,23 @@ public class CrmLicence implements CrmCall<Licence> {
      * the id associated with the contact
      */
     @JsonProperty("ContactId")
+    @NotNull
+    @Length(min = 1)
     private String id;
 
     @JsonProperty("Postcode")
+    @NotNull
+    @Length(min = 1)
     private String postcode;
 
     @JsonProperty("ReturnPermissionNumber")
+    @NotNull
+    @Length(min = 1)
     private String permissionNumber;
-
-    @JsonProperty("ReturnStatus")
-    private String returnStatus;
-
-    @JsonProperty("ErrorMessage")
-    private String errorMessage;
 
     @Override
     @JsonIgnore
     public Licence getBaseEntity() {
-        if ("error".equals(returnStatus)) {
-            return null;
-        }
         final Licence licence = new Licence();
         licence.setLicenceNumber(permissionNumber);
         final Contact contact = new Contact();

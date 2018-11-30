@@ -17,7 +17,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.services.aad.MockTokenServiceImpl;
-import uk.gov.defra.datareturns.services.crm.entity.CrmIdentity;
+import uk.gov.defra.datareturns.services.crm.entity.CrmRoles;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
 
 import java.io.IOException;
@@ -62,9 +62,6 @@ public final class DynamicsMockServer {
                 responseBody.setId(entry.getContactId());
                 responseBody.setPermissionNumber(entry.getPermission());
                 responseBody.setPostcode(entry.getPostcode());
-            } else {
-                responseBody.setReturnStatus("error");
-                responseBody.setErrorMessage("Unable to retrieve permission");
             }
             return respond(HttpStatus.OK, responseBody);
         });
@@ -84,12 +81,12 @@ public final class DynamicsMockServer {
         setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetRcrRolesByUser", (request) -> {
             Assert.notNull(request, "request should not be null");
             final Matcher tokenMatcher = BEARER_TOKEN_PATTERN.matcher(Objects.toString(request.getHeaders().getFirst("Authorization")));
-            CrmIdentity responseBody = null;
+            CrmRoles responseBody = null;
             HttpStatus responseStatus = HttpStatus.FORBIDDEN;
             if (tokenMatcher.matches()) {
                 responseStatus = HttpStatus.valueOf(Integer.parseInt(tokenMatcher.group("responseCode")));
                 if (responseStatus.is2xxSuccessful()) {
-                    responseBody = new CrmIdentity();
+                    responseBody = new CrmRoles();
                     responseBody.setRoles("RcrAdminUser");
                 }
             }
