@@ -38,12 +38,6 @@ cache:
   active-directory-cache-manager-ttl-hours: 24
   licence-cache-manager-ttl-hours: 24
 
-validation:
-  # Enable/disable all validation functionality
-  enabled: true
-  # Allow the current year and the previous (-1)
-  submission-year-allowed-range-offset: -1
-
 security:
   oauth2:
     client:
@@ -56,12 +50,11 @@ security:
 
   role-authorities:
     RcrAdminUser:
-    - USE_INTERNAL
-    - REFERENCE_DATA_WRITE
+      - USE_INTERNAL
+      - REFERENCE_DATA_WRITE
     RcrFMTUser:
-    - USE_INTERNAL
+      - USE_INTERNAL
     RCR_END_USER:
-
 
 logging:
   level:
