@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.ResponseErrorHandler;
 
 /**
@@ -14,13 +13,13 @@ import org.springframework.web.client.ResponseErrorHandler;
  * @author Sam Gardner-Dell
  */
 @Slf4j
-public class IdentityRestTemplateErrorHandler extends DefaultResponseErrorHandler implements ResponseErrorHandler {
+public class IdentityRestTemplateErrorHandler extends StandardResponseErrorHandler implements ResponseErrorHandler {
     @Override
     protected void handleError(final ClientHttpResponse response, final HttpStatus statusCode) {
         if (HttpStatus.FORBIDDEN.equals(statusCode)) {
             throw new InsufficientAuthenticationException("User not permitted to access the target Dynamics service.");
         }
-        log.error("Unexpected response from Microsoft Dynamics using identity template. Status: " + statusCode.toString());
+        log.error("Unexpected response from Microsoft Dynamics using identity template." + toResponseLogMessage(response, statusCode));
         throw new AuthenticationServiceException("Authentication service temporarily unavailable");
     }
 }

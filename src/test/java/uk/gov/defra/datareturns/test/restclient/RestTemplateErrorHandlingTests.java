@@ -35,7 +35,8 @@ public class RestTemplateErrorHandlingTests {
         } catch (Throwable t) {
             Assertions.assertThat(t).isInstanceOf(ResponseStatusException.class);
             Assertions.assertThat(capture.toString())
-                    .contains("Unexpected response attempting to obtain token from provider using client credentials grant. Status: 500");
+                    .contains("Unexpected response attempting to obtain token from provider using client credentials grant.")
+                    .contains("500 INTERNAL_SERVER_ERROR");
         }
     }
 
@@ -46,7 +47,9 @@ public class RestTemplateErrorHandlingTests {
             handler.handleError(new MockClientHttpResponse("".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR));
         } catch (Throwable t) {
             Assertions.assertThat(t).isInstanceOf(ResponseStatusException.class);
-            Assertions.assertThat(capture.toString()).contains("Unexpected response from Microsoft Dynamics using client template. Status: 500");
+            Assertions.assertThat(capture.toString())
+                    .contains("Unexpected response from Microsoft Dynamics using client template.")
+                    .contains("500 INTERNAL_SERVER_ERROR");
         }
     }
 
@@ -56,7 +59,9 @@ public class RestTemplateErrorHandlingTests {
             IdentityRestTemplateErrorHandler handler = new IdentityRestTemplateErrorHandler();
             handler.handleError(new MockClientHttpResponse("".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR));
         } catch (AuthenticationServiceException e) {
-            Assertions.assertThat(capture.toString()).contains("Unexpected response from Microsoft Dynamics using identity template. Status: 500");
+            Assertions.assertThat(capture.toString())
+                    .contains("Unexpected response from Microsoft Dynamics using identity template.")
+                    .contains("500 INTERNAL_SERVER_ERROR");
         } catch (Throwable t) {
             Assertions.fail("Unexpected exception thrown by IdentityRestTemplateErrorHandler", t);
         }

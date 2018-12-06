@@ -20,7 +20,6 @@ public interface SubmissionRepository extends BaseRepository<Submission, Long> {
     /**
      * Retrieve a submission by a given reporting reference and the year that it is applicable to
      *
-     *
      * @param contactId the reporting reference of the submission to lookup
      * @param season    the year that the submission relates to
      * @return the {@link Submission} for the given reporting reference and year or null if not found.
@@ -42,6 +41,7 @@ public interface SubmissionRepository extends BaseRepository<Submission, Long> {
 
     /**
      * Retrieve a list of {@link Submission}s for a set of contact ids for a given year
+     *
      * @param contactIds the contact ids of the submissions to lookup
      * @param season     the year that the submission relates to
      * @return list of {@link Submission}s for a set of contact ids for a given year
