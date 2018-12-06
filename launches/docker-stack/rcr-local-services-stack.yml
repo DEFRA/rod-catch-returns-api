@@ -20,15 +20,9 @@ services:
       POSTGRES_PASSWORD: rcr_owner
       POSTGRES_DB: rcr_api
     deploy:
-      mode: replicated
-      replicas: 1
-      endpoint_mode: vip
-      placement:
-        constraints: [node.role == manager]
+      mode: global
       restart_policy:
         condition: on-failure
-        max_attempts: 3
-        window: 120s
 
   redis:
     image: redis:alpine
@@ -39,15 +33,9 @@ services:
     volumes:
     - redisdata:/data
     deploy:
-      mode: replicated
-      replicas: 1
-      endpoint_mode: vip
-      placement:
-        constraints: [node.role == manager]
+      mode: global
       restart_policy:
         condition: on-failure
-        max_attempts: 3
-        window: 120s
 
 volumes:
   pgdata:
