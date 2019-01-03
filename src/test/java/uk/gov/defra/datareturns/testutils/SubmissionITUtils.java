@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +53,7 @@ public final class SubmissionITUtils {
         final String massProperty = CatchMass.MeasurementType.IMPERIAL.equals(massType) ? "oz" : "kg";
         final Map<String, Object> replacements = new HashMap<>();
         replacements.put("SUBMISSION", submissionId);
+        replacements.put("DATE_CAUGHT", Instant.now().toString());
         replacements.put("SPECIES", speciesId);
         replacements.put("ACTIVITY", activityId);
         replacements.put("METHOD", methodId);

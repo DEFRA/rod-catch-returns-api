@@ -1,6 +1,6 @@
 {
   "submission": "%SUBMISSION%",
-  "dateCaught": "2018-08-08T00:00:00Z",
+  "dateCaught": "%DATE_CAUGHT%",
   "species": "%SPECIES%",
   "activity": "%ACTIVITY%",
   "method": "%METHOD%",
