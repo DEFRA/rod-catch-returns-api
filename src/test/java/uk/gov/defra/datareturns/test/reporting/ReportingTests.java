@@ -14,10 +14,9 @@ import uk.gov.defra.datareturns.data.model.catchments.Catchment;
 import uk.gov.defra.datareturns.data.model.method.Method;
 import uk.gov.defra.datareturns.data.model.method.MethodRepository;
 import uk.gov.defra.datareturns.data.model.regions.Region;
-import uk.gov.defra.datareturns.data.model.reporting.catches.bycontact.CatchSummaryByContact;
-import uk.gov.defra.datareturns.data.model.reporting.catches.bycontact.CatchSummaryByContactRepository;
-import uk.gov.defra.datareturns.data.model.reporting.catches.summary.CatchSummary;
-import uk.gov.defra.datareturns.data.model.reporting.catches.summary.CatchSummaryRepository;
+import uk.gov.defra.datareturns.data.model.reporting.feeds.catches.LargeCatchFeed;
+import uk.gov.defra.datareturns.data.model.reporting.feeds.catches.LargeCatchFeedRepository;
+import uk.gov.defra.datareturns.data.model.reporting.feeds.catches.LargeCatchFeed_;
 import uk.gov.defra.datareturns.data.model.rivers.River;
 import uk.gov.defra.datareturns.data.model.rivers.RiverRepository;
 import uk.gov.defra.datareturns.data.model.species.Species;
@@ -63,9 +62,7 @@ public class ReportingTests {
     @Inject
     private MethodRepository methodRepository;
     @Inject
-    private CatchSummaryByContactRepository catchSummaryByContactRepository;
-    @Inject
-    private CatchSummaryRepository catchSummaryRepository;
+    private LargeCatchFeedRepository largeCatchFeedRepository;
     private Submission submission;
     private Activity activity;
     private Region region;
@@ -99,48 +96,33 @@ public class ReportingTests {
         catchRepository.saveAndFlush(catch2);
     }
 
-    @Test
-    public void testCatchSummary() {
-        final List<CatchSummary> summaryData = catchSummaryRepository.findBySeason((short) Year.now().getValue());
-        Assertions.assertThat(summaryData).hasSize(1);
-        final CatchSummary summary = summaryData.get(0);
-        Assertions.assertThat(summary.getId()).isEqualTo("" + Year.now().getValue() + month.getValue() + river.getId() + species.getId());
-        Assertions.assertThat(summary.getSeason()).isEqualTo((short) Year.now().getValue());
-        Assertions.assertThat(summary.getMonth()).isEqualToIgnoringCase(month.name());
-        Assertions.assertThat(summary.getRegion()).isEqualTo(region.getName());
-        Assertions.assertThat(summary.getCatchment()).isEqualTo(catchment.getName());
-        Assertions.assertThat(summary.getRiver()).isEqualTo(river.getName());
-        Assertions.assertThat(summary.getSpecies()).isEqualTo(species.getName());
-        Assertions.assertThat(summary.getCaught()).isEqualTo(2);
-        Assertions.assertThat(summary.getReleased()).isEqualTo(1);
-        Assertions.assertThat(summary.getCaughtTotalMass()).isEqualByComparingTo("4");
-        Assertions.assertThat(summary.getCaughtAvgMass()).isEqualByComparingTo("2");
-        Assertions.assertThat(summary.getCaughtMaxMass()).isEqualByComparingTo("2.123456");
-        Assertions.assertThat(summary.getCaughtMinMass()).isEqualByComparingTo("1.876544");
-        Assertions.assertThat(summary.getReleasedTotalMass()).isEqualByComparingTo("1.876544");
+    private List<LargeCatchFeed> getLargeCatchReportData() {
+        return largeCatchFeedRepository.findAll((root, query, cb) -> cb.equal(root.get(LargeCatchFeed_.season), Year.now().getValue()));
     }
 
+
     @Test
-    public void testCatchSummaryByContact() {
-        final List<CatchSummaryByContact> summaryData = catchSummaryByContactRepository.findBySeason((short) Year.now().getValue());
-        Assertions.assertThat(summaryData).hasSize(1);
-        final CatchSummaryByContact summary = summaryData.get(0);
-        Assertions.assertThat(summary.getId())
-                .isEqualTo(TEST_CONTACT_ID + Year.now().getValue() + month.getValue() + river.getId() + species.getId());
-        Assertions.assertThat(summary.getContactId()).isEqualTo(TEST_CONTACT_ID);
-        Assertions.assertThat(summary.getSeason()).isEqualTo((short) Year.now().getValue());
-        Assertions.assertThat(summary.getMonth()).isEqualToIgnoringCase(month.name());
-        Assertions.assertThat(summary.getRegion()).isEqualTo(region.getName());
-        Assertions.assertThat(summary.getCatchment()).isEqualTo(catchment.getName());
-        Assertions.assertThat(summary.getRiver()).isEqualTo(river.getName());
-        Assertions.assertThat(summary.getSpecies()).isEqualTo(species.getName());
-        Assertions.assertThat(summary.getCaught()).isEqualTo(2);
-        Assertions.assertThat(summary.getReleased()).isEqualTo(1);
-        Assertions.assertThat(summary.getCaughtTotalMass()).isEqualByComparingTo("4");
-        Assertions.assertThat(summary.getCaughtAvgMass()).isEqualByComparingTo("2");
-        Assertions.assertThat(summary.getCaughtMaxMass()).isEqualByComparingTo("2.123456");
-        Assertions.assertThat(summary.getCaughtMinMass()).isEqualByComparingTo("1.876544");
-        Assertions.assertThat(summary.getReleasedTotalMass()).isEqualByComparingTo("1.876544");
+    public void testLargeCatchReporting() {
+        final List<LargeCatchFeed> catchData = getLargeCatchReportData();
+        LargeCatchFeed data1 = catchData.get(0);
+        Assertions.assertThat(data1.getId()).isEqualTo(catch1.getId());
+        Assertions.assertThat(data1.getSeason()).isEqualTo((short) Year.now().getValue());
+        Assertions.assertThat(data1.getActivityId()).isEqualTo(activity.getId());
+        Assertions.assertThat(data1.getDateCaught()).isEqualToIgnoringHours(catch1.getDateCaught());
+        Assertions.assertThat(data1.getMethodId()).isEqualTo(catch1.getMethod().getId());
+        Assertions.assertThat(data1.getSpeciesId()).isEqualTo(catch1.getSpecies().getId());
+        Assertions.assertThat(data1.getMass()).isEqualTo(catch1.getMass().getKg());
+        Assertions.assertThat(data1.getReleased()).isEqualTo(catch1.isReleased());
+
+        LargeCatchFeed data2 = catchData.get(1);
+        Assertions.assertThat(data2.getId()).isEqualTo(catch2.getId());
+        Assertions.assertThat(data2.getSeason()).isEqualTo((short) Year.now().getValue());
+        Assertions.assertThat(data2.getActivityId()).isEqualTo(activity.getId());
+        Assertions.assertThat(data2.getDateCaught()).isEqualToIgnoringHours(catch2.getDateCaught());
+        Assertions.assertThat(data2.getMethodId()).isEqualTo(catch2.getMethod().getId());
+        Assertions.assertThat(data2.getSpeciesId()).isEqualTo(catch2.getSpecies().getId());
+        Assertions.assertThat(data2.getMass()).isEqualTo(catch2.getMass().getKg());
+        Assertions.assertThat(data2.getReleased()).isEqualTo(catch2.isReleased());
     }
 
     @Test
@@ -148,21 +130,16 @@ public class ReportingTests {
     public void testSubmissionExclusions() {
         submission.setReportingExclude(true);
         submissionRepository.saveAndFlush(submission);
-
-        Assertions.assertThat(catchSummaryRepository.findBySeason((short) Year.now().getValue())).hasSize(0);
-        Assertions.assertThat(catchSummaryByContactRepository.findBySeason((short) Year.now().getValue())).hasSize(0);
+        final List<LargeCatchFeed> catchData = getLargeCatchReportData();
+        Assertions.assertThat(catchData).hasSize(0);
     }
-
 
     @Test
     @Transactional
     public void testCatchExclusions() {
         catch1.setReportingExclude(true);
-        catch2.setReportingExclude(true);
         catchRepository.saveAndFlush(catch1);
-        catchRepository.saveAndFlush(catch2);
-
-        Assertions.assertThat(catchSummaryRepository.findBySeason((short) Year.now().getValue())).hasSize(0);
-        Assertions.assertThat(catchSummaryByContactRepository.findBySeason((short) Year.now().getValue())).hasSize(0);
+        final List<LargeCatchFeed> catchData = getLargeCatchReportData();
+        Assertions.assertThat(catchData).hasSize(1);
     }
 }

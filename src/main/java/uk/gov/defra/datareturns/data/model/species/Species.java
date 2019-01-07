@@ -1,5 +1,7 @@
 package uk.gov.defra.datareturns.data.model.species;
 
+import com.univocity.parsers.annotations.Headers;
+import com.univocity.parsers.annotations.Parsed;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,6 +26,7 @@ import java.math.BigDecimal;
 @Audited
 @Getter
 @Setter
+@Headers
 public class Species extends AbstractBaseEntity<Long> {
     /**
      * Database sequence name for this entity
@@ -39,17 +42,20 @@ public class Species extends AbstractBaseEntity<Long> {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
     @ApiModelProperty(readOnly = true)
     @Setter(AccessLevel.NONE)
+    @Parsed(field = "ID")
     private Long id;
 
     /**
      * The species name
      */
+    @Parsed(field = "Species")
     private String name;
 
     /**
      * The assumed mass of a small catch entry for this species
      */
     @Column(precision = 12, scale = 6)
+    @Parsed(field = "Small Catch Mass")
     private BigDecimal smallCatchMass;
 
 }

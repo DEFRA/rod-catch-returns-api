@@ -1,8 +1,5 @@
 package uk.gov.defra.datareturns.test.reporting;
 
-import com.univocity.parsers.common.processor.RowListProcessor;
-import com.univocity.parsers.csv.CsvParser;
-import com.univocity.parsers.csv.CsvParserSettings;
 import io.restassured.response.ValidatableResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -11,11 +8,14 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
+import uk.gov.defra.datareturns.util.CsvUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Year;
 
 import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
+import static uk.gov.defra.datareturns.util.CsvUtil.CsvReadResult;
 
 /**
  * Integration tests for reporting functionality
@@ -25,55 +25,49 @@ import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
 @WithAdminUser
 @Slf4j
 public class ReportingIT {
-    private static RowListProcessor readCsvFromResponse(final ValidatableResponse response) {
-        final RowListProcessor rowProcessor = new RowListProcessor();
-        try (final InputStream responseContent = response.extract().body().asInputStream()) {
-            final CsvParserSettings parserSettings = new CsvParserSettings();
-            parserSettings.setHeaderExtractionEnabled(true);
-
-            parserSettings.setProcessor(rowProcessor);
-            final CsvParser parser = new CsvParser(parserSettings);
-            parser.parse(responseContent);
+    public static CsvReadResult<Object[]> readCsvFromResponse(final ValidatableResponse response) {
+        try (final InputStream stream = response.extract().body().asInputStream()) {
+            return CsvUtil.read(stream);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-        return rowProcessor;
-
     }
 
     @Test
-    public void testCatchReporting() {
-        final ValidatableResponse response = getEntity("/reporting/catches/2018");
-        final RowListProcessor rowProcessor = readCsvFromResponse(response);
-        final String[] headers = rowProcessor.getHeaders();
-
-        final String[] expectedHeaders = {
-                "Season", "Month", "Region", "Catchment", "River", "Species", "Number Caught", "Total Mass Caught (kg)",
-                "Average Catch Mass (kg)", "Largest Catch Mass (kg)", "Smallest Catch Mass (kg)", "Number Released", "Total Mass Released (kg)"
-        };
-        Assertions.assertThat(headers).isNotNull();
-        Assertions.assertThat(headers).hasSize(expectedHeaders.length);
-        Assertions.assertThat(headers).containsExactly(expectedHeaders);
-
-        // TODO: Add some row content tests (need to insert a set of known submissions and test reporting values)
-        // final List<String[]> rows = rowProcessor.getRows();
+    public void testSubmissionsFeed() {
+        final ValidatableResponse response = getEntity("/reporting/feeds/submissions/" + Year.now().getValue());
+        final CsvReadResult<Object[]> result = readCsvFromResponse(response);
+        Assertions.assertThat(result.getHeaders()).containsExactly("ID", "Contact ID", "Season", "Status", "Source", "Created", "Last Modified");
     }
 
     @Test
-    public void testCatchByContactReporting() {
-        final ValidatableResponse response = getEntity("/reporting/catchesByContact/2018");
-        final RowListProcessor rowProcessor = readCsvFromResponse(response);
-        final String[] headers = rowProcessor.getHeaders();
+    public void testActivitiesFeed() {
+        final ValidatableResponse response = getEntity("/reporting/feeds/activities/" + Year.now().getValue());
+        final CsvReadResult<Object[]> result = readCsvFromResponse(response);
+        Assertions.assertThat(result.getHeaders())
+                .containsExactly("ID", "Submission ID", "River ID", "Days Fished (Mandatory Release)", "Days Fished (Other)");
+    }
 
-        final String[] expectedHeaders = {
-                "Contact Id", "Season", "Month", "Region", "Catchment", "River", "Species", "Number Caught", "Total Mass Caught (kg)",
-                "Average Catch Mass (kg)", "Largest Catch Mass (kg)", "Smallest Catch Mass (kg)", "Number Released", "Total Mass Released (kg)"
-        };
-        Assertions.assertThat(headers).isNotNull();
-        Assertions.assertThat(headers).hasSize(expectedHeaders.length);
-        Assertions.assertThat(headers).containsExactly(expectedHeaders);
+    @Test
+    public void testLargeCatchesFeed() {
+        final ValidatableResponse response = getEntity("/reporting/feeds/large-catches/" + Year.now().getValue());
+        final CsvReadResult<Object[]> result = readCsvFromResponse(response);
+        Assertions.assertThat(result.getHeaders())
+                .containsExactly("ID", "Activity ID", "Date", "Species ID", "Method ID", "Mass (kg)", "Released");
+    }
 
-        // TODO: Add some row content tests (need to insert a set of known submissions and test reporting values)
-        // final List<String[]> rows = rowProcessor.getRows();
+
+    @Test
+    public void testSmallCatchesFeed() {
+        final ValidatableResponse response = getEntity("/reporting/feeds/small-catches/" + Year.now().getValue());
+        final CsvReadResult<Object[]> result = readCsvFromResponse(response);
+        Assertions.assertThat(result.getHeaders()).containsExactly("ID", "Activity ID", "Month", "Species ID", "Released");
+    }
+
+    @Test
+    public void testSmallCatchCountsFeed() {
+        final ValidatableResponse response = getEntity("/reporting/feeds/small-catch-counts/" + Year.now().getValue());
+        final CsvReadResult<Object[]> result = readCsvFromResponse(response);
+        Assertions.assertThat(result.getHeaders()).containsExactly("Small Catch ID", "Method ID", "Caught");
     }
 }

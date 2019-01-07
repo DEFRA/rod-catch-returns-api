@@ -9,8 +9,6 @@ import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
-import javax.inject.Inject;
-import javax.validation.Validator;
 import java.math.BigDecimal;
 
 /**
@@ -21,8 +19,6 @@ import java.math.BigDecimal;
 @WithAdminUser
 @Slf4j
 public class CatchMassTests {
-    @Inject
-    private Validator validator;
 
     @Test
     public void testOzToKg() {
@@ -39,5 +35,4 @@ public class CatchMassTests {
         mass.conciliateMass();
         Assertions.assertThat(mass.getOz()).isEqualByComparingTo(new BigDecimal("35.273962"));
     }
-
 }

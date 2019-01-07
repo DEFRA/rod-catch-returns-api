@@ -1,5 +1,6 @@
 package uk.gov.defra.datareturns.data.model.method;
 
+import com.univocity.parsers.annotations.Parsed;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,11 +39,13 @@ public class Method extends AbstractRestrictedEntity<Long> {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
     @ApiModelProperty(readOnly = true)
     @Setter(AccessLevel.NONE)
+    @Parsed(field = "ID")
     private Long id;
 
     /**
      * The method name
      */
     @Column
+    @Parsed(field = "Method")
     private String name;
 }

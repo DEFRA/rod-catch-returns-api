@@ -25,7 +25,7 @@ import uk.gov.defra.datareturns.services.crm.rest.IdentityRestTemplateErrorHandl
 @Slf4j
 public class RestTemplateErrorHandlingTests {
     @Rule
-    public OutputCapture capture = new OutputCapture();
+    public final OutputCapture capture = new OutputCapture();
 
     @Test
     public void testClientRestTemplateOAuth2ErrorHandler() {

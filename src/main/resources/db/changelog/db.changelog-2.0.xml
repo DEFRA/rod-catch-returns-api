@@ -3,251 +3,193 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
+
+    <!--
+    ****************************************************************
+    Grilse Probability Data
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_grilse_probability" author="Defra">
+        <createSequence sequenceName="rcr_grilse_probability_id_seq" startValue="1" incrementBy="1"/>
+
+        <createTable tableName="rcr_grilse_probability">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_grilse_probability_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="season" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="month" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mass_lbs" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="probability" type="numeric(17, 16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="season, month, mass_lbs" constraintName="uniq_grilse_probability_key" tableName="rcr_grilse_probability"/>
+
+        <createIndex indexName="rcr_grilse_probability_season_idx" tableName="rcr_grilse_probability">
+            <column name="season"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="rcr_grilse_probability" indexName="rcr_grilse_probability_season_idx"/>
+            <dropTable tableName="rcr_grilse_probability"/>
+            <dropSequence sequenceName="rcr_grilse_probability_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_grilse_probability_aud" author="Defra">
+        <createTable tableName="rcr_grilse_probability_aud">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="season" type="smallint"/>
+            <column name="month" type="smallint"/>
+            <column name="mass_lbs" type="smallint"/>
+            <column name="probability" type="numeric(17, 16)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_grilse_probability_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_grilse_probability_aud"/>
+        </rollback>
+    </changeSet>
+
+
     <!--
     ****************************************************************
     Reporting Views
     ****************************************************************
     -->
 
-    <changeSet id="create-view: rcv_effort_by_location" author="Defra">
-        <createView viewName="rcv_effort_by_location" replaceIfExists="true">
+    <changeSet id="create-view: rcv_ref_locations" author="Defra">
+        <createView viewName="rcv_ref_locations" replaceIfExists="true">
             <![CDATA[
-                select sub.season,
-                       act.river_id,
-                       sum(act.days_fished_with_mandatory_release) as days_fished_with_mandatory_release,
-                       sum(act.days_fished_other) as days_fished_other
+                select riv.id   as id,
+                       riv.name as name,
+                       ctm.name as catchment_name,
+                       reg.name as region_name
+                from rcr_river riv
+                       inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
+                       inner join rcr_region reg on (ctm.region_id = reg.id);
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_ref_locations"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-view: rcv_feed_submissions" author="Defra">
+        <createView viewName="rcv_feed_submissions" replaceIfExists="true">
+            <![CDATA[
+                select id, contact_id, season, status, source, created, last_modified
+                from rcr_submission
+                where not rcr_submission.reporting_exclude;
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_feed_submissions"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-view: rcv_feed_activities" author="Defra">
+        <createView viewName="rcv_feed_activities" replaceIfExists="true">
+            <![CDATA[
+                select act.id                                 as id,
+                       sub.season                             as season,
+                       act.submission_id                      as submission_id,
+                       act.river_id                           as river_id,
+                       act.days_fished_with_mandatory_release as days_fished_with_mandatory_release,
+                       act.days_fished_other                  as days_fished_other
                 from rcr_activity act
-                            inner join rcr_submission sub on (act.submission_id = sub.id and not sub.reporting_exclude)
-                group by sub.season, act.river_id;
+                       inner join rcr_submission sub on (act.submission_id = sub.id and not sub.reporting_exclude);
             ]]>
         </createView>
 
         <rollback>
-            <dropView viewName="rcv_effort_by_location"/>
+            <dropView viewName="rcv_feed_activities"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-view: rcv_feed_large_catches" author="Defra">
+        <createView viewName="rcv_feed_large_catches" replaceIfExists="true">
+            <![CDATA[
+                select cat.id          as id,
+                       sub.season      as season,
+                       cat.activity_id as activity_id,
+                       cat.date_caught as date_caught,
+                       cat.species_id  as species_id,
+                       cat.method_id   as method_id,
+                       cat.released    as released,
+                       cat.mass_kg     as mass
+                from rcr_catch cat
+                       inner join rcr_submission sub on (cat.submission_id = sub.id and not sub.reporting_exclude and not cat.reporting_exclude);
+            ]]>
+        </createView>
+
+        <rollback>
+            <dropView viewName="rcv_feed_large_catches"/>
         </rollback>
     </changeSet>
 
 
-    <!--
-    ****************************************************************
-    Large catch reporting
-    ****************************************************************
-    -->
-    <changeSet id="create-view: rcv_large_catches" author="Defra">
-        <createView viewName="rcv_large_catches" replaceIfExists="true">
+    <changeSet id="create-view: rcv_feed_small_catches" author="Defra">
+        <createView viewName="rcv_feed_small_catches" replaceIfExists="true">
             <![CDATA[
-              select sub.season                                                                 as season,
-                     extract(MONTH from catches.date_caught) :: integer                         as month,
-                     act.river_id                                                               as river_id,
-                     catches.species_id                                                         as species_id,
-                     count(*)                                                                   as caught,
-                     max(catches.mass_kg)                                                       as caught_max_mass,
-                     min(catches.mass_kg)                                                       as caught_min_mass,
-                     avg(catches.mass_kg)                                                       as caught_avg_mass,
-                     sum(catches.mass_kg)                                                       as caught_total_mass,
-                     count(catches.released) filter (where catches.released is true)            as released,
-                     coalesce(sum(catches.mass_kg) filter (where catches.released is true), 0)  as released_total_mass
-              from rcr_catch catches
-                     inner join rcr_submission sub on (catches.submission_id = sub.id and not sub.reporting_exclude and not catches.reporting_exclude)
-                     inner join rcr_activity act on catches.activity_id = act.id
-              group by (sub.season,
-                        extract(MONTH from catches.date_caught),
-                        act.river_id,
-                        catches.species_id);
+                select sc.id          as id,
+                       sub.season     as season,
+                       sc.activity_id as activity_id,
+                       sc.month       as month,
+                       2              as species_id,
+                       sc.released    as released
+                from rcr_small_catch sc
+                       inner join rcr_submission sub on (not sc.reporting_exclude and not sub.reporting_exclude and sc.submission_id = sub.id);
             ]]>
         </createView>
 
         <rollback>
-            <dropView viewName="rcv_large_catches"/>
+            <dropView viewName="rcv_feed_small_catches"/>
         </rollback>
     </changeSet>
 
-    <changeSet id="create-view: rcv_large_catches_by_contact" author="Defra">
-        <createView viewName="rcv_large_catches_by_contact" replaceIfExists="true">
+    <changeSet id="create-view: rcv_feed_small_catch_counts" author="Defra">
+        <createView viewName="rcv_feed_small_catch_counts" replaceIfExists="true">
             <![CDATA[
-              select sub.contact_id                                                             as contact_id,
-                     sub.season                                                                 as season,
-                     extract(MONTH from catches.date_caught) :: integer                         as month,
-                     act.river_id                                                               as river_id,
-                     catches.species_id                                                         as species_id,
-                     count(*)                                                                   as caught,
-                     max(catches.mass_kg)                                                       as caught_max_mass,
-                     min(catches.mass_kg)                                                       as caught_min_mass,
-                     avg(catches.mass_kg)                                                       as caught_avg_mass,
-                     sum(catches.mass_kg)                                                       as caught_total_mass,
-                     count(catches.released) filter (where catches.released is true)            as released,
-                     coalesce(sum(catches.mass_kg) filter (where catches.released is true), 0)  as released_total_mass
-              from rcr_catch catches
-                     inner join rcr_submission sub on (catches.submission_id = sub.id and not sub.reporting_exclude and not catches.reporting_exclude)
-                     inner join rcr_activity act on catches.activity_id = act.id
-              group by (sub.contact_id,
-                        sub.season,
-                        extract(MONTH from catches.date_caught),
-                        act.river_id,
-                        catches.species_id);
+                select concat(sc.id, '_', counts.method_id) as id,
+                       sub.season                           as season,
+                       counts.small_catch_id                as small_catch_id,
+                       counts.method_id                     as method_id,
+                       counts.count                         as count
+                from rcr_small_catch_counts counts
+                       inner join rcr_small_catch sc on (counts.small_catch_id = sc.id)
+                       inner join rcr_submission sub on (not sc.reporting_exclude and not sub.reporting_exclude and sc.submission_id = sub.id)
             ]]>
         </createView>
 
         <rollback>
-            <dropView viewName="rcv_large_catches_by_contact"/>
-        </rollback>
-    </changeSet>
-
-
-    <!--
-    ****************************************************************
-    Small catch reporting
-    ****************************************************************
-    -->
-    <changeSet id="create-view: rcv_small_catches" author="Defra">
-        <createView viewName="rcv_small_catches" replaceIfExists="true">
-            <![CDATA[
-                select *
-                from
-                     (select sub.season                              as season,
-                             sc.month                                as month,
-                             act.river_id                            as river_id,
-                             sp.id                                   as species_id,
-                             sum(counts.count)                       as caught,
-                             max(sp.small_catch_mass)                as caught_max_mass,
-                             min(sp.small_catch_mass)                as caught_min_mass,
-                             avg(sp.small_catch_mass)                as caught_avg_mass,
-                             sum(counts.count * sp.small_catch_mass) as caught_total_mass
-                      from rcr_small_catch_counts counts
-                             inner join rcr_small_catch sc on (counts.small_catch_id = sc.id)
-                             inner join rcr_activity act on (sc.activity_id = act.id)
-                             inner join rcr_submission sub on (sc.submission_id = sub.id and not sub.reporting_exclude and not sc.reporting_exclude)
-                             inner join rcr_species sp on (sp.id = 2)
-                      group by (season, month, river_id, species_id)) catches
-                natural join
-                      (select sub.season                             as season,
-                              sc.month                               as month,
-                              act.river_id                           as river_id,
-                              sp.id                                  as species_id,
-                              sum(sc.released)                       as released,
-                              sum(sc.released * sp.small_catch_mass) as released_total_mass
-                       from rcr_small_catch sc
-                              inner join rcr_activity act on sc.activity_id = act.id
-                              inner join rcr_submission sub on (sc.submission_id = sub.id and not sub.reporting_exclude and not sc.reporting_exclude)
-                              inner join rcr_species sp on (sp.id = 2)
-                       group by (season, month, river_id, species_id)) releases;
-            ]]>
-        </createView>
-
-        <rollback>
-            <dropView viewName="rcv_small_catches"/>
-        </rollback>
-    </changeSet>
-
-
-    <changeSet id="create-view: rcv_small_catches_by_contact" author="Defra">
-        <createView viewName="rcv_small_catches_by_contact" replaceIfExists="true">
-            <![CDATA[
-                select *
-                from
-                     (select sub.contact_id                          as contact_id,
-                             sub.season                              as season,
-                             sc.month                                as month,
-                             act.river_id                            as river_id,
-                             sp.id                                   as species_id,
-                             sum(counts.count)                       as caught,
-                             max(sp.small_catch_mass)                as caught_max_mass,
-                             min(sp.small_catch_mass)                as caught_min_mass,
-                             avg(sp.small_catch_mass)                as caught_avg_mass,
-                             sum(counts.count * sp.small_catch_mass) as caught_total_mass
-                      from rcr_small_catch_counts counts
-                             inner join rcr_small_catch sc on (counts.small_catch_id = sc.id)
-                             inner join rcr_activity act on (sc.activity_id = act.id)
-                             inner join rcr_submission sub on (sc.submission_id = sub.id and not sub.reporting_exclude and not sc.reporting_exclude)
-                             inner join rcr_species sp on (sp.id = 2)
-                      group by (contact_id, season, month, river_id, species_id)) catches
-                natural join
-                      (select sub.contact_id                         as contact_id,
-                              sub.season                             as season,
-                              sc.month                               as month,
-                              act.river_id                           as river_id,
-                              sp.id                                  as species_id,
-                              sum(sc.released)                       as released,
-                              sum(sc.released * sp.small_catch_mass) as released_total_mass
-                       from rcr_small_catch sc
-                              inner join rcr_activity act on sc.activity_id = act.id
-                              inner join rcr_submission sub on (sc.submission_id = sub.id and not sub.reporting_exclude and not sc.reporting_exclude)
-                              inner join rcr_species sp on (sp.id = 2)
-                       group by (contact_id, season, month, river_id, species_id)) releases;
-            ]]>
-        </createView>
-
-        <rollback>
-            <dropView viewName="rcv_small_catches_by_contact"/>
-        </rollback>
-    </changeSet>
-
-
-    <!--
-    ****************************************************************
-    Aggregated catch reporting
-    ****************************************************************
-    -->
-    <changeSet id="create-view: rcv_catch_report" author="Defra">
-        <createView viewName="rcv_catch_report" replaceIfExists="true">
-            <![CDATA[
-                select concat(agg.season, agg.month, agg.river_id, agg.species_id) as id,
-                       agg.season                                                                  as season,
-                       trim(to_char(to_timestamp(agg.month :: text, 'MM'), 'Month'))               as month,
-                       reg.name                                                                    as region,
-                       ctm.name                                                                    as catchment,
-                       riv.name                                                                    as river,
-                       spc.name                                                                    as species,
-                       agg.caught                                                                  as caught,
-                       agg.caught_max_mass                                                         as caught_max_mass,
-                       agg.caught_min_mass                                                         as caught_min_mass,
-                       agg.caught_avg_mass                                                         as caught_avg_mass,
-                       agg.caught_total_mass                                                       as caught_total_mass,
-                       agg.released                                                                as released,
-                       agg.released_total_mass                                                     as released_total_mass
-                from (select * from rcv_large_catches_by_contact l
-                      union all (select * from rcv_small_catches_by_contact s)) agg
-                       inner join rcr_species spc on (agg.species_id = spc.id)
-                       inner join rcr_river riv on (agg.river_id = riv.id)
-                       inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
-                       inner join rcr_region reg on (ctm.region_id = reg.id);
-            ]]>
-        </createView>
-
-        <rollback>
-            <dropView viewName="rcv_catch_report"/>
-        </rollback>
-    </changeSet>
-
-    <changeSet id="create-view: rcv_catch_report_by_contact" author="Defra">
-        <createView viewName="rcv_catch_report_by_contact" replaceIfExists="true">
-            <![CDATA[
-                select concat(agg.contact_id, agg.season, agg.month, agg.river_id, agg.species_id) as id,
-                       agg.contact_id                                                              as contact_id,
-                       agg.season                                                                  as season,
-                       trim(to_char(to_timestamp(agg.month :: text, 'MM'), 'Month'))               as month,
-                       reg.name                                                                    as region,
-                       ctm.name                                                                    as catchment,
-                       riv.name                                                                    as river,
-                       spc.name                                                                    as species,
-                       agg.caught                                                                  as caught,
-                       agg.caught_max_mass                                                         as caught_max_mass,
-                       agg.caught_min_mass                                                         as caught_min_mass,
-                       agg.caught_avg_mass                                                         as caught_avg_mass,
-                       agg.caught_total_mass                                                       as caught_total_mass,
-                       agg.released                                                                as released,
-                       agg.released_total_mass                                                     as released_total_mass
-                from (select * from rcv_large_catches_by_contact l
-                      union all (select * from rcv_small_catches_by_contact s)) agg
-                       inner join rcr_species spc on (agg.species_id = spc.id)
-                       inner join rcr_river riv on (agg.river_id = riv.id)
-                       inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
-                       inner join rcr_region reg on (ctm.region_id = reg.id);
-            ]]>
-        </createView>
-
-        <rollback>
-            <dropView viewName="rcv_catch_report_by_contact"/>
+            <dropView viewName="rcv_feed_small_catch_counts"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>
