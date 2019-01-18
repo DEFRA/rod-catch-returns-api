@@ -84,11 +84,13 @@ public class Activity extends AbstractBaseEntity<Long> implements HasSubmission 
      * The significant catches recorded by the angler that are associated with this activity (fish species, rivers, mass, etc)
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
+    @Setter(AccessLevel.NONE)
     private List<Catch> catches;
 
     /**
      * Small catches - summarised counts of catches by method, month and activity
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
+    @Setter(AccessLevel.NONE)
     private List<SmallCatch> smallCatches;
 }

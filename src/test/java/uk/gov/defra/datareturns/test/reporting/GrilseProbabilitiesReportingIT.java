@@ -5,7 +5,7 @@ import io.restassured.response.ValidatableResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.http.HttpStatus;
@@ -34,22 +34,18 @@ public class GrilseProbabilitiesReportingIT {
     @Inject
     private GrilseProbabilityRepository grilseProbabilityRepository;
 
-
-    @Before
-    public void loadGrilseData() throws IOException {
+    @Test
+    public void testLoad() throws IOException {
         grilseProbabilityRepository.deleteAll();
-        String csvData = IOUtils.resourceToString("/data/grilse/Grilse-Probability-Data.csv", StandardCharsets.UTF_8);
-        final ValidatableResponse response = given().contentType("text/csv").body(csvData)
+        String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
+        final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
                 .when().post("reporting/reference/grilse-probabilities/2018")
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
-    }
 
-    @Test
-    public void testLoad() {
-        ValidatableResponse response = getEntity("reporting/reference/grilse-probabilities/2018");
-        CsvUtil.CsvReadResult<Object[]> result = readCsvFromResponse(response);
+        ValidatableResponse getResponse = getEntity("reporting/reference/grilse-probabilities/2018");
+        CsvUtil.CsvReadResult<Object[]> result = readCsvFromResponse(getResponse);
 
         Assertions.assertThat(result.getHeaders()).containsExactly("Season", "Month", "Mass (lbs)", "Probability");
         Assertions.assertThat(result.getRows()).hasSize(69);
@@ -77,9 +73,93 @@ public class GrilseProbabilitiesReportingIT {
                 .extracting(s -> s[2]).containsExactly("0", "1", "2", "4", "5", "6", "7", "8", "9");
 
 
-        response = getEntity("reporting/reference/grilse-probabilities/2017");
-        result = readCsvFromResponse(response);
+        getResponse = getEntity("reporting/reference/grilse-probabilities/2017");
+        result = readCsvFromResponse(getResponse);
         Assertions.assertThat(result.getHeaders()).containsExactly("Season", "Month", "Mass (lbs)", "Probability");
         Assertions.assertThat(result.getRows()).hasSize(0);
+    }
+
+    @Test
+    public void testInvalidHeaders() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        String csvData = IOUtils.resourceToString("/data/grilse/invalid-headers.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("status", Matchers.equalTo(400))
+                .body("error", Matchers.equalTo("Bad Request"))
+                .body("message", Matchers.equalTo("Unexpected header \"Unknown header\" in grilse probability data"));
+    }
+
+    @Test
+    public void testNoWeightHeader() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        String csvData = IOUtils.resourceToString("/data/grilse/no-weight-heading.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("status", Matchers.equalTo(400))
+                .body("error", Matchers.equalTo("Bad Request"))
+                .body("message",
+                        Matchers.equalTo("Unexpected/incorrect headings found:  Must contain a weight heading and at least one month heading"));
+    }
+
+    @Test
+    public void testNoMonthHeader() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        String csvData = IOUtils.resourceToString("/data/grilse/no-month-headings.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("status", Matchers.equalTo(HttpStatus.BAD_REQUEST.value()))
+                .body("error", Matchers.equalTo("Bad Request"))
+                .body("message",
+                        Matchers.equalTo("Unexpected/incorrect headings found:  Must contain a weight heading and at least one month heading"));
+    }
+
+    @Test
+    public void testDuplicateWeight() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        String csvData = IOUtils.resourceToString("/data/grilse/duplicate-weight.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("status", Matchers.equalTo(HttpStatus.BAD_REQUEST.value()))
+                .body("error", Matchers.equalTo("Bad Request"))
+                .body("message", Matchers.equalTo("More than one row was found with the same weight value in the weight column"));
+    }
+
+    @Test
+    public void testOverwrite() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.CREATED.value());
+
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.CONFLICT.value())
+                .body("status", Matchers.equalTo(HttpStatus.CONFLICT.value()))
+                .body("error", Matchers.equalTo("Conflict"))
+                .body("message", Matchers.equalTo("Existing data found for the season \"2018\" but overwrite parameter not set"));
+
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018?overwrite=true")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.CREATED.value());
     }
 }

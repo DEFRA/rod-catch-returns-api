@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.util;
 
-import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.common.processor.BeanWriterProcessor;
 import com.univocity.parsers.common.processor.ObjectRowListProcessor;
 import com.univocity.parsers.common.processor.RowProcessor;
@@ -20,26 +19,6 @@ public final class CsvUtil {
     private CsvUtil() {
     }
 
-    /**
-     * Read CSV data from the given {@link java.io.InputStream}
-     *
-     * @param <T> the generic type of the bean to be used for deserialisation
-     */
-    public static <T> CsvReadResult<T> read(final Class<T> beanCls, final InputStream stream) {
-        final BeanListProcessor<T> rowProcessor = new BeanListProcessor<>(beanCls);
-        final CsvReadResult<T> result = new CsvReadResult<T>() {
-            @Override
-            public String[] getHeaders() {
-                return rowProcessor.getHeaders();
-            }
-
-            @Override
-            public List<T> getRows() {
-                return rowProcessor.getBeans();
-            }
-        };
-        return parse(result, rowProcessor, stream);
-    }
 
     /**
      * Read CSV data from the given {@link java.io.InputStream}

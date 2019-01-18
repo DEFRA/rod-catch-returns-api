@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.defra.datareturns.data.model.grilse.GrilseProbability;
 import uk.gov.defra.datareturns.data.model.grilse.GrilseProbabilityRepository;
@@ -73,71 +74,87 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
     @Transactional
     public ResponseEntity<?> post(@PathVariable("season") final Short season,
                                   @RequestParam(value = "overwrite", required = false) final boolean overwrite,
-                                  final InputStream inputStream) throws IOException {
-        List<GrilseProbability> existing = grilseProbabilityRepository.findBySeason(season);
+                                  final InputStream inputStream) {
+        final GrilseDataLoader loader = new GrilseDataLoader(inputStream);
+        final List<GrilseProbability> existing = grilseProbabilityRepository.findBySeason(season);
         if (!existing.isEmpty()) {
             if (!overwrite) {
-                return new ResponseEntity<>(HttpStatus.CONFLICT);
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Existing data found for the season \"" + season + "\" but overwrite parameter not set");
             }
             grilseProbabilityRepository.deleteAll(existing);
         }
 
-        // Read the csv data into a set of GrilseProbability beans and then set the season from the request path
-        final CsvUtil.CsvReadResult<Object[]> data = read(inputStream);
-        final Set<String> monthNames = Arrays.stream(Month.values()).map(Month::name).collect(Collectors.toSet());
-        final Map<Month, Integer> monthFieldIndexes = new HashMap<>();
-        int weightColumnIndex = -1;
-
-        // Parse headers to determine the appropriate column indexes from which to extract data
-        for (int i = 0; i < data.getHeaders().length; i++) {
-            String header = StringUtils.upperCase(data.getHeaders()[i]);
-            if (monthNames.contains(header)) {
-                monthFieldIndexes.put(Month.valueOf(header), i);
-            } else if ("WEIGHT".equals(header)) {
-                weightColumnIndex = i;
-            } else if (!"NUMBER".equals(header)) {
-                // Encountered a header that was not recognised
-                return new ResponseEntity<>("Unexpected header \"" + header + "\" in grilse probability data", HttpStatus.BAD_REQUEST);
-            }
-        }
-        // If we couldn't find  "WEIGHT" column and at least one month heading then return an error
-        if (weightColumnIndex < 0 || monthFieldIndexes.isEmpty()) {
-            return new ResponseEntity<>("Unexpected/incorrect headings found:  Must contain a weight heading and at least one month heading",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        final List<GrilseProbability> grilseProbabilities = new ArrayList<>();
-        final Set<Short> weightsProcessed = new HashSet<>();
-        for (Object[] rowData : data.getRows()) {
-            // Extract the weight (in lbs) that this row of data belongs to and check that it isn't duplicated from a previously processed row.
-            Short weightVal = Short.parseShort(Objects.toString(rowData[weightColumnIndex]));
-            if (!weightsProcessed.add(weightVal)) {
-                return new ResponseEntity<>("More than one row was found with the same weight value in the weight column", HttpStatus.BAD_REQUEST);
-            }
-
-            // For each month column that was discovered, extract the probability.
-            monthFieldIndexes.forEach((month, fieldIndex) -> {
-                BigDecimal probability = new BigDecimal(Objects.toString(rowData[fieldIndex]));
-                // Only add a grilse probability value if the probability is greater than zero (reporting assumes 0 for any missing data point)
-                if (probability.compareTo(BigDecimal.ZERO) > 0) {
-                    // Duplicate the data for weight=1 to weight=0 (to capture values which are rounded down to zero rather than rounded up)
-                    if (weightVal == 1 && !weightsProcessed.contains((short) 0)) {
-                        grilseProbabilities.add(GrilseProbability.of(null, season, (short) month.getValue(), (short) 0, probability));
-                    }
-                    grilseProbabilities.add(GrilseProbability.of(null, season, (short) month.getValue(), weightVal, probability));
-                }
-            });
-        }
-        grilseProbabilities.sort(Comparator.comparingInt(GrilseProbability::getMassInPounds).thenComparing(GrilseProbability::getMonth));
         grilseProbabilityRepository.flush();
-        grilseProbabilityRepository.saveAll(grilseProbabilities);
+        grilseProbabilityRepository.saveAll(loader.transform(season));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+
 
     @Override
     public RepositoryLinksResource process(final RepositoryLinksResource resource) {
         final String base = ServletUriComponentsBuilder.fromCurrentRequest().toUriString();
         resource.add(new Link(base + "reporting/reference/grilse-probabilities/{season}", "grilseProbabilitiesReporting"));
         return resource;
+    }
+
+    private static final class GrilseDataLoader {
+        private final CsvUtil.CsvReadResult<Object[]> data;
+        private final Map<Month, Integer> monthFieldIndexes = new HashMap<>();
+        private int weightColumnIndex = -1;
+
+        public GrilseDataLoader(final InputStream stream) {
+            // Read the csv data into a set of GrilseProbability beans and then set the season from the request path
+            data = read(stream);
+
+            final Set<String> monthNames = Arrays.stream(Month.values()).map(Month::name).collect(Collectors.toSet());
+
+            // Parse headers to determine the appropriate column indexes from which to extract data
+            for (int i = 0; i < data.getHeaders().length; i++) {
+                final String headerVal = data.getHeaders()[i];
+                final String header = StringUtils.upperCase(headerVal);
+                if (monthNames.contains(header)) {
+                    this.monthFieldIndexes.put(Month.valueOf(header), i);
+                } else if ("WEIGHT".equals(header)) {
+                    this.weightColumnIndex = i;
+                } else if (!"NUMBER".equals(header)) {
+                    // Encountered a header that was not recognised
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unexpected header \"" + headerVal + "\" in grilse probability data");
+                }
+            }
+            // If we couldn't find  "WEIGHT" column and at least one month heading then return an error
+            if (this.weightColumnIndex < 0 || this.monthFieldIndexes.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Unexpected/incorrect headings found:  Must contain a weight heading and at least one month heading");
+            }
+        }
+
+        private List<GrilseProbability> transform(final Short season) {
+            final List<GrilseProbability> grilseProbabilities = new ArrayList<>();
+            final Set<Short> weightsProcessed = new HashSet<>();
+            for (Object[] rowData : data.getRows()) {
+                // Extract the weight (in lbs) that this row of data belongs to and check that it isn't duplicated from a previously processed row.
+                Short weightVal = Short.parseShort(Objects.toString(rowData[weightColumnIndex]));
+                if (!weightsProcessed.add(weightVal)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "More than one row was found with the same weight value in the weight column");
+                }
+
+                // For each month column that was discovered, extract the probability.
+                monthFieldIndexes.forEach((month, fieldIndex) -> {
+                    BigDecimal probability = new BigDecimal(Objects.toString(rowData[fieldIndex]));
+                    // Only add a grilse probability value if the probability is greater than zero (reporting assumes 0 for any missing data point)
+                    if (probability.compareTo(BigDecimal.ZERO) > 0) {
+                        // Duplicate the data for weight=1 to weight=0 (to capture values which are rounded down to zero rather than rounded up)
+                        if (weightVal == 1 && !weightsProcessed.contains((short) 0)) {
+                            grilseProbabilities.add(GrilseProbability.of(null, season, (short) month.getValue(), (short) 0, probability));
+                        }
+                        grilseProbabilities.add(GrilseProbability.of(null, season, (short) month.getValue(), weightVal, probability));
+                    }
+                });
+            }
+            grilseProbabilities.sort(Comparator.comparingInt(GrilseProbability::getMassInPounds).thenComparing(GrilseProbability::getMonth));
+            return grilseProbabilities;
+        }
     }
 }
