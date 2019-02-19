@@ -23,6 +23,7 @@ import uk.gov.defra.datareturns.testutils.WithAdminUser;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
 import java.util.Collections;
@@ -86,7 +87,8 @@ public class InternalUseOnlyEntityIT {
 
     private void checkMethodOnSmallCatch(final Consumer<ValidatableResponse> responseAssertions) {
         final String activityUrl = createValidTestActivity();
-        final String smallCatchJson = getSmallCatchJson(submissionUrl, activityUrl, Month.MARCH, Collections.singletonMap(internalMethodId, 5), 5);
+        final String smallCatchJson = getSmallCatchJson(submissionUrl, activityUrl, Month.from(LocalDate.now()),
+                Collections.singletonMap(internalMethodId, 5), 5);
         createEntity("/smallCatches", smallCatchJson, responseAssertions);
     }
 

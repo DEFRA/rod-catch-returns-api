@@ -17,8 +17,8 @@ import uk.gov.defra.datareturns.testutils.TestLicences;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.Month;
+import java.time.Year;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -54,10 +54,10 @@ public class SubmissionIT {
 
     @Test
     public void testSubmissionJourney() {
-        // Create the submission
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(),
-                Calendar.getInstance().get(Calendar.YEAR));
+        int season = Year.now().getValue() - 1;
 
+        // Create the submission
+        final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(), season);
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
@@ -73,10 +73,10 @@ public class SubmissionIT {
         for (final String activityUrl : activities) {
             // Create multiple catches
             final List<String> catches = new ArrayList<>();
-            catches.addAll(createCatches(submissionUrl, activityUrl, "species/1", "methods/1",
+            catches.addAll(createCatches(submissionUrl, season, activityUrl, "species/1", "methods/1",
                     Pair.of(CatchMass.MeasurementType.METRIC, BigDecimal.ONE),
                     Pair.of(CatchMass.MeasurementType.IMPERIAL, new BigDecimal(23))));
-            catches.addAll(createCatches(submissionUrl, activityUrl, "species/2", "methods/2",
+            catches.addAll(createCatches(submissionUrl, season, activityUrl, "species/2", "methods/2",
                     Pair.of(CatchMass.MeasurementType.METRIC, new BigDecimal(0.8343434d)),
                     Pair.of(CatchMass.MeasurementType.IMPERIAL, new BigDecimal(45.3434d))));
             catchesByActivity.put(activityUrl, catches);
@@ -104,7 +104,7 @@ public class SubmissionIT {
     @Test
     public void testCatchesDeletedWithActivity() {
         final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(2)).getContactId(),
-                Calendar.getInstance().get(Calendar.YEAR));
+                Year.now().getValue());
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
@@ -124,7 +124,7 @@ public class SubmissionIT {
             r.body("errors", Matchers.nullValue());
         });
 
-        final String smallCatchJson = getSmallCatchJson(submissionUrl, activityUrl, Month.MARCH, Collections.singletonMap("methods/1", 5), 5);
+        final String smallCatchJson = getSmallCatchJson(submissionUrl, activityUrl, Month.JANUARY, Collections.singletonMap("methods/1", 5), 5);
         final String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());
             r.body("errors", Matchers.nullValue());
@@ -142,7 +142,7 @@ public class SubmissionIT {
     @Test
     public void testDuplicateActivityDetected() {
         final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(3)).getContactId(),
-                Calendar.getInstance().get(Calendar.YEAR));
+                Year.now().getValue());
 
         final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
             r.statusCode(HttpStatus.CREATED.value());

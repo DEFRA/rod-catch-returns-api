@@ -8,8 +8,10 @@ import org.springframework.http.HttpStatus;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,10 +52,19 @@ public final class SubmissionITUtils {
 
     public static String getCatchJson(final String submissionId, final String activityId, final String speciesId, final String methodId,
                                       final CatchMass.MeasurementType massType, final BigDecimal mass, final boolean released) {
+        return getCatchJson(submissionId, Year.now().getValue(), activityId, speciesId, methodId, massType, mass, released);
+    }
+
+    // FIXME: Refactor into SubmissionBuilder class and maintain state
+    @SuppressWarnings("ParameterNumber")
+    public static String getCatchJson(final String submissionId, final int season, final String activityId, final String speciesId,
+                                      final String methodId,
+                                      final CatchMass.MeasurementType massType, final BigDecimal mass, final boolean released) {
+        final LocalDateTime catchDate = LocalDate.now().withYear(season).atStartOfDay().minusDays(1);
         final String massProperty = CatchMass.MeasurementType.IMPERIAL.equals(massType) ? "oz" : "kg";
         final Map<String, Object> replacements = new HashMap<>();
         replacements.put("SUBMISSION", submissionId);
-        replacements.put("DATE_CAUGHT", Instant.now().toString());
+        replacements.put("DATE_CAUGHT", catchDate);
         replacements.put("SPECIES", speciesId);
         replacements.put("ACTIVITY", activityId);
         replacements.put("METHOD", methodId);
@@ -64,12 +75,12 @@ public final class SubmissionITUtils {
         return fromJson("/data/templates/catch.json.template", replacements);
     }
 
+
     public static String getSmallCatchJson(final String submissionId, final String activityId, final Month month, final Map<String, Integer> counts,
                                            final int released) {
         final String countsJson = counts.entrySet().stream()
                 .map((e) -> getSmallCatchCountJson(e.getKey(), e.getValue()))
                 .collect(Collectors.joining(","));
-
 
         final Map<String, Object> replacements = new HashMap<>();
         replacements.put("SUBMISSION", submissionId);
@@ -90,11 +101,18 @@ public final class SubmissionITUtils {
     @SafeVarargs
     public static List<String> createCatches(final String submissionUrl, final String activityUrl, final String species, final String method,
                                              final Pair<CatchMass.MeasurementType, BigDecimal>... catchEntries) {
+        return createCatches(submissionUrl, Year.now().getValue(), activityUrl, species, method, catchEntries);
+    }
+
+    @SafeVarargs
+    public static List<String> createCatches(final String submissionUrl, final int season, final String activityUrl, final String species,
+                                             final String method,
+                                             final Pair<CatchMass.MeasurementType, BigDecimal>... catchEntries) {
 
         final List<String> catches = new ArrayList<>();
         for (final Pair<CatchMass.MeasurementType, BigDecimal> catchEntry : catchEntries) {
             final String catchJson = SubmissionITUtils
-                    .getCatchJson(submissionUrl, activityUrl, species, method, catchEntry.getFirst(), catchEntry.getSecond(),
+                    .getCatchJson(submissionUrl, season, activityUrl, species, method, catchEntry.getFirst(), catchEntry.getSecond(),
                             false);
             final String catchUrl = createEntity("/catches", catchJson, (r) -> {
                 r.statusCode(HttpStatus.CREATED.value());
@@ -113,8 +131,7 @@ public final class SubmissionITUtils {
         final Map<String, Integer> counts = Arrays.stream(methodCounts).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 
         for (final Month month : Month.values()) {
-            final String smallCatchJson = SubmissionITUtils
-                    .getSmallCatchJson(submissionUrl, activityUrl, month, counts, released);
+            final String smallCatchJson = SubmissionITUtils.getSmallCatchJson(submissionUrl, activityUrl, month, counts, released);
             final String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
                 r.statusCode(HttpStatus.CREATED.value());
                 r.body("errors", Matchers.nullValue());
@@ -124,6 +141,7 @@ public final class SubmissionITUtils {
         }
         return smallCatches;
     }
+
 
     public static List<String> createActivities(final String submissionUrl, final ActivityDef... activityDefs) {
         final List<String> activities = new ArrayList<>();

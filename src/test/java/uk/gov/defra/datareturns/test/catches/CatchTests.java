@@ -26,6 +26,8 @@ import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
@@ -83,6 +85,15 @@ public class CatchTests {
         cat.setDateCaught(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_DATE_REQUIRED"));
+    }
+
+    @Test
+    public void testCatchWithFutureDateFails() {
+        final Catch cat = createValidCatch();
+        Date tomorrow = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
+        cat.setDateCaught(tomorrow);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_DATE_IN_FUTURE"));
     }
 
     @Test

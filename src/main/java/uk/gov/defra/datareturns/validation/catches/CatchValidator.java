@@ -9,6 +9,8 @@ import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
 import javax.validation.ConstraintValidatorContext;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 
 /**
@@ -47,7 +49,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     }
 
     /**
-     * Check date caught is provided and valid with respect to the the submission year
+     * Check date caught is provided and valid with respect to the the submission year and the current date
      *
      * @param catchEntry the {@link Catch} to be validated
      * @param context    the validator context
@@ -62,6 +64,11 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
             if (yearCaught != catchEntry.getSubmission().getSeason().intValue()) {
                 return handleError(context, "YEAR_MISMATCH", b -> b.addPropertyNode("dateCaught"));
             }
+        }
+
+        final LocalDate dateCaught = catchEntry.getDateCaught().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (dateCaught.isAfter(LocalDate.now())) {
+            return handleError(context, "DATE_IN_FUTURE", b -> b.addPropertyNode("dateCaught"));
         }
         return true;
     }
