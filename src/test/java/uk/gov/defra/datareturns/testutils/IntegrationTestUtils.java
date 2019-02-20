@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import javax.validation.ConstraintViolation;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Year;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -78,7 +77,7 @@ public final class IntegrationTestUtils {
         return entityUrl;
     }
 
-    public static String patchEntity(final String resourceUrl, final String entityJson, final Consumer<ValidatableResponse> responseAssertions) {
+    public static void patchEntity(final String resourceUrl, final String entityJson, final Consumer<ValidatableResponse> responseAssertions) {
         final ValidatableResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(entityJson)
@@ -86,14 +85,7 @@ public final class IntegrationTestUtils {
                 .patch(resourceUrl)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL);
-
         responseAssertions.accept(response);
-
-        String entityUrl = null;
-        if (response != null) {
-            entityUrl = response.extract().header("Location");
-        }
-        return entityUrl;
     }
 
     public static void deleteEntity(final String url) {
@@ -105,9 +97,4 @@ public final class IntegrationTestUtils {
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
-
-    public static short getCurrentSeason() {
-        return (short) Year.now().getValue();
-    }
-
 }

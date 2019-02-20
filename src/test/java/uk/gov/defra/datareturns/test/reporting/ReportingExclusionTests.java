@@ -101,9 +101,9 @@ public class ReportingExclusionTests {
     public void setupTestData() {
         submissionRepository.deleteAll();
 
-        River river = riverRepository.getOne(1L);
-        Method method = methodRepository.getOne(1L);
-        Species species = speciesRepository.getOne(1L);
+        final River river = riverRepository.getOne(1L);
+        final Method method = methodRepository.getOne(1L);
+        final Species species = speciesRepository.getOne(1L);
 
         submission = submissionRepository.saveAndFlush(SubmissionTests.createValidSubmission(TEST_CONTACT_ID, Year.now().getValue(),
                 SubmissionStatus.INCOMPLETE, SubmissionSource.WEB));
@@ -111,7 +111,7 @@ public class ReportingExclusionTests {
         largeCatch = catchRepository
                 .saveAndFlush(CatchTests.createValidCatch(submission, activity, method, species, new BigDecimal("2.123456"), false));
 
-        List<SmallCatchCount> counts = new ArrayList<>(Collections.singletonList(SmallCatchCountTests.createValidSmallCatchCount(method, 6)));
+        final List<SmallCatchCount> counts = new ArrayList<>(Collections.singletonList(SmallCatchCountTests.createValidSmallCatchCount(method, 6)));
         smallCatch = smallCatchRepository.saveAndFlush(SmallCatchTests.createSmallCatch(submission, activity, counts, 3));
     }
 

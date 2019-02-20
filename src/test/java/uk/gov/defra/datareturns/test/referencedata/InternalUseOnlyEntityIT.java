@@ -3,11 +3,11 @@ package uk.gov.defra.datareturns.test.referencedata;
 import io.restassured.response.ValidatableResponse;
 import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.data.domain.Example;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
@@ -20,22 +20,20 @@ import uk.gov.defra.datareturns.services.crm.DynamicsMockData;
 import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
 import uk.gov.defra.datareturns.testutils.TestLicences;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
+import uk.gov.defra.datareturns.testutils.client.TestActivity;
+import uk.gov.defra.datareturns.testutils.client.TestCatch;
+import uk.gov.defra.datareturns.testutils.client.TestSmallCatch;
+import uk.gov.defra.datareturns.testutils.client.TestSubmission;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
-import java.util.Collections;
 import java.util.function.Consumer;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.createEntity;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getActivityJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getCatchJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSmallCatchJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSubmissionJson;
 
 /**
  * Integration tests for restricted entities
@@ -51,45 +49,48 @@ public class InternalUseOnlyEntityIT {
     @Inject
     private MethodRepository methodRepository;
 
-    private Method internalMethod;
     private String internalMethodId;
-    private River internalRiver;
     private String internalRiverId;
-    private String submissionUrl;
 
     @Before
     public void setup() {
         submissionRepository.deleteAll();
 
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(), Year.now().getValue());
-        submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-            r.body("errors", Matchers.nullValue());
-        });
-
-        Method exampleMethod = new Method();
+        final Method exampleMethod = new Method();
         exampleMethod.setInternal(true);
-        internalMethod = methodRepository.findAll(Example.of(exampleMethod)).stream().findFirst().orElseThrow(AssertionFailedError::new);
+        final Method internalMethod = methodRepository.findAll(Example.of(exampleMethod)).stream().findFirst().orElseThrow(AssertionFailedError::new);
         internalMethodId = "methods/" + internalMethod.getId();
-        River exampleRiver = new River();
+        final River exampleRiver = new River();
         exampleRiver.setInternal(true);
-        internalRiver = riverRepository.findAll(Example.of(exampleRiver)).stream().findFirst().orElseThrow(AssertionFailedError::new);
+        final River internalRiver = riverRepository.findAll(Example.of(exampleRiver)).stream().findFirst().orElseThrow(AssertionFailedError::new);
         internalRiverId = "rivers/" + internalRiver.getId();
     }
 
 
     private void checkMethodOnCatch(final Consumer<ValidatableResponse> responseAssertions) {
-        final String activityUrl = createValidTestActivity();
-        final String catchJson = getCatchJson(submissionUrl, activityUrl, "species/1", internalMethodId,
-                CatchMass.MeasurementType.METRIC, BigDecimal.ONE, false);
-        createEntity("/catches", catchJson, responseAssertions);
+        final TestSubmission sub = TestSubmission.of(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(), Year.now().getValue());
+        sub.create();
+        final TestActivity activity = sub.withActivity().river("rivers/1").daysFishedWithMandatoryRelease(1).daysFishedOther(1);
+        activity.create();
+        final TestCatch testCatch = activity.withCatch()
+                .anyValidCatchDate()
+                .method(internalMethodId)
+                .species("species/1")
+                .mass(CatchMass.MeasurementType.METRIC, BigDecimal.ONE)
+                .released(false);
+        testCatch.create(responseAssertions);
     }
 
     private void checkMethodOnSmallCatch(final Consumer<ValidatableResponse> responseAssertions) {
-        final String activityUrl = createValidTestActivity();
-        final String smallCatchJson = getSmallCatchJson(submissionUrl, activityUrl, Month.from(LocalDate.now()),
-                Collections.singletonMap(internalMethodId, 5), 5);
-        createEntity("/smallCatches", smallCatchJson, responseAssertions);
+        final TestSubmission sub = TestSubmission.of(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(), Year.now().getValue());
+        sub.create();
+        final TestActivity activity = sub.withActivity().river("rivers/1").daysFishedWithMandatoryRelease(1).daysFishedOther(1);
+        activity.create();
+        final TestSmallCatch sc = activity.withSmallCatch()
+                .month(Month.from(LocalDate.now()))
+                .counts(Pair.of(internalMethodId, 5))
+                .released(5);
+        sc.create(responseAssertions);
     }
 
     @Test
@@ -129,27 +130,23 @@ public class InternalUseOnlyEntityIT {
     @Test
     @WithAdminUser
     public void testInternalRiverOnActivityForAdmin() {
-        final String activityJson = getActivityJson(submissionUrl, internalRiverId, 5, 5);
-        createEntity("/activities", activityJson, (r) -> r.statusCode(HttpStatus.CREATED.value()));
+        final TestSubmission sub = TestSubmission.of(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(), Year.now().getValue());
+        sub.create();
+        final TestActivity activity = sub.withActivity().river(internalRiverId).daysFishedWithMandatoryRelease(1).daysFishedOther(1);
+        activity.create();
     }
 
     @Test
     public void testInternalRiverOnActivityForEndUser() {
-        final String activityJson = getActivityJson(submissionUrl, internalRiverId, 5, 5);
-        createEntity("/activities", activityJson, (r) -> {
+        final TestSubmission sub = TestSubmission.of(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(), Year.now().getValue());
+        sub.create();
+        final TestActivity activity = sub.withActivity().river(internalRiverId).daysFishedWithMandatoryRelease(1).daysFishedOther(1);
+        activity.create((r) -> {
             r.statusCode(HttpStatus.BAD_REQUEST.value());
             r.body("errors", hasSize(1));
             r.body("errors[0].entity", equalTo("Activity"));
             r.body("errors[0].property", equalTo("river"));
             r.body("errors[0].message", equalTo("ACTIVITY_RIVER_FORBIDDEN"));
-        });
-    }
-
-    private String createValidTestActivity() {
-        final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5, 5);
-        return createEntity("/activities", activityJson, (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-            r.body("errors", Matchers.nullValue());
         });
     }
 }

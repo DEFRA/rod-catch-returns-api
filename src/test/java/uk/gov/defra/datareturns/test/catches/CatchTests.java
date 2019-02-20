@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -26,8 +27,8 @@ import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
@@ -35,7 +36,7 @@ import java.util.Set;
 import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.violationMessageMatching;
 
 /**
- * Integration tests catch object property validation
+ * Tests catch object property validation
  */
 @RunWith(SpringRunner.class)
 @ApiContextTest
@@ -51,6 +52,8 @@ public class CatchTests {
     @Inject
     private Validator validator;
 
+    private Catch testCatch;
+
     public static Catch createValidCatch(final Submission submission, final Activity activity, final Method method, final Species species,
                                          final BigDecimal kg, final boolean released) {
         final Catch cat = new Catch();
@@ -64,75 +67,78 @@ public class CatchTests {
         return cat;
     }
 
+    @Before
+    public void setup() {
+        final River river = riverRepository.getOne(RandomUtils.nextLong(1, 100));
+        final Submission submission = SubmissionTests.createValidSubmission();
+        final Activity activity = ActivityTests.createValidActivity(submission, river, 100, 100);
+        submission.setActivities(Collections.singletonList(activity));
+        final Species species = speciesRepository.getOne(RandomUtils.nextLong(1, speciesRepository.count()));
+        final Method method = methodRepository.getOne(RandomUtils.nextLong(1, methodRepository.count()));
+        testCatch = createValidCatch(submission, activity, method, species, BigDecimal.valueOf(0.98765432112), false);
+    }
+
     @Test
     public void testValidCatch() {
-        final Catch cat = createValidCatch();
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).isEmpty();
     }
 
     @Test
     public void testCatchWithoutSubmissionFails() {
-        final Catch cat = createValidCatch();
-        cat.setSubmission(null);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.setSubmission(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_SUBMISSION_REQUIRED"));
     }
 
     @Test
     public void testCatchWithoutDateFails() {
-        final Catch cat = createValidCatch();
-        cat.setDateCaught(null);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.setDateCaught(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_DATE_REQUIRED"));
     }
 
     @Test
     public void testCatchWithFutureDateFails() {
-        final Catch cat = createValidCatch();
-        Date tomorrow = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
-        cat.setDateCaught(tomorrow);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        final LocalDate tomorrow = LocalDate.now().plusDays(1);
+        testCatch.getSubmission().setSeason((short) tomorrow.getYear());
+        testCatch.setDateCaught(Date.from(tomorrow.atStartOfDay().toInstant(ZoneOffset.UTC)));
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_DATE_IN_FUTURE"));
     }
 
     @Test
     public void testCatchWithDateMismatchToSubmissionFails() {
-        final Catch cat = createValidCatch();
-        cat.setDateCaught(DateUtils.addYears(cat.getDateCaught(), -1));
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.setDateCaught(DateUtils.addYears(testCatch.getDateCaught(), -1));
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_YEAR_MISMATCH"));
     }
 
     @Test
     public void testCatchWithoutActivityFails() {
-        final Catch cat = createValidCatch();
-        cat.setActivity(null);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.setActivity(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_ACTIVITY_REQUIRED"));
     }
 
     @Test
     public void testCatchWithoutSpeciesFails() {
-        final Catch cat = createValidCatch();
-        cat.setSpecies(null);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.setSpecies(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_SPECIES_REQUIRED"));
     }
 
     @Test
     public void testCatchWithoutMassFails() {
-        final Catch cat = createValidCatch();
-        cat.setMass(null);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.setMass(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_REQUIRED"));
     }
 
     @Test
     public void testCatchWithoutMassTypeFails() {
-        final Catch cat = createValidCatch();
-        cat.getMass().setType(null);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.getMass().setType(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_TYPE_REQUIRED"));
     }
 
@@ -141,9 +147,8 @@ public class CatchTests {
         final CatchMass catchMass = new CatchMass();
         catchMass.set(CatchMass.MeasurementType.IMPERIAL, null);
 
-        final Catch cat = createValidCatch();
-        cat.setMass(catchMass);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.setMass(catchMass);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_OZ_REQUIRED"));
     }
 
@@ -152,46 +157,29 @@ public class CatchTests {
         final CatchMass catchMass = new CatchMass();
         catchMass.set(CatchMass.MeasurementType.METRIC, null);
 
-        final Catch cat = createValidCatch();
-        cat.setMass(catchMass);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.setMass(catchMass);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_KG_REQUIRED"));
     }
 
     @Test
     public void testCatchWithMaxWeightExceededFails() {
-        final Catch cat = createValidCatch();
-        cat.getMass().setKg(BigDecimal.valueOf(50.1));
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.getMass().setKg(BigDecimal.valueOf(50.1));
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_MAX_EXCEEDED"));
     }
 
     @Test
     public void testCatchBelowMinWeightFails() {
-        final Catch cat = createValidCatch();
-        cat.getMass().set(CatchMass.MeasurementType.METRIC, BigDecimal.valueOf(-0.0001));
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.getMass().set(CatchMass.MeasurementType.METRIC, BigDecimal.valueOf(-0.0001));
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_MASS_BELOW_MINIMUM"));
     }
 
     @Test
     public void testCatchWithoutMethodFails() {
-        final Catch cat = createValidCatch();
-        cat.setMethod(null);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(cat);
+        testCatch.setMethod(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_METHOD_REQUIRED"));
-    }
-
-    private Catch createValidCatch() {
-        final River targetRiver = riverRepository.getOne(RandomUtils.nextLong(1, 100));
-        return createValidCatch(SubmissionTests.createValidSubmission(), targetRiver);
-    }
-
-    public Catch createValidCatch(final Submission submission, final River river) {
-        final Activity activity = ActivityTests.createValidActivity(submission, river, 100, 100);
-        submission.setActivities(Collections.singletonList(activity));
-        final Species species = speciesRepository.getOne(RandomUtils.nextLong(1, speciesRepository.count()));
-        final Method method = methodRepository.getOne(RandomUtils.nextLong(1, methodRepository.count()));
-        return createValidCatch(submission, activity, method, species, BigDecimal.valueOf(0.98765432112), false);
     }
 }

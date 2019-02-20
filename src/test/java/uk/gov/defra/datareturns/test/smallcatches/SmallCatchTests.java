@@ -92,7 +92,7 @@ public class SmallCatchTests {
     @Test
     public void testSmallCatchWithCurrentMonthSucceeds() {
         final SmallCatch cat = createValidSmallCatch();
-        YearMonth thisMonth = YearMonth.from(LocalDate.now());
+        final YearMonth thisMonth = YearMonth.from(LocalDate.now());
         cat.getSubmission().setSeason((short) thisMonth.getYear());
         cat.setMonth(thisMonth.getMonth());
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
@@ -102,7 +102,7 @@ public class SmallCatchTests {
     @Test
     public void testSmallCatchWithFutureMonthFails() {
         final SmallCatch cat = createValidSmallCatch();
-        YearMonth nextMonth = YearMonth.from(LocalDate.now()).plusMonths(1);
+        final YearMonth nextMonth = YearMonth.from(LocalDate.now()).plusMonths(1);
         cat.getSubmission().setSeason((short) nextMonth.getYear());
         cat.setMonth(nextMonth.getMonth());
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);

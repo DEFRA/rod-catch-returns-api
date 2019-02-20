@@ -15,7 +15,7 @@ import java.net.ServerSocket;
 public class InitialisationTests {
     @Test
     public void testStartup() {
-        int port = findAvailablePort();
+        final int port = findAvailablePort();
         final String portArg = "--server.port=" + port;
         RcrApi.main(new String[] {
                 "--spring.profiles.active=h2",
@@ -26,9 +26,9 @@ public class InitialisationTests {
     }
 
     private int findAvailablePort() {
-        try (ServerSocket socket = new ServerSocket(0)) {
+        try (final ServerSocket socket = new ServerSocket(0)) {
             return socket.getLocalPort();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException("Unable to find available port for test.");
         }
     }

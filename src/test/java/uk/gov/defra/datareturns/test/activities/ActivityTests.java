@@ -68,7 +68,7 @@ public class ActivityTests {
     }
 
     @Test
-    public void testActivityWithoutManadatoryReleaseDaysFishedFails() {
+    public void testActivityWithoutMandatoryReleaseDaysFishedFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 1, 1);
         activity.setDaysFishedWithMandatoryRelease(null);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
@@ -85,7 +85,7 @@ public class ActivityTests {
     }
 
     @Test
-    public void testActivityWithNegativeDaysFishedWithManadatoryReleaseFails() {
+    public void testActivityWithNegativeDaysFishedWithMandatoryReleaseFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), -1, 1);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_WITH_MANDATORY_RELEASE_NEGATIVE"));

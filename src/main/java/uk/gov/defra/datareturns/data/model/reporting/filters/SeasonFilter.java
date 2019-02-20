@@ -27,7 +27,7 @@ public class SeasonFilter extends AbstractPathVariableFilter<Short> {
             final String high = m.group("high");
 
             if (single != null) {
-                int s = Integer.parseInt(single);
+                final int s = Integer.parseInt(single);
                 if (s < 1) {
                     startYear = Year.now().minusYears(Math.abs(s)).getValue();
                     endYear = Year.now().getValue();
@@ -36,8 +36,8 @@ public class SeasonFilter extends AbstractPathVariableFilter<Short> {
                     endYear = s;
                 }
             } else {
-                int lowVal = Integer.parseInt(low);
-                int highVal = Integer.parseInt(high);
+                final int lowVal = Integer.parseInt(low);
+                final int highVal = Integer.parseInt(high);
                 startYear = Math.min(lowVal, highVal);
                 endYear = Math.max(lowVal, highVal);
             }
