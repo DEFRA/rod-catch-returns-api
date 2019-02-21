@@ -39,7 +39,7 @@ public class GrilseProbability extends AbstractBaseEntity<Long> {
     /**
      * Database sequence name for this entity
      */
-    public static final String SEQUENCE = "rcr_activity_id_seq";
+    public static final String SEQUENCE = "rcr_grilse_probability_id_seq";
 
     /**
      * Primary key
