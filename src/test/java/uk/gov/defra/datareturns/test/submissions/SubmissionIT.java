@@ -13,29 +13,16 @@ import uk.gov.defra.datareturns.data.model.submissions.SubmissionRepository;
 import uk.gov.defra.datareturns.services.crm.DynamicsMockData;
 import uk.gov.defra.datareturns.testcommons.framework.RestAssuredTest;
 import uk.gov.defra.datareturns.testutils.TestLicences;
+import uk.gov.defra.datareturns.testutils.client.TestActivity;
+import uk.gov.defra.datareturns.testutils.client.TestCatch;
+import uk.gov.defra.datareturns.testutils.client.TestSmallCatch;
+import uk.gov.defra.datareturns.testutils.client.TestSubmission;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.createEntity;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.deleteEntity;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
-import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.patchEntity;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.ActivityDef;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.createActivities;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.createCatches;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.createSmallCatches;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getActivityJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getCatchJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSmallCatchJson;
-import static uk.gov.defra.datareturns.testutils.SubmissionITUtils.getSubmissionJson;
+import java.time.Year;
 
 /**
  * Integration tests submission-level property validation
@@ -54,114 +41,90 @@ public class SubmissionIT {
 
     @Test
     public void testSubmissionJourney() {
-        // Create the submission
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(1)).getContactId(),
-                Calendar.getInstance().get(Calendar.YEAR));
+        final String contactId = DynamicsMockData.get(TestLicences.getLicence(1)).getContactId();
+        final int season = Year.now().getValue() - 1;
+        final TestSubmission sub = TestSubmission.of(contactId, season);
 
-        final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-            r.body("errors", Matchers.nullValue());
-        });
+        final TestActivity act = sub.withActivity().river("rivers/3").daysFishedWithMandatoryRelease(20).daysFishedOther(5);
+        sub.create();
+        act.create();
 
-        // Create some activities
-        final List<String> activities = createActivities(submissionUrl,
-                ActivityDef.of("rivers/3", 20, 5),
-                ActivityDef.of("rivers/5", 40, 30));
-        final Map<String, List<String>> catchesByActivity = new HashMap<>();
-        final Map<String, List<String>> smallCatchesByActivity = new HashMap<>();
+        // Update the activity
+        act.daysFishedOther(10);
+        act.update();
 
-        for (final String activityUrl : activities) {
-            // Create multiple catches
-            final List<String> catches = new ArrayList<>();
-            catches.addAll(createCatches(submissionUrl, activityUrl, "species/1", "methods/1",
-                    Pair.of(CatchMass.MeasurementType.METRIC, BigDecimal.ONE),
-                    Pair.of(CatchMass.MeasurementType.IMPERIAL, new BigDecimal(23))));
-            catches.addAll(createCatches(submissionUrl, activityUrl, "species/2", "methods/2",
-                    Pair.of(CatchMass.MeasurementType.METRIC, new BigDecimal(0.8343434d)),
-                    Pair.of(CatchMass.MeasurementType.IMPERIAL, new BigDecimal(45.3434d))));
-            catchesByActivity.put(activityUrl, catches);
+        // Add a large catch
+        final TestCatch cat = act.withCatch()
+                .anyValidCatchDate()
+                .method("methods/1")
+                .species("species/1")
+                .mass(CatchMass.MeasurementType.METRIC, BigDecimal.ONE)
+                .released(false);
+        cat.create();
 
-            // Create small catch entries for every month.
-            smallCatchesByActivity.put(activityUrl, createSmallCatches(submissionUrl, activityUrl, 5,
-                    Pair.of("methods/1", 2), Pair.of("methods/2", 2), Pair.of("methods/3", 1)));
+        // Add a small catch
+        final TestSmallCatch sc = act.withSmallCatch()
+                .month(Month.JANUARY)
+                .counts(Pair.of("methods/1", 2), Pair.of("methods/2", 2), Pair.of("methods/3", 1))
+                .released(1);
+        sc.create();
 
-        }
+        // Mark the submission as submitted
+        sub.status("SUBMITTED");
+        sub.update();
 
-        // Submit the submission
-        final String submissionPatchStr = "{ \"status\": \"SUBMITTED\" }";
-        patchEntity(submissionUrl, submissionPatchStr, (r) -> {
-            r.statusCode(HttpStatus.OK.value());
-            r.body("errors", Matchers.nullValue());
-        });
-
-        deleteEntity(submissionUrl);
-        activities.forEach(url -> getEntity(url).statusCode(HttpStatus.NOT_FOUND.value()));
-        catchesByActivity.values().stream().flatMap(List::stream).forEach(url -> getEntity(url).statusCode(HttpStatus.NOT_FOUND.value()));
-        smallCatchesByActivity.values().stream().flatMap(List::stream).forEach(url -> getEntity(url).statusCode(HttpStatus.NOT_FOUND.value()));
-        getEntity(submissionUrl).statusCode(HttpStatus.NOT_FOUND.value());
+        // Delete the submission and expect all related entities to also be deleted
+        sub.delete();
+        sub.read().statusCode(HttpStatus.NOT_FOUND.value());
+        act.read().statusCode(HttpStatus.NOT_FOUND.value());
+        cat.read().statusCode(HttpStatus.NOT_FOUND.value());
+        sc.read().statusCode(HttpStatus.NOT_FOUND.value());
     }
 
     @Test
-    public void testCatchesDeletedWithActivity() {
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(2)).getContactId(),
-                Calendar.getInstance().get(Calendar.YEAR));
+    public void testCatchEntriesDeletedWithActivity() {
+        final String contactId = DynamicsMockData.get(TestLicences.getLicence(2)).getContactId();
+        final int season = Year.now().getValue() - 1;
+        final TestSubmission sub = TestSubmission.of(contactId, season);
+        final TestActivity act = sub.withActivity().river("rivers/3").daysFishedWithMandatoryRelease(20).daysFishedOther(5);
+        final TestCatch cat = act.withCatch()
+                .dateCaught(LocalDate.now().withYear(season).minusDays(1))
+                .method("methods/1")
+                .species("species/1")
+                .mass(CatchMass.MeasurementType.METRIC, BigDecimal.ONE)
+                .released(false);
+        final TestSmallCatch sc = act.withSmallCatch()
+                .month(Month.JANUARY)
+                .counts(Pair.of("methods/1", 2), Pair.of("methods/2", 2), Pair.of("methods/3", 1))
+                .released(1);
+        sub.create();
+        act.create();
+        cat.create();
+        sc.create();
 
-        final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-            r.body("errors", Matchers.nullValue());
-        });
-
-        final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5, 5);
-        final String activityUrl = createEntity("/activities", activityJson, (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-            r.body("errors", Matchers.nullValue());
-        });
-
-        final String catchJson = getCatchJson(submissionUrl, activityUrl, "species/1", "methods/1",
-                CatchMass.MeasurementType.METRIC, BigDecimal.ONE, false);
-        final String catchUrl = createEntity("/catches", catchJson, (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-            r.body("errors", Matchers.nullValue());
-        });
-
-        final String smallCatchJson = getSmallCatchJson(submissionUrl, activityUrl, Month.MARCH, Collections.singletonMap("methods/1", 5), 5);
-        final String smallCatchUrl = createEntity("/smallCatches", smallCatchJson, (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-            r.body("errors", Matchers.nullValue());
-        });
-
-        deleteEntity(activityUrl);
-        getEntity(catchUrl).statusCode(HttpStatus.NOT_FOUND.value());
-        getEntity(smallCatchUrl).statusCode(HttpStatus.NOT_FOUND.value());
-        getEntity(activityUrl).statusCode(HttpStatus.NOT_FOUND.value());
-        getEntity(submissionUrl).statusCode(HttpStatus.OK.value());
-        deleteEntity(submissionUrl);
+        // Delete the activity and expect related catches to also be deleted
+        act.delete();
+        cat.read().statusCode(HttpStatus.NOT_FOUND.value());
+        sc.read().statusCode(HttpStatus.NOT_FOUND.value());
     }
-
 
     @Test
     public void testDuplicateActivityDetected() {
-        final String submissionJson = getSubmissionJson(DynamicsMockData.get(TestLicences.getLicence(3)).getContactId(),
-                Calendar.getInstance().get(Calendar.YEAR));
+        final String contactId = DynamicsMockData.get(TestLicences.getLicence(3)).getContactId();
+        final int season = Year.now().getValue() - 1;
+        final TestSubmission sub = TestSubmission.of(contactId, season);
+        final TestActivity act = sub.withActivity().river("rivers/3").daysFishedWithMandatoryRelease(20).daysFishedOther(5);
+        final TestActivity dup = sub.withActivity().river("rivers/3").daysFishedWithMandatoryRelease(1).daysFishedOther(2);
 
-        final String submissionUrl = createEntity("/submissions", submissionJson, (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-            r.body("errors", Matchers.nullValue());
-        });
-
-        final String activityJson = getActivityJson(submissionUrl, "rivers/1", 5, 5);
-        final String activity1Url = createEntity("/activities", activityJson, (r) -> {
-            r.statusCode(HttpStatus.CREATED.value());
-            r.body("errors", Matchers.nullValue());
-        });
-
-        createEntity("/activities", activityJson, (r) -> {
+        sub.create();
+        act.create();
+        dup.create((r) -> {
             r.statusCode(HttpStatus.BAD_REQUEST.value());
             r.body("errors", Matchers.hasSize(1));
             r.body("errors[0].message", Matchers.hasToString("ACTIVITY_RIVER_DUPLICATE_FOUND"));
             r.body("errors[0].entity", Matchers.hasToString("Activity"));
         });
-        deleteEntity(submissionUrl);
-        getEntity(activity1Url).statusCode(HttpStatus.NOT_FOUND.value());
+
+        sub.delete();
     }
 }

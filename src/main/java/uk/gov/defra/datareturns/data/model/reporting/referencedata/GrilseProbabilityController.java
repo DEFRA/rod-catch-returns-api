@@ -62,7 +62,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
     @GetMapping(value = "/{season}")
     @ApiOperation(value = "Retrieve grilse probability data for the given season filter", produces = "text/csv")
     public void get(@PathVariable("season") final SeasonFilter season, final HttpServletResponse response) throws IOException {
-        Specification<GrilseProbability> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(GrilseProbability_.season));
+        final Specification<GrilseProbability> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(GrilseProbability_.season));
         final List<GrilseProbability> entries = grilseProbabilityRepository.findAll(Specification.where(seasonSpec));
         writeCsv(GrilseProbability.class, entries, response, "grilse-probabilities-" + season + ".csv");
     }
@@ -132,9 +132,9 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
         private List<GrilseProbability> transform(final Short season) {
             final List<GrilseProbability> grilseProbabilities = new ArrayList<>();
             final Set<Short> weightsProcessed = new HashSet<>();
-            for (Object[] rowData : data.getRows()) {
+            for (final Object[] rowData : data.getRows()) {
                 // Extract the weight (in lbs) that this row of data belongs to and check that it isn't duplicated from a previously processed row.
-                Short weightVal = Short.parseShort(Objects.toString(rowData[weightColumnIndex]));
+                final Short weightVal = Short.parseShort(Objects.toString(rowData[weightColumnIndex]));
                 if (!weightsProcessed.add(weightVal)) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                             "More than one row was found with the same weight value in the weight column");
@@ -142,7 +142,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
                 // For each month column that was discovered, extract the probability.
                 monthFieldIndexes.forEach((month, fieldIndex) -> {
-                    BigDecimal probability = new BigDecimal(Objects.toString(rowData[fieldIndex]));
+                    final BigDecimal probability = new BigDecimal(Objects.toString(rowData[fieldIndex]));
                     // Only add a grilse probability value if the probability is greater than zero (reporting assumes 0 for any missing data point)
                     if (probability.compareTo(BigDecimal.ZERO) > 0) {
                         // Duplicate the data for weight=1 to weight=0 (to capture values which are rounded down to zero rather than rounded up)

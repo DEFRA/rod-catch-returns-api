@@ -30,9 +30,9 @@ public class RestTemplateErrorHandlingTests {
     @Test
     public void testClientRestTemplateOAuth2ErrorHandler() {
         try {
-            ClientRestTemplateOAuth2ErrorHandler handler = new ClientRestTemplateOAuth2ErrorHandler();
+            final ClientRestTemplateOAuth2ErrorHandler handler = new ClientRestTemplateOAuth2ErrorHandler();
             handler.handleError(new MockClientHttpResponse("".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR));
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             Assertions.assertThat(t).isInstanceOf(ResponseStatusException.class);
             Assertions.assertThat(capture.toString())
                     .contains("Unexpected response attempting to obtain token from provider using client credentials grant.")
@@ -43,9 +43,9 @@ public class RestTemplateErrorHandlingTests {
     @Test
     public void testClientRestTemplateDynamicsErrorHandler() {
         try {
-            ClientRestTemplateErrorHandler handler = new ClientRestTemplateErrorHandler();
+            final ClientRestTemplateErrorHandler handler = new ClientRestTemplateErrorHandler();
             handler.handleError(new MockClientHttpResponse("".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR));
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             Assertions.assertThat(t).isInstanceOf(ResponseStatusException.class);
             Assertions.assertThat(capture.toString())
                     .contains("Unexpected response from Microsoft Dynamics using client template.")
@@ -56,13 +56,13 @@ public class RestTemplateErrorHandlingTests {
     @Test
     public void testIdentityRestTemplateInternalErrorHandling() {
         try {
-            IdentityRestTemplateErrorHandler handler = new IdentityRestTemplateErrorHandler();
+            final IdentityRestTemplateErrorHandler handler = new IdentityRestTemplateErrorHandler();
             handler.handleError(new MockClientHttpResponse("".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR));
-        } catch (AuthenticationServiceException e) {
+        } catch (final AuthenticationServiceException e) {
             Assertions.assertThat(capture.toString())
                     .contains("Unexpected response from Microsoft Dynamics using identity template.")
                     .contains("500 INTERNAL_SERVER_ERROR");
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             Assertions.fail("Unexpected exception thrown by IdentityRestTemplateErrorHandler", t);
         }
     }
@@ -70,11 +70,11 @@ public class RestTemplateErrorHandlingTests {
     @Test
     public void testIdentityRestTemplateForbiddenErrorHandling() {
         try {
-            IdentityRestTemplateErrorHandler handler = new IdentityRestTemplateErrorHandler();
+            final IdentityRestTemplateErrorHandler handler = new IdentityRestTemplateErrorHandler();
             handler.handleError(new MockClientHttpResponse("".getBytes(), HttpStatus.FORBIDDEN));
-        } catch (InsufficientAuthenticationException e) {
+        } catch (final InsufficientAuthenticationException e) {
             Assertions.assertThat(capture.toString()).doesNotContain("User not permitted to access the target Dynamics service.");
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             Assertions.fail("Unexpected exception thrown by IdentityRestTemplateErrorHandler", t);
         }
     }

@@ -22,7 +22,9 @@ import uk.gov.defra.datareturns.testutils.WithAdminUser;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.time.LocalDate;
 import java.time.Month;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -85,6 +87,26 @@ public class SmallCatchTests {
         cat.setMonth(null);
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_MONTH_REQUIRED"));
+    }
+
+    @Test
+    public void testSmallCatchWithCurrentMonthSucceeds() {
+        final SmallCatch cat = createValidSmallCatch();
+        final YearMonth thisMonth = YearMonth.from(LocalDate.now());
+        cat.getSubmission().setSeason((short) thisMonth.getYear());
+        cat.setMonth(thisMonth.getMonth());
+        final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(0);
+    }
+
+    @Test
+    public void testSmallCatchWithFutureMonthFails() {
+        final SmallCatch cat = createValidSmallCatch();
+        final YearMonth nextMonth = YearMonth.from(LocalDate.now()).plusMonths(1);
+        cat.getSubmission().setSeason((short) nextMonth.getYear());
+        cat.setMonth(nextMonth.getMonth());
+        final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_MONTH_IN_FUTURE"));
     }
 
     @Test

@@ -1,0 +1,70 @@
+package uk.gov.defra.datareturns.testutils.client;
+
+import lombok.Getter;
+import uk.gov.defra.datareturns.data.model.catches.CatchMass;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
+@Getter
+public class TestCatch extends AbstractTestEntity {
+    private final TestActivity activity;
+    public static final String SUBMISSION = "submission";
+    public static final String ACTIVITY = "activity";
+    public static final String DATE_CAUGHT = "dateCaught";
+    public static final String SPECIES = "species";
+    public static final String METHOD = "method";
+    public static final String MASS = "mass";
+    public static final String RELEASED = "released";
+
+    TestCatch(final TestActivity activity) {
+        modify(SUBMISSION, () -> activity.getSubmission().getUrl());
+        modify(ACTIVITY, activity::getUrl);
+        this.activity = activity;
+    }
+
+    public TestCatch anyValidCatchDate() {
+        final Integer season = activity.getSubmission().getIntegerValue(TestSubmission.SEASON);
+        dateCaught(LocalDate.now().withYear(season).minusDays(1));
+        return this;
+    }
+
+    public final TestCatch dateCaught(final LocalDate date) {
+        modify(DATE_CAUGHT, date);
+        return this;
+    }
+
+    public final TestCatch species(final String species) {
+        modify(SPECIES, species);
+        return this;
+    }
+
+    public final TestCatch method(final String method) {
+        modify(METHOD, method);
+        return this;
+    }
+
+    public final TestCatch mass(final CatchMass.MeasurementType massType, final BigDecimal mass) {
+        final Map<String, Object> massObj = new HashMap<>();
+        massObj.put("type", massType.name());
+        if (CatchMass.MeasurementType.METRIC.equals(massType)) {
+            massObj.put("kg", mass);
+        } else {
+            massObj.put("oz", mass);
+        }
+        modify(MASS, () -> massObj);
+        return this;
+    }
+
+    public final TestCatch released(final boolean released) {
+        modify(RELEASED, released);
+        return this;
+    }
+
+    @Override
+    String getResourcePath() {
+        return "/catches";
+    }
+}

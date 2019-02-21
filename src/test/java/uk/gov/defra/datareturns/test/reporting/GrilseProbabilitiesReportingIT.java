@@ -37,7 +37,7 @@ public class GrilseProbabilitiesReportingIT {
     @Test
     public void testLoad() throws IOException {
         grilseProbabilityRepository.deleteAll();
-        String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
+        final String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
         final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
                 .when().post("reporting/reference/grilse-probabilities/2018")
                 .then()
@@ -82,7 +82,7 @@ public class GrilseProbabilitiesReportingIT {
     @Test
     public void testInvalidHeaders() throws IOException {
         grilseProbabilityRepository.deleteAll();
-        String csvData = IOUtils.resourceToString("/data/grilse/invalid-headers.csv", StandardCharsets.UTF_8);
+        final String csvData = IOUtils.resourceToString("/data/grilse/invalid-headers.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
                 .when().post("reporting/reference/grilse-probabilities/2018")
                 .then()
@@ -96,7 +96,7 @@ public class GrilseProbabilitiesReportingIT {
     @Test
     public void testNoWeightHeader() throws IOException {
         grilseProbabilityRepository.deleteAll();
-        String csvData = IOUtils.resourceToString("/data/grilse/no-weight-heading.csv", StandardCharsets.UTF_8);
+        final String csvData = IOUtils.resourceToString("/data/grilse/no-weight-heading.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
                 .when().post("reporting/reference/grilse-probabilities/2018")
                 .then()
@@ -111,7 +111,7 @@ public class GrilseProbabilitiesReportingIT {
     @Test
     public void testNoMonthHeader() throws IOException {
         grilseProbabilityRepository.deleteAll();
-        String csvData = IOUtils.resourceToString("/data/grilse/no-month-headings.csv", StandardCharsets.UTF_8);
+        final String csvData = IOUtils.resourceToString("/data/grilse/no-month-headings.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
                 .when().post("reporting/reference/grilse-probabilities/2018")
                 .then()
@@ -126,7 +126,7 @@ public class GrilseProbabilitiesReportingIT {
     @Test
     public void testDuplicateWeight() throws IOException {
         grilseProbabilityRepository.deleteAll();
-        String csvData = IOUtils.resourceToString("/data/grilse/duplicate-weight.csv", StandardCharsets.UTF_8);
+        final String csvData = IOUtils.resourceToString("/data/grilse/duplicate-weight.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
                 .when().post("reporting/reference/grilse-probabilities/2018")
                 .then()
@@ -140,7 +140,7 @@ public class GrilseProbabilitiesReportingIT {
     @Test
     public void testOverwrite() throws IOException {
         grilseProbabilityRepository.deleteAll();
-        String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
+        final String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
                 .when().post("reporting/reference/grilse-probabilities/2018")
                 .then()

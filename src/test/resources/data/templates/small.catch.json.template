@@ -1,7 +1,0 @@
-{
-  "submission": "%SUBMISSION%",
-  "activity": "%ACTIVITY%",
-  "month": "%MONTH%",
-  "counts": [ %COUNTS_JSON% ],
-  "released": %RELEASED%
-}

@@ -1,3 +1,4 @@
+
 package uk.gov.defra.datareturns.test.reporting;
 
 import org.assertj.core.api.Assertions;
@@ -9,7 +10,7 @@ import java.time.Year;
 public class SeasonFilterTests {
     @Test
     public void testSinglePositiveValue() {
-        SeasonFilter filter = new SeasonFilter("2018");
+        final SeasonFilter filter = new SeasonFilter("2018");
         Assertions.assertThat(filter.getStartYear()).isEqualTo(2018);
         Assertions.assertThat(filter.getEndYear()).isEqualTo(2018);
 
@@ -17,30 +18,49 @@ public class SeasonFilterTests {
 
     @Test
     public void testZeroValueUsesCurrentYear() {
-        SeasonFilter filter = new SeasonFilter("0");
+        final SeasonFilter filter = new SeasonFilter("0");
         Assertions.assertThat(filter.getStartYear()).isEqualTo(Year.now().getValue());
         Assertions.assertThat(filter.getEndYear()).isEqualTo(Year.now().getValue());
     }
 
     @Test
     public void testNegativeRange() {
-        SeasonFilter filter = new SeasonFilter("-2");
+        final SeasonFilter filter = new SeasonFilter("-2");
         Assertions.assertThat(filter.getStartYear()).isEqualTo(Year.now().getValue() - 2);
         Assertions.assertThat(filter.getEndYear()).isEqualTo(Year.now().getValue());
     }
 
     @Test
     public void testSpecificRange() {
-        SeasonFilter filter = new SeasonFilter("2016-2018");
+        final SeasonFilter filter = new SeasonFilter("2016-2018");
         Assertions.assertThat(filter.getStartYear()).isEqualTo(2016);
         Assertions.assertThat(filter.getEndYear()).isEqualTo(2018);
     }
 
     @Test
     public void testSpecificRangeBackwards() {
-        SeasonFilter filter = new SeasonFilter("2018-2016");
+        final SeasonFilter filter = new SeasonFilter("2018-2016");
         Assertions.assertThat(filter.getStartYear()).isEqualTo(2016);
         Assertions.assertThat(filter.getEndYear()).isEqualTo(2018);
+    }
+
+
+    @Test
+    public void testInactiveAsterisk() {
+        final SeasonFilter filter = new SeasonFilter("*");
+        Assertions.assertThat(filter.isActive()).isEqualTo(false);
+    }
+
+    @Test
+    public void testInactiveUnderscore() {
+        final SeasonFilter filter = new SeasonFilter("_");
+        Assertions.assertThat(filter.isActive()).isEqualTo(false);
+    }
+
+    @Test
+    public void testInactiveNull() {
+        final SeasonFilter filter = new SeasonFilter(null);
+        Assertions.assertThat(filter.isActive()).isEqualTo(false);
     }
 
     @Test(expected = UnsupportedOperationException.class)

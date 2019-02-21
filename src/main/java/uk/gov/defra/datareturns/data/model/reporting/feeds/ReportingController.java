@@ -56,15 +56,15 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
     @GetMapping(value = "/submissions/{season}")
     @ApiOperation(value = "Retrieve reporting summary data by contact for the given season", produces = "text/csv")
     public void submissions(@PathVariable("season") final SeasonFilter season, final HttpServletResponse response) throws IOException {
-        Specification<SubmissionFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(SubmissionFeed_.season));
-        Iterable<SubmissionFeed> submissions = submissionFeedRepository.findAll(seasonSpec);
+        final Specification<SubmissionFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(SubmissionFeed_.season));
+        final Iterable<SubmissionFeed> submissions = submissionFeedRepository.findAll(seasonSpec);
         writeCsv(SubmissionFeed.class, submissions, response, "SubmissionFeed-" + season + ".csv");
     }
 
     @GetMapping(value = "/activities/{season}")
     @ApiOperation(value = "Retrieve full large catch data for the given filters", produces = "text/csv")
     public void activities(@PathVariable("season") final SeasonFilter season, final HttpServletResponse response) throws IOException {
-        Specification<ActivityFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(ActivityFeed_.season));
+        final Specification<ActivityFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(ActivityFeed_.season));
         final List<ActivityFeed> entries = activityFeedRepository.findAll(seasonSpec);
         writeCsv(ActivityFeed.class, entries, response, "Activities-" + season + ".csv");
     }
@@ -73,7 +73,7 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
     @ApiOperation(value = "Large catch reporting feed", produces = "text/csv")
     public void largeCatches(@PathVariable("season") final SeasonFilter season,
                              final HttpServletResponse response) throws IOException {
-        Specification<LargeCatchFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(LargeCatchFeed_.season));
+        final Specification<LargeCatchFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(LargeCatchFeed_.season));
         final List<LargeCatchFeed> entries = largeCatchFeedRepository.findAll(seasonSpec);
         writeCsv(LargeCatchFeed.class, entries, response, "LargeCatchFeed-" + season + ".csv");
     }
@@ -82,7 +82,7 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
     @ApiOperation(value = "Catch submission data feed", produces = "text/csv")
     public void smallCatches(@PathVariable("season") final SeasonFilter season,
                              final HttpServletResponse response) throws IOException {
-        Specification<SmallCatchFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(SmallCatchFeed_.season));
+        final Specification<SmallCatchFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(SmallCatchFeed_.season));
         final List<SmallCatchFeed> entries = smallCatchFeedRepository.findAll(seasonSpec);
         writeCsv(SmallCatchFeed.class, entries, response, "SmallCatchFeed-" + season + ".csv");
     }
@@ -91,7 +91,7 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
     @ApiOperation(value = "Catch submission data feed", produces = "text/csv")
     public void smallCatchCounts(@PathVariable("season") final SeasonFilter season,
                                  final HttpServletResponse response) throws IOException {
-        Specification<SmallCatchCountFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(SmallCatchCountFeed_.season));
+        final Specification<SmallCatchCountFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(SmallCatchCountFeed_.season));
         final List<SmallCatchCountFeed> entries = smallCatchCountFeedRepository.findAll(seasonSpec);
         writeCsv(SmallCatchCountFeed.class, entries, response, "SmallCatchCountFeed-" + season + ".csv");
     }
