@@ -109,7 +109,6 @@ public abstract class AbstractConstraintValidator<A extends Annotation, T> imple
      */
     protected final boolean handleError(final ConstraintValidatorContext context, final String code,
                                         final String propertyName) {
-        // FIXME: Refactor everything?!
         return ValidationUtil.handleError(context, getErrorPrefix() + "_" + code, b -> b.addPropertyNode(propertyName).addBeanNode());
     }
 

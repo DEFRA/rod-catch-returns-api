@@ -9,16 +9,13 @@ jobs:
   include:
     - stage: test
       script:
-        - "./mvnw -B verify"
+        - "./mvnw -B verify sonar:sonar"
 jdk:
   - openjdk11
 
 addons:
   sonarcloud:
     organization: "defra"
-
-script:
-  - sonar-scanner
 
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter

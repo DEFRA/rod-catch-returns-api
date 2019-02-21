@@ -21,6 +21,11 @@ import java.util.Calendar;
 @RequiredArgsConstructor
 @Slf4j
 public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catch> {
+    private static final String PROPERTY_DATE_CAUGHT = "dateCaught";
+    private static final String PROPERTY_METHOD = "method";
+    private static final String PROPERTY_SPECIES = "species";
+    private static final String PROPERTY_ACTIVITY = "activity";
+
     /**
      * Maximum possible mass of a salmon/sea trout (world record is about 48kg)
      */
@@ -45,7 +50,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      * @return true if valid, false otherwise
      */
     private boolean checkActivity(final Catch catchEntry, final ConstraintValidatorContext context) {
-        return catchEntry.getActivity() != null || handleError(context, "ACTIVITY_REQUIRED", b -> b.addPropertyNode("activity"));
+        return catchEntry.getActivity() != null || handleError(context, "ACTIVITY_REQUIRED", b -> b.addPropertyNode(PROPERTY_ACTIVITY));
     }
 
     /**
@@ -57,18 +62,18 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      */
     private boolean checkDate(final Catch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getDateCaught() == null) {
-            return handleError(context, "DATE_REQUIRED", b -> b.addPropertyNode("dateCaught"));
+            return handleError(context, "DATE_REQUIRED", b -> b.addPropertyNode(PROPERTY_DATE_CAUGHT));
         }
         if (catchEntry.getSubmission() != null) {
             final int yearCaught = DateUtils.toCalendar(catchEntry.getDateCaught()).get(Calendar.YEAR);
             if (yearCaught != catchEntry.getSubmission().getSeason().intValue()) {
-                return handleError(context, "YEAR_MISMATCH", b -> b.addPropertyNode("dateCaught"));
+                return handleError(context, "YEAR_MISMATCH", b -> b.addPropertyNode(PROPERTY_DATE_CAUGHT));
             }
         }
 
         final LocalDate dateCaught = catchEntry.getDateCaught().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         if (dateCaught.isAfter(LocalDate.now())) {
-            return handleError(context, "DATE_IN_FUTURE", b -> b.addPropertyNode("dateCaught"));
+            return handleError(context, "DATE_IN_FUTURE", b -> b.addPropertyNode(PROPERTY_DATE_CAUGHT));
         }
         return true;
     }
@@ -81,7 +86,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      * @return true if valid, false otherwise
      */
     private boolean checkSpecies(final Catch catchEntry, final ConstraintValidatorContext context) {
-        return catchEntry.getSpecies() != null || handleError(context, "SPECIES_REQUIRED", b -> b.addPropertyNode("species"));
+        return catchEntry.getSpecies() != null || handleError(context, "SPECIES_REQUIRED", b -> b.addPropertyNode(PROPERTY_SPECIES));
     }
 
     /**
@@ -150,7 +155,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      * @return true if valid, false otherwise
      */
     private boolean checkMethod(final Catch catchEntry, final ConstraintValidatorContext context) {
-        return catchEntry.getMethod() != null || handleError(context, "METHOD_REQUIRED", b -> b.addPropertyNode("method"));
+        return catchEntry.getMethod() != null || handleError(context, "METHOD_REQUIRED", b -> b.addPropertyNode(PROPERTY_METHOD));
     }
 
     /**
@@ -161,7 +166,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      * @return true if valid, false otherwise
      */
     private boolean checkMethodPermissions(final Catch catchEntry, final ConstraintValidatorContext context) {
-        return checkRestrictedEntity(catchEntry.getMethod(), "method", context);
+        return checkRestrictedEntity(catchEntry.getMethod(), PROPERTY_METHOD, context);
     }
 
 

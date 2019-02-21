@@ -13,10 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 
 import java.util.Optional;
@@ -54,15 +52,6 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
             responseEntity = new ResponseEntity<>(licence.get(), HttpStatus.OK);
         }
         return responseEntity;
-    }
-
-    /**
-     * @return 405, "Method Not Allowed"
-     */
-    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST, RequestMethod.DELETE}, value = "/*")
-    @ApiIgnore
-    public ResponseEntity<Licence> disabledMethods() {
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @Override

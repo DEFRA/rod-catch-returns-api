@@ -3,6 +3,7 @@ package uk.gov.defra.datareturns.test.referencedata;
 import io.restassured.response.ValidatableResponse;
 import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -134,6 +135,7 @@ public class InternalUseOnlyEntityIT {
         sub.create();
         final TestActivity activity = sub.withActivity().river(internalRiverId).daysFishedWithMandatoryRelease(1).daysFishedOther(1);
         activity.create();
+        Assertions.assertThat(activity.getUrl()).isNotNull();
     }
 
     @Test

@@ -46,9 +46,9 @@ public class GrilseProbability extends AbstractBaseEntity<Long> {
      */
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
+    @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
-    @ApiModelProperty(readOnly = true)
+    @ApiModelProperty(accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Setter(AccessLevel.NONE)
     private Long id;
 

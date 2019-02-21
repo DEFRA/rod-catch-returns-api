@@ -14,16 +14,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
 
+
 /**
  * Reference data repository
  * Prevents reference data from being modified by unauthorized users
  *
- * @param <E>  the entity this repository will serve
- * @param <ID> the generic type of the entity identifier
+ * @param <E> the entity this repository will serve
+ * @param <I> the generic type of the entity identifier
  * @author Sam Gardner-Dell
  */
 @NoRepositoryBean
-public interface ReferenceDataRepository<E extends AbstractBaseEntity, ID extends Serializable> extends BaseRepository<E, ID> {
+public interface ReferenceDataRepository<E extends AbstractBaseEntity, I extends Serializable> extends BaseRepository<E, I> {
     @Override
     @HasReferenceDataWrite
     void deleteAll(@NonNull Iterable<? extends E> entities);
@@ -45,7 +46,7 @@ public interface ReferenceDataRepository<E extends AbstractBaseEntity, ID extend
 
     @Override
     @HasReferenceDataWrite
-    void deleteById(@NonNull ID id);
+    void deleteById(@NonNull I id);
 
     @Override
     @HasReferenceDataWrite

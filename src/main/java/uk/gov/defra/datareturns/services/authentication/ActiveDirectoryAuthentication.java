@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,7 @@ public class ActiveDirectoryAuthentication implements ActiveDirectoryAuthenticat
     @Override
     @Cacheable(cacheNames = "crm-aad-auth",
                key = "{ #authentication.name, #authentication.credentials }")
-    public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(final Authentication authentication) {
         final String username = authentication.getName();
         final String password = authentication.getCredentials().toString();
         try {

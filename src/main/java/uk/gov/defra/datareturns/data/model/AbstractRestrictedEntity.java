@@ -9,7 +9,7 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 @Getter
 @Setter
-public abstract class AbstractRestrictedEntity<ID> extends AbstractBaseEntity<ID> {
+public abstract class AbstractRestrictedEntity<I> extends AbstractBaseEntity<I> {
     @Column
     private boolean internal = false;
 }

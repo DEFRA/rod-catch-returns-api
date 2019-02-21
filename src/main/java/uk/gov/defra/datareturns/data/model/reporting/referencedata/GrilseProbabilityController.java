@@ -72,9 +72,9 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                   consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                   produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ResponseEntity<?> post(@PathVariable("season") final Short season,
-                                  @RequestParam(value = "overwrite", required = false) final boolean overwrite,
-                                  final InputStream inputStream) {
+    public ResponseEntity<Object> post(@PathVariable("season") final Short season,
+                                       @RequestParam(value = "overwrite", required = false) final boolean overwrite,
+                                       final InputStream inputStream) {
         final GrilseDataLoader loader = new GrilseDataLoader(inputStream);
         final List<GrilseProbability> existing = grilseProbabilityRepository.findBySeason(season);
         if (!existing.isEmpty()) {

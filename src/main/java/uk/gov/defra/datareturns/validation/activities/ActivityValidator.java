@@ -15,6 +15,10 @@ import javax.validation.ConstraintValidatorContext;
 @RequiredArgsConstructor
 @Slf4j
 public class ActivityValidator extends AbstractConstraintValidator<ValidActivity, Activity> {
+    private static final String PROPERTY_RIVER = "river";
+    private static final String PROPERTY_DAYS_FISHED_WITH_MANDATORY_RELEASE = "daysFishedWithMandatoryRelease";
+    private static final String PROPERTY_DAYS_FISHED_OTHER = "daysFishedOther";
+
     @Override
     public void initialize(final ValidActivity constraintAnnotation) {
         super.addChecks(this::checkSubmission, this::checkRiver, this::checkRiverPermissions, this::checkUniqueRiverPerSubmission, this::checkDays);
@@ -28,7 +32,7 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
      * @return true if valid, false otherwise
      */
     private boolean checkRiver(final Activity activity, final ConstraintValidatorContext context) {
-        return activity.getRiver() != null || handleError(context, "RIVER_REQUIRED", b -> b.addPropertyNode("river"));
+        return activity.getRiver() != null || handleError(context, "RIVER_REQUIRED", b -> b.addPropertyNode(PROPERTY_RIVER));
     }
 
     /**
@@ -39,7 +43,7 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
      * @return true if valid, false otherwise
      */
     private boolean checkRiverPermissions(final Activity activity, final ConstraintValidatorContext context) {
-        return checkRestrictedEntity(activity.getRiver(), "river", context);
+        return checkRestrictedEntity(activity.getRiver(), PROPERTY_RIVER, context);
     }
 
 
@@ -56,7 +60,7 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
                     .filter(a -> activity != a && activity.getRiver().equals(a.getRiver()))
                     .count();
             if (riverCount > 0) {
-                return handleError(context, "RIVER_DUPLICATE_FOUND", b -> b.addPropertyNode("river"));
+                return handleError(context, "RIVER_DUPLICATE_FOUND", b -> b.addPropertyNode(PROPERTY_RIVER));
             }
 
         }
@@ -72,10 +76,8 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
      */
     private boolean checkDays(final Activity activity, final ConstraintValidatorContext context) {
         boolean valid = checkDaysMandatoryRelease(activity, context) && checkDaysOther(activity, context);
-        if (valid) {
-            if (activity.getDaysFishedWithMandatoryRelease() < 1 && activity.getDaysFishedOther() < 1) {
-                valid = handleError(context, "DAYS_FISHED_NOT_GREATER_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
-            }
+        if (valid && activity.getDaysFishedWithMandatoryRelease() < 1 && activity.getDaysFishedOther() < 1) {
+            valid = handleError(context, "DAYS_FISHED_NOT_GREATER_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
         }
         return valid;
     }
@@ -89,7 +91,7 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
      */
     private boolean checkDaysMandatoryRelease(final Activity activity, final ConstraintValidatorContext context) {
         final int maxDaysMandatory = activity.getSubmission() != null && activity.getSubmission().getSeason() % 4 == 0 ? 168 : 167;
-        return checkDaysWithinLimit("DAYS_FISHED_WITH_MANDATORY_RELEASE", "daysFishedWithMandatoryRelease",
+        return checkDaysWithinLimit("DAYS_FISHED_WITH_MANDATORY_RELEASE", PROPERTY_DAYS_FISHED_WITH_MANDATORY_RELEASE,
                 maxDaysMandatory, activity.getDaysFishedWithMandatoryRelease(), context);
     }
 
@@ -101,7 +103,7 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
      * @return true if valid, false otherwise
      */
     private boolean checkDaysOther(final Activity activity, final ConstraintValidatorContext context) {
-        return checkDaysWithinLimit("DAYS_FISHED_OTHER", "daysFishedOther", 198, activity.getDaysFishedOther(), context);
+        return checkDaysWithinLimit("DAYS_FISHED_OTHER", PROPERTY_DAYS_FISHED_OTHER, 198, activity.getDaysFishedOther(), context);
     }
 
     private boolean checkDaysWithinLimit(final String errorPrefix, final String errorField, final int maxAllowedDays, final Short actualValue,

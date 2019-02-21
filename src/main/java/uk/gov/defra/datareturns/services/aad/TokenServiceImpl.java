@@ -61,21 +61,21 @@ public class TokenServiceImpl implements TokenService {
             try {
                 final AuthenticationContext context = new AuthenticationContext(aadConfiguration.getAuthority().toString(), true, service);
                 return context.acquireToken(endpoint.getUrl().toString(), aadConfiguration.getIdentityClientId(), username, password, null).get();
-            } catch (final Throwable throwable) {
+            } catch (final Exception ex) {
                 // handle adal4j AuthenticationExceptions and convert to spring authentication exceptions as required.
                 // sadly the only way to do this is by looking at the exception message itself.
-                if (throwable.getCause() instanceof AuthenticationException) {
-                    final AuthenticationException e = (AuthenticationException) throwable.getCause();
-                    if (e.getMessage().contains("ID3242: The security token could not be authenticated or authorized")) {
+                if (ex.getCause() instanceof AuthenticationException) {
+                    final AuthenticationException authEx = (AuthenticationException) ex.getCause();
+                    if (authEx.getMessage().contains("ID3242: The security token could not be authenticated or authorized")) {
                         // adfs returns a 500 response (?!) with a soap envelope on authentication failure with a valid domain
-                        throw new BadCredentialsException("AAD authentication failed - no identity was found for the given credentials.", e);
-                    } else if (e.getMessage().contains("AADSTS90002: Tenant not found.")) { // domain specified but not recognised.
-                        throw new BadCredentialsException("AAD authentication failed - invalid domain", e);
-                    } else if (e.getMessage().contains("AADSTS50034: The user account does not exist")) { // no domain specified in username
-                        throw new BadCredentialsException("AAD authentication failed - the user account does not exist in the directory.", e);
+                        throw new BadCredentialsException("AAD authentication failed - no identity was found for the given credentials.", authEx);
+                    } else if (authEx.getMessage().contains("AADSTS90002: Tenant not found.")) { // domain specified but not recognised.
+                        throw new BadCredentialsException("AAD authentication failed - invalid domain", authEx);
+                    } else if (authEx.getMessage().contains("AADSTS50034: The user account does not exist")) { // no domain specified in username
+                        throw new BadCredentialsException("AAD authentication failed - the user account does not exist in the directory.", authEx);
                     }
                 }
-                throw new AuthenticationServiceException("Error fetching identity token", throwable);
+                throw new AuthenticationServiceException("Error fetching identity token", ex);
             } finally {
                 service.shutdown();
             }

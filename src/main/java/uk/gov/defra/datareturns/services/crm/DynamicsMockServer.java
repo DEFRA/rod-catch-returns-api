@@ -17,8 +17,8 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.services.aad.MockTokenServiceImpl;
-import uk.gov.defra.datareturns.services.crm.entity.CrmRoles;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
+import uk.gov.defra.datareturns.services.crm.entity.CrmRoles;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -54,7 +54,7 @@ public final class DynamicsMockServer {
     }
 
     private static void setupGetContactByLicenceNumberMock(final MockRestServiceServer restServiceServer) {
-        setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetContactByLicenceAndPostcode", (request) -> {
+        setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetContactByLicenceAndPostcode", request -> {
             final CrmLicence.QueryParams requestBody = readRequestBody(request, CrmLicence.QueryParams.class);
             final CrmLicence responseBody = new CrmLicence();
             final DynamicsMockData.Entry entry = DynamicsMockData.get(requestBody.getPermissionNumber());
@@ -69,16 +69,16 @@ public final class DynamicsMockServer {
 
     private static void setupCreateRCRActivityMock(final MockRestServiceServer restServiceServer) {
         setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_CreateRCRActivity",
-                (request) -> new MockClientHttpResponse(new byte[] {}, HttpStatus.CREATED));
+                request -> new MockClientHttpResponse(new byte[] {}, HttpStatus.CREATED));
     }
 
     private static void setupUpdateRCRActivityMock(final MockRestServiceServer restServiceServer) {
         setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_UpdateRCRActivity",
-                (request) -> new MockClientHttpResponse(new byte[] {}, HttpStatus.CREATED));
+                request -> new MockClientHttpResponse(new byte[] {}, HttpStatus.CREATED));
     }
 
     private static void setupGetRcrRolesByUserMock(final MockRestServiceServer restServiceServer) {
-        setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetRcrRolesByUser", (request) -> {
+        setupCrmMock(restServiceServer, HttpMethod.POST, "/api/data/v9.0/defra_GetRcrRolesByUser", request -> {
             Assert.notNull(request, "request should not be null");
             final Matcher tokenMatcher = BEARER_TOKEN_PATTERN.matcher(Objects.toString(request.getHeaders().getFirst("Authorization")));
             CrmRoles responseBody = null;
