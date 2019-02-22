@@ -48,29 +48,29 @@ public class GrilseProbabilitiesReportingIT {
         CsvUtil.CsvReadResult<Object[]> result = readCsvFromResponse(getResponse);
 
         Assertions.assertThat(result.getHeaders()).containsExactly("Season", "Month", "Mass (lbs)", "Probability");
-        Assertions.assertThat(result.getRows()).hasSize(69);
+        Assertions.assertThat(result.getRows()).hasSize(62);
         // June should have 6 probability values for 0-6lbs
-        Assertions.assertThat(result.getRows()).filteredOn(s -> "6".equals(s[1])).hasSize(6)
-                .extracting(s -> s[2]).containsExactly("0", "1", "2", "3", "4", "5");
+        Assertions.assertThat(result.getRows()).filteredOn(s -> "6".equals(s[1])).hasSize(5)
+                .extracting(s -> s[2]).containsExactly("1", "2", "3", "4", "5");
 
         // July should have 9 probability values for 0-8lbs
-        Assertions.assertThat(result.getRows()).filteredOn(s -> "7".equals(s[1])).hasSize(9)
-                .extracting(s -> s[2]).containsExactly("0", "1", "2", "3", "4", "5", "6", "7", "8");
+        Assertions.assertThat(result.getRows()).filteredOn(s -> "7".equals(s[1])).hasSize(8)
+                .extracting(s -> s[2]).containsExactly("1", "2", "3", "4", "5", "6", "7", "8");
         // August should have 10 probability values for 0-9lbs
-        Assertions.assertThat(result.getRows()).filteredOn(s -> "8".equals(s[1])).hasSize(10)
-                .extracting(s -> s[2]).containsExactly("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+        Assertions.assertThat(result.getRows()).filteredOn(s -> "8".equals(s[1])).hasSize(9)
+                .extracting(s -> s[2]).containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9");
         // September should have 12 probability values for 0-11lbs
-        Assertions.assertThat(result.getRows()).filteredOn(s -> "9".equals(s[1])).hasSize(12)
-                .extracting(s -> s[2]).containsExactly("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
+        Assertions.assertThat(result.getRows()).filteredOn(s -> "9".equals(s[1])).hasSize(11)
+                .extracting(s -> s[2]).containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
         // October should have 12 probability values for 0-11lbs
-        Assertions.assertThat(result.getRows()).filteredOn(s -> "10".equals(s[1])).hasSize(12)
-                .extracting(s -> s[2]).containsExactly("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
+        Assertions.assertThat(result.getRows()).filteredOn(s -> "10".equals(s[1])).hasSize(11)
+                .extracting(s -> s[2]).containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
         // November should have 11 probability values for 0-11lbs (with no value for 10lbs)
-        Assertions.assertThat(result.getRows()).filteredOn(s -> "11".equals(s[1])).hasSize(11)
-                .extracting(s -> s[2]).containsExactly("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "11");
+        Assertions.assertThat(result.getRows()).filteredOn(s -> "11".equals(s[1])).hasSize(10)
+                .extracting(s -> s[2]).containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9", "11");
         // December should have 9 probability values for 0-9lbs (with no value for 3lbs)
-        Assertions.assertThat(result.getRows()).filteredOn(s -> "12".equals(s[1])).hasSize(9)
-                .extracting(s -> s[2]).containsExactly("0", "1", "2", "4", "5", "6", "7", "8", "9");
+        Assertions.assertThat(result.getRows()).filteredOn(s -> "12".equals(s[1])).hasSize(8)
+                .extracting(s -> s[2]).containsExactly("1", "2", "4", "5", "6", "7", "8", "9");
 
 
         getResponse = getEntity("reporting/reference/grilse-probabilities/2017");

@@ -145,10 +145,6 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                     final BigDecimal probability = new BigDecimal(Objects.toString(rowData[fieldIndex]));
                     // Only add a grilse probability value if the probability is greater than zero (reporting assumes 0 for any missing data point)
                     if (probability.compareTo(BigDecimal.ZERO) > 0) {
-                        // Duplicate the data for weight=1 to weight=0 (to capture values which are rounded down to zero rather than rounded up)
-                        if (weightVal == 1 && !weightsProcessed.contains((short) 0)) {
-                            grilseProbabilities.add(GrilseProbability.of(null, season, (short) month.getValue(), (short) 0, probability));
-                        }
                         grilseProbabilities.add(GrilseProbability.of(null, season, (short) month.getValue(), weightVal, probability));
                     }
                 });
