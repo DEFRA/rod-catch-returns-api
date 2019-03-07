@@ -23,7 +23,9 @@ import java.util.Calendar;
 @Slf4j
 public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catch> {
     private static final String PROPERTY_DATE_CAUGHT = "dateCaught";
+    private static final String PROPERTY_MASS = "mass";
     private static final String PROPERTY_METHOD = "method";
+    private static final String PROPERTY_RELEASED = "released";
     private static final String PROPERTY_SPECIES = "species";
     private static final String PROPERTY_ACTIVITY = "activity";
 
@@ -40,7 +42,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     @Override
     public void initialize(final ValidCatch constraintAnnotation) {
         super.addChecks(this::checkSubmission, this::checkActivity, this::checkDate, this::checkSpecies,
-                this::checkMass, this::checkMassValue, this::checkMassLimits, this::checkMethod, this::checkMethodPermissions);
+                this::checkMass, this::checkMassValue, this::checkMassLimits, this::checkMethod, this::checkMethodPermissions, this::checkReleased);
     }
 
     /**
@@ -51,7 +53,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      * @return true if valid, false otherwise
      */
     private boolean checkActivity(final Catch catchEntry, final ConstraintValidatorContext context) {
-        return catchEntry.getActivity() != null || handleError(context, "ACTIVITY_REQUIRED", b -> b.addPropertyNode(PROPERTY_ACTIVITY));
+        return catchEntry.getActivity() != null || handleError(context, "ACTIVITY_REQUIRED", PROPERTY_ACTIVITY);
     }
 
     /**
@@ -63,18 +65,18 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      */
     private boolean checkDate(final Catch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getDateCaught() == null) {
-            return handleError(context, "DATE_REQUIRED", b -> b.addPropertyNode(PROPERTY_DATE_CAUGHT));
+            return handleError(context, "DATE_REQUIRED", PROPERTY_DATE_CAUGHT);
         }
         if (catchEntry.getSubmission() != null) {
             final int yearCaught = DateUtils.toCalendar(catchEntry.getDateCaught()).get(Calendar.YEAR);
             if (yearCaught != catchEntry.getSubmission().getSeason().intValue()) {
-                return handleError(context, "YEAR_MISMATCH", b -> b.addPropertyNode(PROPERTY_DATE_CAUGHT));
+                return handleError(context, "YEAR_MISMATCH", PROPERTY_DATE_CAUGHT);
             }
         }
 
         final LocalDate dateCaught = Instant.ofEpochMilli(catchEntry.getDateCaught().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
         if (dateCaught.isAfter(LocalDate.now())) {
-            return handleError(context, "DATE_IN_FUTURE", b -> b.addPropertyNode(PROPERTY_DATE_CAUGHT));
+            return handleError(context, "DATE_IN_FUTURE", PROPERTY_DATE_CAUGHT);
         }
         return true;
     }
@@ -87,7 +89,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      * @return true if valid, false otherwise
      */
     private boolean checkSpecies(final Catch catchEntry, final ConstraintValidatorContext context) {
-        return catchEntry.getSpecies() != null || handleError(context, "SPECIES_REQUIRED", b -> b.addPropertyNode(PROPERTY_SPECIES));
+        return catchEntry.getSpecies() != null || handleError(context, "SPECIES_REQUIRED", PROPERTY_SPECIES);
     }
 
     /**
@@ -99,7 +101,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      */
     private boolean checkMass(final Catch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getMass() == null) {
-            return handleError(context, "MASS_REQUIRED", b -> b.addPropertyNode("mass"));
+            return handleError(context, "MASS_REQUIRED", PROPERTY_MASS);
         }
         return catchEntry.getMass().getType() != null || handleError(context, "MASS_TYPE_REQUIRED",
                 b -> b.addPropertyNode("mass").addPropertyNode("type"));
@@ -139,9 +141,9 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
 
             if (catchEntry.getMass().getKg() != null) {
                 if (MIN_FISH_MASS_KG.compareTo(catchEntry.getMass().getKg()) > -1) {
-                    return handleError(context, "MASS_BELOW_MINIMUM", b -> b.addPropertyNode("mass"));
+                    return handleError(context, "MASS_BELOW_MINIMUM", PROPERTY_MASS);
                 } else if (MAX_FISH_MASS_KG.compareTo(catchEntry.getMass().getKg()) < 1) {
-                    return handleError(context, "MASS_MAX_EXCEEDED", b -> b.addPropertyNode("mass"));
+                    return handleError(context, "MASS_MAX_EXCEEDED", PROPERTY_MASS);
                 }
             }
         }
@@ -156,7 +158,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      * @return true if valid, false otherwise
      */
     private boolean checkMethod(final Catch catchEntry, final ConstraintValidatorContext context) {
-        return catchEntry.getMethod() != null || handleError(context, "METHOD_REQUIRED", b -> b.addPropertyNode(PROPERTY_METHOD));
+        return catchEntry.getMethod() != null || handleError(context, "METHOD_REQUIRED", PROPERTY_METHOD);
     }
 
     /**
@@ -168,6 +170,18 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      */
     private boolean checkMethodPermissions(final Catch catchEntry, final ConstraintValidatorContext context) {
         return checkRestrictedEntity(catchEntry.getMethod(), PROPERTY_METHOD, context);
+    }
+
+
+    /**
+     * Check that the released property has been provided
+     *
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
+    private boolean checkReleased(final Catch catchEntry, final ConstraintValidatorContext context) {
+        return catchEntry.getReleased() != null || handleError(context, "RELEASED_REQUIRED", PROPERTY_RELEASED);
     }
 
 

@@ -143,7 +143,7 @@ public class ReportingExclusionTests {
                 .hasFieldOrPropertyWithValue("methodId", largeCatch.getMethod().getId())
                 .hasFieldOrPropertyWithValue("speciesId", largeCatch.getSpecies().getId())
                 .hasFieldOrPropertyWithValue("mass", largeCatch.getMass().getKg())
-                .hasFieldOrPropertyWithValue("released", largeCatch.isReleased());
+                .hasFieldOrPropertyWithValue("released", largeCatch.getReleased());
 
         Assertions.assertThat(getSmallCatchReportData()).hasSize(1).first()
                 .hasFieldOrPropertyWithValue("id", smallCatch.getId())

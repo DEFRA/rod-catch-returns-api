@@ -17,6 +17,12 @@ import java.util.Calendar;
 @RequiredArgsConstructor
 @Slf4j
 public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmission, Submission> {
+
+    private static final String PROPERTY_CONTACT_ID = "contactId";
+    private static final String PROPERTY_STATUS = "status";
+    private static final String PROPERTY_SEASON = "season";
+
+
     @Override
     public void initialize(final ValidSubmission constraintAnnotation) {
         super.addChecks(this::checkContact, this::checkSubmissionStatus, this::checkSubmissionSeason);
@@ -30,7 +36,7 @@ public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmis
      * @return true if valid, false otherwise
      */
     private boolean checkContact(final Submission submission, final ConstraintValidatorContext context) {
-        return StringUtils.isNotBlank(submission.getContactId()) || handleError(context, "CONTACT_ID_REQUIRED", b -> b.addPropertyNode("contactId"));
+        return StringUtils.isNotBlank(submission.getContactId()) || handleError(context, "CONTACT_ID_REQUIRED", PROPERTY_CONTACT_ID);
     }
 
     /**
@@ -41,7 +47,7 @@ public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmis
      * @return true if valid, false otherwise
      */
     private boolean checkSubmissionStatus(final Submission submission, final ConstraintValidatorContext context) {
-        return submission.getStatus() != null || handleError(context, "STATUS_REQUIRED", b -> b.addPropertyNode("status"));
+        return submission.getStatus() != null || handleError(context, "STATUS_REQUIRED", PROPERTY_STATUS);
     }
 
     /**
@@ -55,7 +61,7 @@ public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmis
         final int currentSeason = Calendar.getInstance().get(Calendar.YEAR);
         final int lastSeason = currentSeason - 1;
         return (submission.getSeason() != null && submission.getSeason() <= currentSeason && submission.getSeason() >= lastSeason)
-                || handleError(context, "SEASON_INVALID", b -> b.addPropertyNode("season"));
+                || handleError(context, "SEASON_INVALID", PROPERTY_SEASON);
     }
 
     @Override

@@ -182,4 +182,10 @@ public class CatchTests {
         final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_METHOD_REQUIRED"));
     }
+    @Test
+    public void testCatchWithoutReleasedFails() {
+        testCatch.setReleased(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_RELEASED_REQUIRED"));
+    }
 }

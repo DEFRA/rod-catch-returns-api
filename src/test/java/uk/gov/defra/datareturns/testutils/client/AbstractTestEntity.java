@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public abstract class AbstractTestEntity {
     private final Map<String, Object> state = new HashMap<>();
@@ -37,7 +36,8 @@ public abstract class AbstractTestEntity {
         if (url != null) {
             throw new UnsupportedOperationException("Attempted to create a pre-existing entity");
         }
-        final Map<String, Object> values = modifications.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get()));
+        final Map<String, Object> values = modifications.entrySet().stream()
+                .collect(HashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue().get()), HashMap::putAll);
         this.url = IntegrationTestUtils.createEntity(getResourcePath(), new JSONObject(values).toString(), responseAssertions);
         this.state.putAll(values);
         this.modifications.clear();
@@ -50,7 +50,8 @@ public abstract class AbstractTestEntity {
         if (modifications.isEmpty()) {
             throw new UnsupportedOperationException("No changes to persist");
         }
-        final Map<String, Object> values = modifications.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get()));
+        final Map<String, Object> values = modifications.entrySet().stream()
+                .collect(HashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue().get()), HashMap::putAll);
         final JSONObject json = new JSONObject(values);
         IntegrationTestUtils.patchEntity(url, json.toString(), (r) -> {
             r.statusCode(HttpStatus.OK.value());

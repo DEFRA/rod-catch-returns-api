@@ -65,7 +65,7 @@ public class TestCatch extends AbstractTestEntity {
         return this;
     }
 
-    public final TestCatch released(final boolean released) {
+    public final TestCatch released(final Boolean released) {
         modify(RELEASED, released);
         return this;
     }

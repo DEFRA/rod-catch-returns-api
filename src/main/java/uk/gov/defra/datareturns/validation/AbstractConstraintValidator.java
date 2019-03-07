@@ -59,7 +59,7 @@ public abstract class AbstractConstraintValidator<A extends Annotation, T> imple
      * @return true if the object's reference to its submission is not null, false otherwise
      */
     public boolean checkSubmission(final HasSubmission obj, final ConstraintValidatorContext context) {
-        return obj.getSubmission() != null || handleError(context, "SUBMISSION_REQUIRED", b -> b.addPropertyNode("submission"));
+        return obj.getSubmission() != null || handleError(context, "SUBMISSION_REQUIRED", "submission");
     }
 
     /**

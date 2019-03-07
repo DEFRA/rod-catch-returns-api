@@ -32,7 +32,7 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
      * @return true if valid, false otherwise
      */
     private boolean checkRiver(final Activity activity, final ConstraintValidatorContext context) {
-        return activity.getRiver() != null || handleError(context, "RIVER_REQUIRED", b -> b.addPropertyNode(PROPERTY_RIVER));
+        return activity.getRiver() != null || handleError(context, "RIVER_REQUIRED", PROPERTY_RIVER);
     }
 
     /**
@@ -60,7 +60,7 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
                     .filter(a -> activity != a && activity.getRiver().equals(a.getRiver()))
                     .count();
             if (riverCount > 0) {
-                return handleError(context, "RIVER_DUPLICATE_FOUND", b -> b.addPropertyNode(PROPERTY_RIVER));
+                return handleError(context, "RIVER_DUPLICATE_FOUND", PROPERTY_RIVER);
             }
 
         }
@@ -110,11 +110,11 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
                                          final ConstraintValidatorContext context) {
         boolean valid = true;
         if (actualValue == null) {
-            valid = handleError(context, errorPrefix + "_REQUIRED", b -> b.addPropertyNode(errorField));
+            valid = handleError(context, errorPrefix + "_REQUIRED", errorField);
         } else if (actualValue < 0) {
-            valid = handleError(context, errorPrefix + "_NEGATIVE", b -> b.addPropertyNode(errorField));
+            valid = handleError(context, errorPrefix + "_NEGATIVE", errorField);
         } else if (actualValue > maxAllowedDays) {
-            valid = handleError(context, errorPrefix + "_MAX_EXCEEDED", b -> b.addPropertyNode(errorField));
+            valid = handleError(context, errorPrefix + "_MAX_EXCEEDED", errorField);
         }
         return valid;
     }
