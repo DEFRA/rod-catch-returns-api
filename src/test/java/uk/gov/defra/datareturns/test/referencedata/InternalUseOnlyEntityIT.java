@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.data.domain.Example;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.catches.CatchMass;
@@ -89,9 +88,10 @@ public class InternalUseOnlyEntityIT {
         activity.create();
         final TestSmallCatch sc = activity.withSmallCatch()
                 .month(Month.from(LocalDate.now()))
-                .counts(Pair.of(internalMethodId, 5))
+                .counts(TestSmallCatch.Count.of(internalMethodId, 5))
                 .released(5);
         sc.create(responseAssertions);
+
     }
 
     @Test

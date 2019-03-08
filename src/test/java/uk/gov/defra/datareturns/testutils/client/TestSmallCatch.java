@@ -1,7 +1,7 @@
 package uk.gov.defra.datareturns.testutils.client;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.data.util.Pair;
 
 import java.time.Month;
 import java.util.Arrays;
@@ -27,22 +27,26 @@ public class TestSmallCatch extends AbstractTestEntity {
     }
 
     public final TestSmallCatch month(final Month month) {
-        modify(MONTH, month.name());
+        return month(month.name());
+    }
+
+
+    public final TestSmallCatch month(final String month) {
+        modify(MONTH, month);
         return this;
     }
 
-    @SafeVarargs
-    @SuppressWarnings("varargs")
-    public final TestSmallCatch counts(final Pair<String, Integer>... counts) {
-        final List<Map<String, Object>> countObj = Arrays.stream(counts).map(c -> {
+    public final TestSmallCatch counts(final Count... counts) {
+        final List<Map<String, Object>> countObj = Arrays.stream(counts).map(entry -> {
             Map<String, Object> countEntry = new HashMap<>();
-            countEntry.put("method", c.getFirst());
-            countEntry.put("count", c.getSecond());
+            countEntry.put("method", entry.getMethod());
+            countEntry.put("count", entry.getCount());
             return countEntry;
         }).collect(Collectors.toList());
         modify(COUNTS, () -> countObj);
         return this;
     }
+
 
     public final TestSmallCatch released(final int released) {
         modify(RELEASED, released);
@@ -57,5 +61,12 @@ public class TestSmallCatch extends AbstractTestEntity {
     @Override
     String getResourcePath() {
         return "/smallCatches";
+    }
+
+    @AllArgsConstructor(staticName = "of")
+    @Getter
+    public static class Count {
+        private final String method;
+        private final Integer count;
     }
 }

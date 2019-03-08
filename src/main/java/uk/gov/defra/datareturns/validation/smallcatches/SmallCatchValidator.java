@@ -23,11 +23,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallCatch, SmallCatch> {
+    private static final String PROPERTY_COUNTS = "counts";
+    private static final String PROPERTY_RELEASED = "released";
+    private static final String PROPERTY_MONTH = "month";
+    private static final String PROPERTY_ACTIVITY = "activity";
+
+
     @Override
     public void initialize(final ValidSmallCatch constraintAnnotation) {
         super.addChecks(
                 this::checkSubmission, this::checkActivity, this::checkMonth,
-                this::checkUniqueActivityAndMonth, this::checkCountsProvided, this::checkCountMethodDuplicates, this::checkReleased);
+                this::checkUniqueActivityAndMonth, this::checkCountsProvided, this::checkCountMethodDuplicates,
+                this::checkReleased, this::checkReleasedDoesNotExceedCounts);
     }
 
     /**
@@ -38,7 +45,7 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
      * @return true if valid, false otherwise
      */
     private boolean checkActivity(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
-        return smallCatch.getActivity() != null || handleError(context, "ACTIVITY_REQUIRED", b -> b.addPropertyNode("activity"));
+        return smallCatch.getActivity() != null || handleError(context, "ACTIVITY_REQUIRED", PROPERTY_ACTIVITY);
     }
 
     /**
@@ -52,10 +59,10 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
         final LocalDate today = LocalDate.now();
         boolean valid = true;
         if (smallCatch.getMonth() == null) {
-            valid = handleError(context, "MONTH_REQUIRED", b -> b.addPropertyNode("month"));
+            valid = handleError(context, "MONTH_REQUIRED", PROPERTY_MONTH);
         } else if (smallCatch.getMonth().getValue() > Month.from(today).getValue()
                 && smallCatch.getSubmission().getSeason() >= today.getYear()) {
-            valid = handleError(context, "MONTH_IN_FUTURE", b -> b.addPropertyNode("month"));
+            valid = handleError(context, "MONTH_IN_FUTURE", PROPERTY_MONTH);
         }
         return valid;
     }
@@ -68,7 +75,7 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
      * @return true if valid, false otherwise
      */
     private boolean checkCountsProvided(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
-        return CollectionUtils.isNotEmpty(smallCatch.getCounts()) || handleError(context, "COUNTS_REQUIRED", b -> b.addPropertyNode("counts"));
+        return CollectionUtils.isNotEmpty(smallCatch.getCounts()) || handleError(context, "COUNTS_REQUIRED", PROPERTY_COUNTS);
     }
 
     /**
@@ -104,14 +111,14 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
         if (CollectionUtils.isNotEmpty(smallCatch.getCounts())) {
             final List<Method> allMethodsUsed = smallCatch.getCounts().stream().map(SmallCatchCount::getMethod).collect(Collectors.toList());
             if (allMethodsUsed.size() != new HashSet<>(allMethodsUsed).size()) {
-                return handleError(context, "COUNTS_METHOD_DUPLICATE_FOUND", b -> b.addPropertyNode("counts"));
+                return handleError(context, "COUNTS_METHOD_DUPLICATE_FOUND", PROPERTY_COUNTS);
             }
         }
         return true;
     }
 
     /**
-     * Check that the released value is positive and that it is not greater than the total of the counts
+     * Check that the released value has been provided and is not negative
      *
      * @param smallCatch the {@link SmallCatch} to be validated
      * @param context    the validator context
@@ -119,20 +126,40 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
      */
     private boolean checkReleased(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
         if (smallCatch.getReleased() == null) {
-            return handleError(context, "RELEASED_REQUIRED", b -> b.addPropertyNode("released"));
+            return handleError(context, "RELEASED_REQUIRED", PROPERTY_RELEASED);
         }
         if (smallCatch.getReleased() < 0) {
-            return handleError(context, "RELEASED_NEGATIVE", b -> b.addPropertyNode("released"));
+            return handleError(context, "RELEASED_NEGATIVE", PROPERTY_RELEASED);
         }
+        return true;
+    }
 
-        if (CollectionUtils.isNotEmpty(smallCatch.getCounts())) {
-            final int total = smallCatch.getCounts().stream().mapToInt(SmallCatchCount::getCount).sum();
-            if (smallCatch.getReleased() > total) {
-                return handleError(context, "RELEASED_EXCEEDS_COUNTS", b -> b.addPropertyNode("released"));
+    /**
+     * Check that the released value does not exceed the sum of the fish caught
+     *
+     * @param smallCatch the {@link SmallCatch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
+    private boolean checkReleasedDoesNotExceedCounts(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
+        if (CollectionUtils.isNotEmpty(smallCatch.getCounts()) && smallCatch.getReleased() != null) {
+            boolean checkReleasedExceedsCounts = true;
+            int totalCaught = 0;
+
+            for (final SmallCatchCount c : smallCatch.getCounts()) {
+                if (c.getCount() == null) {
+                    checkReleasedExceedsCounts = false;
+                    break;
+                }
+                totalCaught += c.getCount();
+            }
+            if (checkReleasedExceedsCounts && smallCatch.getReleased() > totalCaught) {
+                return handleError(context, "RELEASED_EXCEEDS_COUNTS", PROPERTY_RELEASED);
             }
         }
         return true;
     }
+
 
     @Override
     public String getErrorPrefix() {

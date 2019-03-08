@@ -15,9 +15,12 @@ import javax.validation.ConstraintValidatorContext;
 @RequiredArgsConstructor
 @Slf4j
 public class SmallCatchCountValidator extends AbstractConstraintValidator<ValidSmallCatchCount, SmallCatchCount> {
+    private static final String PROPERTY_METHOD = "method";
+    private static final String PROPERTY_COUNT = "count";
+
     @Override
     public void initialize(final ValidSmallCatchCount constraintAnnotation) {
-        super.addChecks(this::checkMethod, this::checkMethodPermissions, this::checkCountGreaterThanZero);
+        super.addChecks(this::checkMethod, this::checkMethodPermissions, this::checkCount);
     }
 
     /**
@@ -28,7 +31,7 @@ public class SmallCatchCountValidator extends AbstractConstraintValidator<ValidS
      * @return true if valid, false otherwise
      */
     private boolean checkMethod(final SmallCatchCount count, final ConstraintValidatorContext context) {
-        return count.getMethod() != null || handleError(context, "METHOD_REQUIRED", b -> b.addPropertyNode("method"));
+        return count.getMethod() != null || handleError(context, "METHOD_REQUIRED", PROPERTY_METHOD);
     }
 
     /**
@@ -43,14 +46,17 @@ public class SmallCatchCountValidator extends AbstractConstraintValidator<ValidS
     }
 
     /**
-     * Check that the count is greater than zero
+     * Check that the count provided is valid
      *
      * @param count   the {@link SmallCatchCount} to be validated
      * @param context the validator context
      * @return true if valid, false otherwise
      */
-    private boolean checkCountGreaterThanZero(final SmallCatchCount count, final ConstraintValidatorContext context) {
-        return count.getCount() > 0 || handleError(context, "NOT_GREATER_THAN_ZERO", b -> b.addPropertyNode("count"));
+    private boolean checkCount(final SmallCatchCount count, final ConstraintValidatorContext context) {
+        if (count.getCount() == null) {
+            return handleError(context, "COUNT_REQUIRED", PROPERTY_COUNT);
+        }
+        return count.getCount() > 0 || handleError(context, "NOT_GREATER_THAN_ZERO", PROPERTY_COUNT);
     }
 
     @Override
