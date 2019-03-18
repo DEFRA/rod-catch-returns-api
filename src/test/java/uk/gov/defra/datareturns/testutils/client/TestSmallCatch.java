@@ -18,6 +18,7 @@ public class TestSmallCatch extends AbstractTestEntity {
     public static final String MONTH = "month";
     public static final String COUNTS = "counts";
     public static final String RELEASED = "released";
+    public static final String REPORTING_EXCLUSION = "reportingExclude";
 
     TestSmallCatch(final TestActivity activity) {
         modify(SUBMISSION, () -> activity.getSubmission().getUrl());
@@ -45,6 +46,11 @@ public class TestSmallCatch extends AbstractTestEntity {
 
     public final TestSmallCatch released(final int released) {
         modify(RELEASED, released);
+        return this;
+    }
+
+    public final TestSmallCatch reportingExclude(final Boolean exclude) {
+        modify(REPORTING_EXCLUSION, exclude);
         return this;
     }
 

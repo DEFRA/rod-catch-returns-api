@@ -127,4 +127,48 @@ public class SubmissionIT {
 
         sub.delete();
     }
+
+    @Test
+    public void testSubmissionExclusion() {
+        final String contactId = DynamicsMockData.get(TestLicences.getLicence(1)).getContactId();
+        final int season = Year.now().getValue() - 1;
+        final TestSubmission sub = TestSubmission.of(contactId, season);
+
+        final TestActivity act = sub.withActivity().river("rivers/3").daysFishedWithMandatoryRelease(20).daysFishedOther(5);
+        sub.create();
+        act.create();
+
+        // Update the activity
+        act.daysFishedOther(10);
+        act.update();
+
+        // Add a large catch
+        final TestCatch cat = act.withCatch()
+                .anyValidCatchDate()
+                .method("methods/1")
+                .species("species/1")
+                .mass(CatchMass.MeasurementType.METRIC, BigDecimal.ONE)
+                .released(false);
+        cat.create();
+
+        // Add a small catch
+        final TestSmallCatch sc = act.withSmallCatch()
+                .month(Month.JANUARY)
+                .counts(Pair.of("methods/1", 2), Pair.of("methods/2", 2), Pair.of("methods/3", 1))
+                .released(1);
+        sc.create();
+
+        // Mark the submission as submitted
+        sub.status("SUBMITTED");
+        sub.update();
+
+        sub.reportingExclude(true);
+        sub.update();
+
+        cat.reportingExclude(true);
+        cat.update();
+
+        sc.reportingExclude(true);
+        sc.update();
+    }
 }

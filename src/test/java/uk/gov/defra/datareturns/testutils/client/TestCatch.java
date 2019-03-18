@@ -18,6 +18,8 @@ public class TestCatch extends AbstractTestEntity {
     public static final String METHOD = "method";
     public static final String MASS = "mass";
     public static final String RELEASED = "released";
+    public static final String REPORTING_EXCLUSION = "reportingExclude";
+
 
     TestCatch(final TestActivity activity) {
         modify(SUBMISSION, () -> activity.getSubmission().getUrl());
@@ -43,6 +45,11 @@ public class TestCatch extends AbstractTestEntity {
 
     public final TestCatch method(final String method) {
         modify(METHOD, method);
+        return this;
+    }
+
+    public final TestCatch reportingExclude(final Boolean exclude) {
+        modify(REPORTING_EXCLUSION, exclude);
         return this;
     }
 

@@ -9,6 +9,7 @@ import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
 import javax.validation.ConstraintValidatorContext;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
@@ -71,7 +72,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
             }
         }
 
-        final LocalDate dateCaught = catchEntry.getDateCaught().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        final LocalDate dateCaught = Instant.ofEpochMilli(catchEntry.getDateCaught().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
         if (dateCaught.isAfter(LocalDate.now())) {
             return handleError(context, "DATE_IN_FUTURE", b -> b.addPropertyNode(PROPERTY_DATE_CAUGHT));
         }

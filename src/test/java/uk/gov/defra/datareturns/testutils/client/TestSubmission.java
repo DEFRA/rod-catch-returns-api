@@ -10,6 +10,7 @@ public class TestSubmission extends AbstractTestEntity {
     static final String SEASON = "season";
     static final String SOURCE = "source";
     static final String STATUS = "status";
+    static final String REPORTING_EXCLUSION = "reportingExclude";
 
     @Getter
     private final List<TestActivity> activities = new ArrayList<>();
@@ -37,6 +38,11 @@ public class TestSubmission extends AbstractTestEntity {
 
     public TestSubmission status(final String status) {
         modify(STATUS, status);
+        return this;
+    }
+
+    public TestSubmission reportingExclude(final Boolean exclude) {
+        modify(REPORTING_EXCLUSION, exclude);
         return this;
     }
 
