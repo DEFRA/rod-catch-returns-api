@@ -50,8 +50,10 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Year;
-import java.time.temporal.ChronoUnit;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -135,11 +137,12 @@ public class ReportingExclusionTests {
                 .hasFieldOrPropertyWithValue("daysFishedWithMandatoryRelease", activity.getDaysFishedWithMandatoryRelease())
                 .hasFieldOrPropertyWithValue("daysFishedOther", activity.getDaysFishedOther());
 
+        final LocalDate dateCaught = Instant.ofEpochMilli(largeCatch.getDateCaught().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
         Assertions.assertThat(getLargeCatchReportData()).hasSize(1).first()
                 .hasFieldOrPropertyWithValue("id", largeCatch.getId())
                 .hasFieldOrPropertyWithValue("season", submission.getSeason())
                 .hasFieldOrPropertyWithValue("activityId", largeCatch.getActivity().getId())
-                .hasFieldOrPropertyWithValue("dateCaught", Timestamp.from(largeCatch.getDateCaught().toInstant().truncatedTo(ChronoUnit.DAYS)))
+                .hasFieldOrPropertyWithValue("dateCaught", java.sql.Date.valueOf(dateCaught))
                 .hasFieldOrPropertyWithValue("methodId", largeCatch.getMethod().getId())
                 .hasFieldOrPropertyWithValue("speciesId", largeCatch.getSpecies().getId())
                 .hasFieldOrPropertyWithValue("mass", largeCatch.getMass().getKg())

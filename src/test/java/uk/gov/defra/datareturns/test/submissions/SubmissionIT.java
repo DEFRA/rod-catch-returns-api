@@ -153,7 +153,7 @@ public class SubmissionIT {
         // Add a small catch
         final TestSmallCatch sc = act.withSmallCatch()
                 .month(Month.JANUARY)
-                .counts(Pair.of("methods/1", 2), Pair.of("methods/2", 2), Pair.of("methods/3", 1))
+                .counts(TestSmallCatch.Count.of("methods/1", 2), TestSmallCatch.Count.of("methods/2", 2), TestSmallCatch.Count.of("methods/3", 1))
                 .released(1);
         sc.create();
 
