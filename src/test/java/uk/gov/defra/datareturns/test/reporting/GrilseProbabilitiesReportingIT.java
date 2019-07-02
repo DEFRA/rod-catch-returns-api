@@ -162,4 +162,20 @@ public class GrilseProbabilitiesReportingIT {
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
     }
+
+    @Test
+    public void testDuplicateHeaders() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/duplicate-headers.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("status", Matchers.equalTo(400))
+                .body("error", Matchers.equalTo("Bad Request"))
+                .body("message", Matchers.equalTo("Duplicated headers \"June, August\" in grilse probability data"));
+    }
+
+
 }

@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static uk.gov.defra.datareturns.util.CsvUtil.read;
@@ -108,6 +109,22 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
             data = read(stream);
 
             final Set<String> monthNames = Arrays.stream(Month.values()).map(Month::name).collect(Collectors.toSet());
+
+            // Test for duplicate headers
+            final Map<String, Long> headerCounts = Arrays.stream(data.getHeaders())
+                    .map(String::toLowerCase)
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+            final Set<String> duplicates = headerCounts.entrySet().stream()
+                    .filter(e -> e.getValue() > 1)
+                    .map(Map.Entry::getKey)
+                    .map(StringUtils::capitalize)
+                    .collect(Collectors.toSet());
+
+            if (duplicates.size() != 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Duplicated headers \"" + String.join(", ", duplicates) + "\" in grilse probability data");
+            }
 
             // Parse headers to determine the appropriate column indexes from which to extract data
             for (int i = 0; i < data.getHeaders().length; i++) {
