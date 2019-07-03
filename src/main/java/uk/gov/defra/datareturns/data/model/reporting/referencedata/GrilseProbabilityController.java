@@ -103,6 +103,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
         private final CsvUtil.CsvReadResult<Object[]> data;
         private final Map<Month, Integer> monthFieldIndexes = new HashMap<>();
         private int weightColumnIndex = -1;
+        private int numberOfHeaders = 0;
 
         public GrilseDataLoader(final InputStream stream) {
             // Read the csv data into a set of GrilseProbability beans and then set the season from the request path
@@ -125,6 +126,8 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Duplicated headers \"" + String.join(", ", duplicates) + "\" in grilse probability data");
             }
+
+            this.numberOfHeaders = data.getHeaders().length;
 
             // Parse headers to determine the appropriate column indexes from which to extract data
             for (int i = 0; i < data.getHeaders().length; i++) {
@@ -149,23 +152,49 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
         private List<GrilseProbability> transform(final Short season) {
             final List<GrilseProbability> grilseProbabilities = new ArrayList<>();
             final Set<Short> weightsProcessed = new HashSet<>();
+            short rownum = 0;
             for (final Object[] rowData : data.getRows()) {
-                // Extract the weight (in lbs) that this row of data belongs to and check that it isn't duplicated from a previously processed row.
-                final Short weightVal = Short.parseShort(Objects.toString(rowData[weightColumnIndex]));
-                if (!weightsProcessed.add(weightVal)) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "More than one row was found with the same weight value in the weight column");
-                }
+                rownum++;
 
-                // For each month column that was discovered, extract the probability.
-                monthFieldIndexes.forEach((month, fieldIndex) -> {
-                    final BigDecimal probability = new BigDecimal(Objects.toString(rowData[fieldIndex]));
-                    // Only add a grilse probability value if the probability is greater than zero (reporting assumes 0 for any missing data point)
-                    if (probability.compareTo(BigDecimal.ZERO) > 0) {
-                        grilseProbabilities.add(GrilseProbability.of(null, season, (short) month.getValue(), weightVal, probability));
+                try {
+                    // Check the number of data items in the row
+                    if (this.numberOfHeaders != rowData.length) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "The number of data items on a row: " + Objects.toString(rownum) + " does not match the header");
                     }
-                });
+
+                    /*
+                     * Extract the weight (in lbs) that this row of data belongs to and check that it isn't duplicated from a previously processed
+                     * row and that it is a short.
+                     */
+                    Short weightVal = Short.parseShort(Objects.toString(rowData[weightColumnIndex]));
+
+                    if (!weightsProcessed.add(weightVal)) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "More than one row was found with the same weight value in the weight column, row " + rownum);
+                    }
+
+                    // For each month column that was discovered, extract the probability.
+                    monthFieldIndexes.forEach((month, fieldIndex) -> {
+                        final BigDecimal probability = (rowData[fieldIndex] != null) ? new BigDecimal(Objects.toString(rowData[fieldIndex])) : BigDecimal.ZERO;
+                        // Only add a grilse probability value if the probability is between zero and 1)
+                        if (probability.compareTo(BigDecimal.ZERO) >= 0 && probability.compareTo(BigDecimal.ONE) <= 0) {
+                            if (probability.compareTo(BigDecimal.ZERO) > 0) {
+                                grilseProbabilities.add(GrilseProbability.of(null, season, (short) month.getValue(), weightVal, probability));
+                            }
+                        } else {
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                    "Found probabilities not between 0 and 1, e.g " + Objects.toString(probability));
+                        }
+                    });
+
+                } catch (NumberFormatException e) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Found weights that are not whole numbers in the weight column, e.g " + Objects.toString(rowData[weightColumnIndex]) + ""
+                                    + " on row " + rownum);
+                }
             }
+
             grilseProbabilities.sort(Comparator.comparingInt(GrilseProbability::getMassInPounds).thenComparing(GrilseProbability::getMonth));
             return grilseProbabilities;
         }

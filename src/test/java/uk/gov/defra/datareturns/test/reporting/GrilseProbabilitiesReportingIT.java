@@ -134,7 +134,7 @@ public class GrilseProbabilitiesReportingIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body("status", Matchers.equalTo(HttpStatus.BAD_REQUEST.value()))
                 .body("error", Matchers.equalTo("Bad Request"))
-                .body("message", Matchers.equalTo("More than one row was found with the same weight value in the weight column"));
+                .body("message", Matchers.equalTo("More than one row was found with the same weight value in the weight column, row 3"));
     }
 
     @Test
@@ -177,5 +177,56 @@ public class GrilseProbabilitiesReportingIT {
                 .body("message", Matchers.equalTo("Duplicated headers \"June, August\" in grilse probability data"));
     }
 
+    @Test
+    public void testWeightIsWhole() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/weight-not-whole-number.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("status", Matchers.equalTo(400))
+                .body("error", Matchers.equalTo("Bad Request"))
+                .body("message", Matchers.equalTo("Found weights that are not whole numbers in the weight column, e.g 2.1 on row 2"));
+    }
 
+    @Test
+    public void testProbabilitiesNotBetweenZeroAndOne() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/probability-not-between-0-and-1.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("status", Matchers.equalTo(400))
+                .body("error", Matchers.equalTo("Bad Request"))
+                .body("message", Matchers.equalTo("Found probabilities not between 0 and 1, e.g -0.001"));
+    }
+
+    @Test
+    public void wrongNumberOfDataOnRow() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/wrong-number-of-data-on-row.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("status", Matchers.equalTo(400))
+                .body("error", Matchers.equalTo("Bad Request"))
+                .body("message", Matchers.equalTo("The number of data items on a row: 3 does not match the header"));
+    }
+
+    @Test
+    public void testMissingProbabilitiesTreatedAsZero() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/missing-probabilities-treated-as-zeros.csv", StandardCharsets.UTF_8);
+        final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.CREATED.value());
+    }
 }
