@@ -124,7 +124,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
             if (duplicates.size() != 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Duplicated headers \"" + String.join(", ", duplicates) + "\" in grilse probability data");
+                        "File contains a duplicate column header. Remove or change the duplicate header");
             }
 
             this.numberOfHeaders = data.getHeaders().length;
@@ -137,15 +137,16 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                     this.monthFieldIndexes.put(Month.valueOf(header), i);
                 } else if ("WEIGHT".equals(header)) {
                     this.weightColumnIndex = i;
-                } else if (!"NUMBER".equals(header)) {
+                } else {
                     // Encountered a header that was not recognised
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unexpected header \"" + headerVal + "\" in grilse probability data");
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Column header '" + headerVal + "' is not allowed. Column headers can "
+                            + "only be 'Weight' and a month of the year (such as July)");
                 }
             }
             // If we couldn't find  "WEIGHT" column and at least one month heading then return an error
             if (this.weightColumnIndex < 0 || this.monthFieldIndexes.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Unexpected/incorrect headings found:  Must contain a weight heading and at least one month heading");
+                        "File is missing a required column header. Column headers 'Weight' and at least one month of the year must exist (for example Weight, April)");
             }
         }
 
@@ -160,7 +161,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                     // Check the number of data items in the row
                     if (this.numberOfHeaders != rowData.length) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "The number of data items on a row: " + Objects.toString(rownum) + " does not match the header");
+                                "File has .csv formatting issues. Check for missing commas, extra commas, or improper use of quotes");
                     }
 
                     /*
@@ -171,7 +172,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
                     if (!weightsProcessed.add(weightVal)) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "More than one row was found with the same weight value in the weight column, row " + rownum);
+                                "File contains a duplicate weight. Remove or change the duplicate weight");
                     }
 
                     // For each month column that was discovered, extract the probability.
@@ -184,14 +185,13 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                             }
                         } else {
                             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                    "Found probabilities not between 0 and 1, e.g " + Objects.toString(probability));
+                                    "Proportion must be a number between 0 and 1 (inclusive). Change proportion to a number between 0 and 1 (inclusive)");
                         }
                     });
 
                 } catch (NumberFormatException e) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Found weights that are not whole numbers in the weight column, e.g " + Objects.toString(rowData[weightColumnIndex]) + ""
-                                    + " on row " + rownum);
+                            "Weight must be a whole number. Change weight to a whole number");
                 }
             }
 

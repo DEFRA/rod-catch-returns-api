@@ -90,7 +90,7 @@ public class GrilseProbabilitiesReportingIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body("status", Matchers.equalTo(400))
                 .body("error", Matchers.equalTo("Bad Request"))
-                .body("message", Matchers.equalTo("Unexpected header \"Unknown header\" in grilse probability data"));
+                .body("message", Matchers.equalTo("Column header 'Unknown header' is not allowed. Column headers can only be 'Weight' and a month of the year (such as July)"));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class GrilseProbabilitiesReportingIT {
                 .body("status", Matchers.equalTo(400))
                 .body("error", Matchers.equalTo("Bad Request"))
                 .body("message",
-                        Matchers.equalTo("Unexpected/incorrect headings found:  Must contain a weight heading and at least one month heading"));
+                        Matchers.equalTo("File is missing a required column header. Column headers 'Weight' and at least one month of the year must exist (for example Weight, April)"));
     }
 
     @Test
@@ -120,7 +120,7 @@ public class GrilseProbabilitiesReportingIT {
                 .body("status", Matchers.equalTo(HttpStatus.BAD_REQUEST.value()))
                 .body("error", Matchers.equalTo("Bad Request"))
                 .body("message",
-                        Matchers.equalTo("Unexpected/incorrect headings found:  Must contain a weight heading and at least one month heading"));
+                        Matchers.equalTo("File is missing a required column header. Column headers 'Weight' and at least one month of the year must exist (for example Weight, April)"));
     }
 
     @Test
@@ -134,7 +134,7 @@ public class GrilseProbabilitiesReportingIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body("status", Matchers.equalTo(HttpStatus.BAD_REQUEST.value()))
                 .body("error", Matchers.equalTo("Bad Request"))
-                .body("message", Matchers.equalTo("More than one row was found with the same weight value in the weight column, row 3"));
+                .body("message", Matchers.equalTo("File contains a duplicate weight. Remove or change the duplicate weight"));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class GrilseProbabilitiesReportingIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body("status", Matchers.equalTo(400))
                 .body("error", Matchers.equalTo("Bad Request"))
-                .body("message", Matchers.equalTo("Duplicated headers \"June, August\" in grilse probability data"));
+                .body("message", Matchers.equalTo("File contains a duplicate column header. Remove or change the duplicate header"));
     }
 
     @Test
@@ -188,7 +188,7 @@ public class GrilseProbabilitiesReportingIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body("status", Matchers.equalTo(400))
                 .body("error", Matchers.equalTo("Bad Request"))
-                .body("message", Matchers.equalTo("Found weights that are not whole numbers in the weight column, e.g 2.1 on row 2"));
+                .body("message", Matchers.equalTo("Weight must be a whole number. Change weight to a whole number"));
     }
 
     @Test
@@ -202,7 +202,7 @@ public class GrilseProbabilitiesReportingIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body("status", Matchers.equalTo(400))
                 .body("error", Matchers.equalTo("Bad Request"))
-                .body("message", Matchers.equalTo("Found probabilities not between 0 and 1, e.g -0.001"));
+                .body("message", Matchers.equalTo("Proportion must be a number between 0 and 1 (inclusive). Change proportion to a number between 0 and 1 (inclusive)"));
     }
 
     @Test
@@ -216,7 +216,7 @@ public class GrilseProbabilitiesReportingIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body("status", Matchers.equalTo(400))
                 .body("error", Matchers.equalTo("Bad Request"))
-                .body("message", Matchers.equalTo("The number of data items on a row: 3 does not match the header"));
+                .body("message", Matchers.equalTo("File has .csv formatting issues. Check for missing commas, extra commas, or improper use of quotes"));
     }
 
     @Test
@@ -228,5 +228,19 @@ public class GrilseProbabilitiesReportingIT {
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    public void invalidCsv() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/invalid-csv.csv", StandardCharsets.UTF_8);
+        final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("status", Matchers.equalTo(400))
+                .body("error", Matchers.equalTo("Bad Request"))
+                .body("message", Matchers.equalTo("File has .csv formatting issues. Check for missing commas, extra commas, or improper use of quotes"));
     }
 }
