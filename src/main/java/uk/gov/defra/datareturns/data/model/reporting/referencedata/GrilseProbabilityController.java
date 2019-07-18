@@ -75,7 +75,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
     @Value(staticConstructor = "of")
     private final static class ErrorResultSet {
-        final ErrorType errorType;
+        final Set<ErrorType> generalErrors;
         final Map<ErrorType, Set<String>> headerErrors;
         final Map<ErrorType, Map<String, Set<Short>>> errorsByColumnAndRowNumber;
         final Map<ErrorType, Set<Short>> errorsByRow;
@@ -100,14 +100,14 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
         final GrilseDataLoader loader = new GrilseDataLoader(inputStream);
         final List<GrilseProbability> existing = grilseProbabilityRepository.findBySeason(season);
+        final Set<ErrorType> generalErrors = new HashSet<>();
         if (!existing.isEmpty()) {
             if (!overwrite) {
-                return new ResponseEntity<>(ErrorResultSet.of(ErrorType.OVERWRITE_DISALLOWED, null, null, null), HttpStatus.CONFLICT);
+                generalErrors.add(ErrorType.OVERWRITE_DISALLOWED);
             }
-            grilseProbabilityRepository.deleteAll(existing);
         }
 
-        return loader.transform(season, grilseProbabilityRepository);
+        return loader.transform(season, grilseProbabilityRepository, generalErrors);
     }
 
     @Override
@@ -128,7 +128,8 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
             data = read(stream);
         }
 
-        private ResponseEntity<Object> transform(final Short season, final GrilseProbabilityRepository grilseProbabilityRepository) {
+        private ResponseEntity<Object> transform(final Short season, final GrilseProbabilityRepository grilseProbabilityRepository,
+                                                 final Set<ErrorType> generalErrors) {
             try {
                 final List<GrilseProbability> grilseProbabilities = new ArrayList<>();
                 final Set<Short> weightsProcessed = new HashSet<>();
@@ -181,7 +182,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
                 // Cannot process the rows unless the headers are ok so return here if errors
                 if (!headerErrors.isEmpty()) {
-                    return new ResponseEntity<>(ErrorResultSet.of(null, headerErrors, null, null), HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(ErrorResultSet.of(generalErrors, headerErrors, null, null), HttpStatus.BAD_REQUEST);
                 } else {
 
                     // Row counter
@@ -233,16 +234,20 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                         }
                     }
 
-                    if (errorsByColumnAndRowNumber.isEmpty() && errorsByRow.isEmpty()) {
+                    if (generalErrors.isEmpty() && errorsByColumnAndRowNumber.isEmpty() && errorsByRow.isEmpty()) {
+                        final List<GrilseProbability> existing = grilseProbabilityRepository.findBySeason(season);
+                        grilseProbabilityRepository.deleteAll(existing);
+                        grilseProbabilityRepository.flush();
                         grilseProbabilities.sort(Comparator.comparingInt(GrilseProbability::getMassInPounds).thenComparing(GrilseProbability::getMonth));
                         grilseProbabilityRepository.saveAll(grilseProbabilities);
                         return new ResponseEntity<>(HttpStatus.CREATED);
                     } else {
-                        return new ResponseEntity<>(ErrorResultSet.of(null,null, errorsByColumnAndRowNumber, errorsByRow), HttpStatus.BAD_REQUEST);
+                        return new ResponseEntity<>(ErrorResultSet.of(generalErrors,null, errorsByColumnAndRowNumber, errorsByRow), HttpStatus.BAD_REQUEST);
                     }
                 }
             } catch (NullPointerException e) {
-                return new ResponseEntity<>(ErrorResultSet.of(ErrorType.INVALID_CSV, null, null, null), HttpStatus.BAD_REQUEST);
+                generalErrors.add(ErrorType.INVALID_CSV);
+                return new ResponseEntity<>(ErrorResultSet.of(generalErrors, null, null, null), HttpStatus.BAD_REQUEST);
             }
         }
     }

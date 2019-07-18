@@ -143,8 +143,8 @@ public class GrilseProbabilitiesReportingIT {
                 .when().post("reporting/reference/grilse-probabilities/2018")
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
-                .statusCode(HttpStatus.CONFLICT.value())
-                .body("errorType", is("OVERWRITE_DISALLOWED"));
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("generalErrors", hasItems("OVERWRITE_DISALLOWED"));
 
         given().contentType("text/csv").body(csvData)
                 .when().post("reporting/reference/grilse-probabilities/2018?overwrite=true")
@@ -223,6 +223,6 @@ public class GrilseProbabilitiesReportingIT {
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("errorType", is("INVALID_CSV"));
+                .body("generalErrors", hasItems("INVALID_CSV"));
     }
 }
