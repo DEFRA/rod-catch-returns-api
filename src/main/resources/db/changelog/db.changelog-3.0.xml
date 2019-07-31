@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <property name="now" value="now()"/>
+
+    <!--
+    ****************************************************************
+    Grilse Data collection gates
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_grilse_weight_gate" author="Defra">
+        <createSequence sequenceName="rcr_grilse_weight_id_seq" startValue="1" incrementBy="1"/>
+
+        <createTable tableName="rcr_grilse_weight_gate">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_grilse_weight_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="name" constraintName="uniq_gate_name" tableName="rcr_grilse_weight_gate"/>
+
+        <rollback>
+            <dropTable tableName="rcr_grilse_weight_gate"/>
+            <dropSequence sequenceName="rcr_grilse_weight_id_seq"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_grilse_weight_gate_aud" author="Defra">
+
+        <createTable tableName="rcr_grilse_weight_gate_aud">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="rcr_grilse_weight_gate_aud"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="load-table: rcr_grilse_weight_gate" author="Defra">
+        <loadData file="db/data/grilse-weight-gate.csv"
+                  tableName="rcr_grilse_weight_gate">
+            <column name="id" type="numeric" header="id"/>
+            <column name="name" type="string" header="name"/>
+            <column name="created" type="date" header="created"/>
+            <column name="last_modified" type="date" header="last_modified"/>
+            <column name="version" type="date" header="version"/>
+        </loadData>
+
+        <rollback>
+            <delete tableName="rcr_grilse_weight_gate"/>
+        </rollback>
+    </changeSet>
+
+
+    <!--
+    ****************************************************************
+    Grilse Catchment (is represented by) grilse weight gate
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_grilse_catchment_weight_gate" author="Defra">
+        <createTable tableName="rcr_grilse_catchment_weight_gate">
+            <column name="catchment_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gate_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_grilse_catchment_weight_gate" columnNames="catchment_id, gate_id"/>
+
+        <rollback>
+            <dropTable tableName="rcr_grilse_catchment_weight_gate"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-table: rcr_grilse_catchment_weight_gate_aud" author="Defra">
+        <createTable tableName="rcr_grilse_catchment_weight_gate_aud">
+            <column name="catchment_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gate_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revtype" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_grilse_catchment_weight_gate_aud" columnNames="catchment_id, gate_id, rev"/>
+
+        <rollback>
+            <dropTable tableName="rcr_grilse_catchment_weight_gate_aud"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="load-table: rcr_grilse_catchment_weight_gate" author="Defra">
+        <loadData file="db/data/grilse-catchment-weight-gate.csv"
+                  tableName="rcr_grilse_catchment_weight_gate">
+            <column name="catchment_id" type="numeric" header="id"/>
+            <column name="gate_id" type="numeric" header="gate_id"/>
+            <column name="created" type="date" header="created"/>
+            <column name="last_modified" type="date" header="last_modified"/>
+            <column name="version" type="date" header="version"/>
+        </loadData>
+
+        <rollback>
+            <delete tableName="rcr_grilse_catchment_weight_gate"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
