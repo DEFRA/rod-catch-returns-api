@@ -33,6 +33,7 @@ import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
 @WithAdminUser
 @Slf4j
 public class GrilseProbabilitiesReportingIT {
+    public static final String GRILSE_PROBABILITIES_2018_1 = "reporting/reference/grilse-probabilities/2018/1";
     @Inject
     private GrilseProbabilityRepository grilseProbabilityRepository;
 
@@ -41,7 +42,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
         final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
@@ -86,7 +87,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/invalid-headers.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -98,7 +99,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/no-weight-heading.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -110,7 +111,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/no-month-headings.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -122,7 +123,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/duplicate-weight.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -134,20 +135,40 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
 
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body("generalErrors", hasItems("OVERWRITE_DISALLOWED"));
 
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018?overwrite=true")
+                .when().post(GRILSE_PROBABILITIES_2018_1 + "?overwrite=true")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.CREATED.value());
+
+        // The gate source sets are independent
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018/2")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.CREATED.value());
+
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018/2")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("generalErrors", hasItems("OVERWRITE_DISALLOWED"));
+
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018/2?overwrite=true")
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
@@ -158,7 +179,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/duplicate-headers.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -170,7 +191,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/weight-not-whole-number.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -182,7 +203,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/probability-not-between-0-and-1.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -196,7 +217,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/wrong-number-of-data-on-row.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -208,7 +229,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/missing-probabilities-treated-as-zeros.csv", StandardCharsets.UTF_8);
         final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
@@ -219,7 +240,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/invalid-csv.csv", StandardCharsets.UTF_8);
         final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())

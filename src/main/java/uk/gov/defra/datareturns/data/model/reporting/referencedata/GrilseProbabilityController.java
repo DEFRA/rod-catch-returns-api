@@ -23,6 +23,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import uk.gov.defra.datareturns.data.model.grilse.GrilseProbability;
 import uk.gov.defra.datareturns.data.model.grilse.GrilseProbabilityRepository;
 import uk.gov.defra.datareturns.data.model.grilse.GrilseProbability_;
+import uk.gov.defra.datareturns.data.model.grilse.GrilseWeightGate;
+import uk.gov.defra.datareturns.data.model.grilse.GrilseWeightGateRepository;
 import uk.gov.defra.datareturns.data.model.reporting.filters.SeasonFilter;
 import uk.gov.defra.datareturns.util.CsvUtil;
 
@@ -41,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -60,6 +63,7 @@ import static uk.gov.defra.datareturns.util.CsvUtil.writeCsv;
 @RequestMapping("/reporting/reference/grilse-probabilities")
 public class GrilseProbabilityController implements ResourceProcessor<RepositoryLinksResource> {
     private final GrilseProbabilityRepository grilseProbabilityRepository;
+    private final GrilseWeightGateRepository grilseWeightGateRepository;
 
     private enum ErrorType {
         DUPLICATE_HEADERS,
@@ -89,25 +93,34 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
         writeCsv(GrilseProbability.class, entries, response, "grilse-probabilities-" + season + ".csv");
     }
 
-    @PostMapping(value = "/{season}")
+    @PostMapping(value = "/{season}/{gate}")
     @ApiOperation(value = "Store new grilse probability data for the given season",
                   consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                   produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ResponseEntity<Object> post(@PathVariable("season") final Short season,
+                                       @PathVariable("gate") final Short gate,
                                        @RequestParam(value = "overwrite", required = false) final boolean overwrite,
                                        final InputStream inputStream) {
 
+        final Optional<GrilseWeightGate> grilseWeightGate = grilseWeightGateRepository.findById(gate);
+
+        if (!grilseWeightGate.isPresent()) {
+            return new ResponseEntity<>("Gate identifier '" + gate + "' not found: Must contain a known gate identifier",
+                    HttpStatus.BAD_REQUEST);
+        }
+
         final GrilseDataLoader loader = new GrilseDataLoader(inputStream);
-        final List<GrilseProbability> existing = grilseProbabilityRepository.findBySeason(season);
+        final List<GrilseProbability> existing = grilseProbabilityRepository.findBySeasonAndGrilseWeightGate(season, grilseWeightGate.get());
         final Set<ErrorType> generalErrors = new HashSet<>();
+
         if (!existing.isEmpty()) {
             if (!overwrite) {
                 generalErrors.add(ErrorType.OVERWRITE_DISALLOWED);
             }
         }
 
-        return loader.transform(season, grilseProbabilityRepository, generalErrors);
+        return loader.transform(season, grilseWeightGate.get(), grilseProbabilityRepository, generalErrors);
     }
 
     @Override
@@ -128,7 +141,8 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
             data = read(stream);
         }
 
-        private ResponseEntity<Object> transform(final Short season, final GrilseProbabilityRepository grilseProbabilityRepository,
+        private ResponseEntity<Object> transform(final Short season, final GrilseWeightGate grilseWeightGate,
+                                                 final GrilseProbabilityRepository grilseProbabilityRepository,
                                                  final Set<ErrorType> generalErrors) {
             try {
                 final List<GrilseProbability> grilseProbabilities = new ArrayList<>();
@@ -222,7 +236,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
                                 if (probability.compareTo(BigDecimal.ZERO) >= 0 && probability.compareTo(BigDecimal.ONE) <= 0) {
                                     if (probability.compareTo(BigDecimal.ZERO) > 0) {
-                                        grilseProbabilities.add(GrilseProbability.of(null, season, (short) month.getValue(), weightVal, probability));
+                                        grilseProbabilities.add(GrilseProbability.of(null, season, grilseWeightGate, (short) month.getValue(), weightVal, probability));
                                     }
                                 } else {
                                     gatherRowError(ErrorType.INVALID_PROBABILITY, month.name(), rownuml, errorsByColumnAndRowNumber);
@@ -235,7 +249,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                     }
 
                     if (generalErrors.isEmpty() && errorsByColumnAndRowNumber.isEmpty() && errorsByRow.isEmpty()) {
-                        final List<GrilseProbability> existing = grilseProbabilityRepository.findBySeason(season);
+                        final List<GrilseProbability> existing = grilseProbabilityRepository.findBySeasonAndGrilseWeightGate(season, grilseWeightGate);
                         grilseProbabilityRepository.deleteAll(existing);
                         grilseProbabilityRepository.flush();
                         grilseProbabilities.sort(Comparator.comparingInt(GrilseProbability::getMassInPounds).thenComparing(GrilseProbability::getMonth));

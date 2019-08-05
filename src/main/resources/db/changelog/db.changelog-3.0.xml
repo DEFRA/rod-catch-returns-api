@@ -5,16 +5,22 @@
 
     <property name="now" value="now()"/>
 
+    <changeSet id="drop-table: rcr_grilse_probability" author="Defra">
+        <dropSequence sequenceName="rcr_grilse_probability_id_seq"/>
+        <dropTable tableName="rcr_grilse_probability"/>
+        <dropTable tableName="rcr_grilse_probability_aud" />
+    </changeSet>
+
     <!--
     ****************************************************************
     Grilse Data collection gates
     ****************************************************************
     -->
     <changeSet id="create-table: rcr_grilse_weight_gate" author="Defra">
-        <createSequence sequenceName="rcr_grilse_weight_id_seq" startValue="1" incrementBy="1"/>
+        <createSequence sequenceName="rcr_grilse_weight_gate_id_seq" startValue="1" incrementBy="1"/>
 
         <createTable tableName="rcr_grilse_weight_gate">
-            <column name="id" type="bigint" defaultValueSequenceNext="rcr_grilse_weight_id_seq">
+            <column name="id" type="smallint" defaultValueSequenceNext="rcr_grilse_weight_gate_id_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(255)">
@@ -35,14 +41,14 @@
 
         <rollback>
             <dropTable tableName="rcr_grilse_weight_gate"/>
-            <dropSequence sequenceName="rcr_grilse_weight_id_seq"/>
+            <dropSequence sequenceName="rcr_grilse_weight_gate_id_seq"/>
         </rollback>
     </changeSet>
 
     <changeSet id="create-table: rcr_grilse_weight_gate_aud" author="Defra">
 
         <createTable tableName="rcr_grilse_weight_gate_aud">
-            <column name="id" type="bigint">
+            <column name="id" type="smallint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="rev" type="integer">
@@ -76,21 +82,32 @@
         </rollback>
     </changeSet>
 
-
     <!--
     ****************************************************************
-    Grilse Catchment (is represented by) grilse weight gate
+    Grilse Probability Data - recreate
     ****************************************************************
     -->
-    <changeSet id="create-table: rcr_grilse_catchment_weight_gate" author="Defra">
-        <createTable tableName="rcr_grilse_catchment_weight_gate">
-            <column name="catchment_id" type="bigint">
+    <changeSet id="recreate-table: rcr_grilse_probability" author="Defra">
+        <createSequence sequenceName="rcr_grilse_probability_id_seq" startValue="1" incrementBy="1"/>
+        <createTable tableName="rcr_grilse_probability">
+            <column name="id" type="bigint" defaultValueSequenceNext="rcr_grilse_probability_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="season" type="smallint">
                 <constraints nullable="false"/>
             </column>
-            <column name="gate_id" type="bigint">
+            <column name="gate_id" type="smallint">
                 <constraints nullable="false"/>
             </column>
-
+            <column name="month" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mass_lbs" type="smallint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="probability" type="numeric(17, 16)">
+                <constraints nullable="false"/>
+            </column>
             <column name="created" type="timestamp">
                 <constraints nullable="false"/>
             </column>
@@ -102,19 +119,32 @@
             </column>
         </createTable>
 
-        <addPrimaryKey tableName="rcr_grilse_catchment_weight_gate" columnNames="catchment_id, gate_id"/>
+        <addUniqueConstraint columnNames="season, gate_id, month, mass_lbs" constraintName="uniq_grilse_probability_key" tableName="rcr_grilse_probability"/>
+
+        <createIndex indexName="rcr_grilse_probability_season_gate_idx" tableName="rcr_grilse_probability">
+            <column name="season"/>
+            <column name="gate_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                baseTableName="rcr_grilse_probability"
+                baseColumnNames="gate_id"
+                constraintName="fk_grilse_probability__gate"
+                referencedTableName="rcr_grilse_weight_gate"
+                referencedColumnNames="id"
+        />
 
         <rollback>
-            <dropTable tableName="rcr_grilse_catchment_weight_gate"/>
+            <dropForeignKeyConstraint baseTableName="rcr_grilse_probability" constraintName="rcr_grilse_probability_gate_fk"/>
+            <dropIndex tableName="rcr_grilse_probability" indexName="rcr_grilse_probability_season_idx"/>
+            <dropTable tableName="rcr_grilse_probability"/>
+            <dropSequence sequenceName="rcr_grilse_probability_id_seq"/>
         </rollback>
     </changeSet>
 
-    <changeSet id="create-table: rcr_grilse_catchment_weight_gate_aud" author="Defra">
-        <createTable tableName="rcr_grilse_catchment_weight_gate_aud">
-            <column name="catchment_id" type="bigint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="gate_id" type="bigint">
+    <changeSet id="recreate-table: rcr_grilse_probability_aud" author="Defra">
+        <createTable tableName="rcr_grilse_probability_aud">
+            <column name="id" type="bigint">
                 <constraints nullable="false"/>
             </column>
             <column name="rev" type="integer">
@@ -123,12 +153,39 @@
             <column name="revtype" type="tinyint">
                 <constraints nullable="false"/>
             </column>
+            <column name="season" type="smallint"/>
+            <column name="gate_id" type="smallint"/>
+            <column name="month" type="smallint"/>
+            <column name="mass_lbs" type="smallint"/>
+            <column name="probability" type="numeric(17, 16)"/>
         </createTable>
 
-        <addPrimaryKey tableName="rcr_grilse_catchment_weight_gate_aud" columnNames="catchment_id, gate_id, rev"/>
+        <addPrimaryKey tableName="rcr_grilse_probability_aud" columnNames="id, rev"/>
+        <rollback>
+            <dropTable tableName="rcr_grilse_probability_aud"/>
+        </rollback>
+    </changeSet>
+
+    <!--
+    ****************************************************************
+    Grilse Catchment
+    Not entity mapped, association only. Will be removed
+    ****************************************************************
+    -->
+    <changeSet id="create-table: rcr_grilse_catchment_weight_gate" author="Defra">
+        <createTable tableName="rcr_grilse_catchment_weight_gate">
+            <column name="catchment_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gate_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="rcr_grilse_catchment_weight_gate" columnNames="catchment_id, gate_id"/>
 
         <rollback>
-            <dropTable tableName="rcr_grilse_catchment_weight_gate_aud"/>
+            <dropTable tableName="rcr_grilse_catchment_weight_gate"/>
         </rollback>
     </changeSet>
 
@@ -137,9 +194,6 @@
                   tableName="rcr_grilse_catchment_weight_gate">
             <column name="catchment_id" type="numeric" header="id"/>
             <column name="gate_id" type="numeric" header="gate_id"/>
-            <column name="created" type="date" header="created"/>
-            <column name="last_modified" type="date" header="last_modified"/>
-            <column name="version" type="date" header="version"/>
         </loadData>
 
         <rollback>
@@ -147,4 +201,47 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="amend-catchment" author="Defra">
+        <addColumn tableName="rcr_catchment">
+            <column name="gate_id" afterColumn="region_id" type="smallint"/>
+        </addColumn>
+
+        <addColumn tableName="rcr_catchment_aud">
+            <column name="gate_id" afterColumn="region_id" type="smallint"/>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="rcr_catchment"
+                baseColumnNames="gate_id"
+                constraintName="fk_catchment__gate"
+                referencedTableName="rcr_grilse_weight_gate"
+                referencedColumnNames="id"
+        />
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="rcr_catchment" constraintName="rcr_catchment_gate_fk" />
+            <dropColumn tableName="rcr_catchment" columnName="gate_id"/>
+            <dropColumn tableName="rcr_catchment_aud" columnName="gate_id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="update-catchment" author="Defra">
+        <sql>
+            update rcr_catchment c set gate_id = (
+                select g.gate_id
+                from rcr_grilse_catchment_weight_gate g
+                where g.catchment_id = c.id
+            )
+            where exists (
+                select null
+                from rcr_grilse_catchment_weight_gate g
+                join rcr_catchment c2
+                    on c2.id = g.catchment_id
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet id="drop rcr_grilse_catchment_weight_gate" author="Defra">
+        <dropTable tableName="rcr_grilse_catchment_weight_gate"/>
+    </changeSet>
 </databaseChangeLog>
