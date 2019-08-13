@@ -5,7 +5,6 @@ import io.restassured.response.ValidatableResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.http.HttpStatus;
@@ -21,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
 import static uk.gov.defra.datareturns.test.reporting.ReportingIT.readCsvFromResponse;
 import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
 

@@ -78,11 +78,11 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
     }
 
     @Value(staticConstructor = "of")
-    private final static class ErrorResultSet {
-        final Set<ErrorType> generalErrors;
-        final Map<ErrorType, Set<String>> headerErrors;
-        final Map<ErrorType, Map<String, Set<Short>>> errorsByColumnAndRowNumber;
-        final Map<ErrorType, Set<Short>> errorsByRow;
+    private static final class ErrorResultSet {
+        private final Set<ErrorType> generalErrors;
+        private final Map<ErrorType, Set<String>> headerErrors;
+        private final Map<ErrorType, Map<String, Set<Short>>> errorsByColumnAndRowNumber;
+        private final Map<ErrorType, Set<Short>> errorsByRow;
     }
 
     @GetMapping(value = "/{season}")
@@ -134,9 +134,8 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
         private final CsvUtil.CsvReadResult<Object[]> data;
         private final Map<Month, Integer> monthFieldIndexes = new HashMap<>();
         private int weightColumnIndex = -1;
-        private int numberOfHeaders = 0;
 
-        public GrilseDataLoader(final InputStream stream) {
+        GrilseDataLoader(final InputStream stream) {
             // Read the csv data into a set of GrilseProbability beans and then set the season from the request path
             data = read(stream);
         }
@@ -169,7 +168,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                     headerErrors.put(ErrorType.DUPLICATE_HEADERS, duplicates);
                 }
 
-                this.numberOfHeaders = data.getHeaders().length;
+                final int numberOfHeaders = data.getHeaders().length;
 
                 // Parse headers to determine the appropriate column indexes from which to extract data
                 for (int i = 0; i < data.getHeaders().length; i++) {
@@ -196,7 +195,8 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
                 // Cannot process the rows unless the headers are ok so return here if errors
                 if (!headerErrors.isEmpty()) {
-                    return new ResponseEntity<>(ErrorResultSet.of(generalErrors, headerErrors, null, null), HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(ErrorResultSet.of(generalErrors, headerErrors, null, null),
+                            HttpStatus.BAD_REQUEST);
                 } else {
 
                     // Row counter
@@ -210,7 +210,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                         final short rownuml = rownum;
 
                         // Check the number of data items in the row
-                        if (this.numberOfHeaders != rowData.length) {
+                        if (numberOfHeaders != rowData.length) {
                             if (errorsByRow.containsKey(ErrorType.ROW_HEADER_DISCREPANCY)) {
                                 errorsByRow.get(ErrorType.ROW_HEADER_DISCREPANCY).add(rownum);
                             } else {
@@ -236,7 +236,8 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
                                 if (probability.compareTo(BigDecimal.ZERO) >= 0 && probability.compareTo(BigDecimal.ONE) <= 0) {
                                     if (probability.compareTo(BigDecimal.ZERO) > 0) {
-                                        grilseProbabilities.add(GrilseProbability.of(null, season, grilseWeightGate, (short) month.getValue(), weightVal, probability));
+                                        grilseProbabilities.add(GrilseProbability.of(null, season,
+                                                grilseWeightGate, (short) month.getValue(), weightVal, probability));
                                     }
                                 } else {
                                     gatherRowError(ErrorType.INVALID_PROBABILITY, month.name(), rownuml, errorsByColumnAndRowNumber);
@@ -249,19 +250,23 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                     }
 
                     if (generalErrors.isEmpty() && errorsByColumnAndRowNumber.isEmpty() && errorsByRow.isEmpty()) {
-                        final List<GrilseProbability> existing = grilseProbabilityRepository.findBySeasonAndGrilseWeightGate(season, grilseWeightGate);
+                        final List<GrilseProbability> existing = grilseProbabilityRepository
+                                .findBySeasonAndGrilseWeightGate(season, grilseWeightGate);
                         grilseProbabilityRepository.deleteAll(existing);
                         grilseProbabilityRepository.flush();
-                        grilseProbabilities.sort(Comparator.comparingInt(GrilseProbability::getMassInPounds).thenComparing(GrilseProbability::getMonth));
+                        grilseProbabilities.sort(Comparator.comparingInt(GrilseProbability::getMassInPounds)
+                                .thenComparing(GrilseProbability::getMonth));
                         grilseProbabilityRepository.saveAll(grilseProbabilities);
                         return new ResponseEntity<>(HttpStatus.CREATED);
                     } else {
-                        return new ResponseEntity<>(ErrorResultSet.of(generalErrors,null, errorsByColumnAndRowNumber, errorsByRow), HttpStatus.BAD_REQUEST);
+                        return new ResponseEntity<>(ErrorResultSet.of(generalErrors, null,
+                                errorsByColumnAndRowNumber, errorsByRow), HttpStatus.BAD_REQUEST);
                     }
                 }
             } catch (NullPointerException e) {
                 generalErrors.add(ErrorType.INVALID_CSV);
-                return new ResponseEntity<>(ErrorResultSet.of(generalErrors, null, null, null), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(ErrorResultSet.of(generalErrors, null, null, null),
+                        HttpStatus.BAD_REQUEST);
             }
         }
     }

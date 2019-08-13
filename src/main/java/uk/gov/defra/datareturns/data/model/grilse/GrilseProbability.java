@@ -64,7 +64,7 @@ public class GrilseProbability extends AbstractBaseEntity<Long> {
     /**
      * The grilse weight gate that the probability relates to
      */
-    @ManyToOne(targetEntity=GrilseWeightGate.class)
+    @ManyToOne(targetEntity = GrilseWeightGate.class)
     @JoinColumn(name = "gate_id")
     private GrilseWeightGate grilseWeightGate;
 

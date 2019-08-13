@@ -19,7 +19,8 @@ public class TestCatch extends AbstractTestEntity {
     public static final String MASS = "mass";
     public static final String RELEASED = "released";
     public static final String REPORTING_EXCLUSION = "reportingExclude";
-
+    public static final String NO_DATE_RECORDED = "noDateRecorded";
+    public static final String ONLY_MONTH_RECORDED = "onlyMonthRecorded";
 
     TestCatch(final TestActivity activity) {
         modify(SUBMISSION, () -> activity.getSubmission().getUrl());
@@ -50,6 +51,16 @@ public class TestCatch extends AbstractTestEntity {
 
     public final TestCatch reportingExclude(final Boolean exclude) {
         modify(REPORTING_EXCLUSION, exclude);
+        return this;
+    }
+
+    public final TestCatch noDateRecorded(final Boolean noDateRecorded) {
+        modify(NO_DATE_RECORDED, noDateRecorded);
+        return this;
+    }
+
+    public final TestCatch onlyMonthRecorded(final Boolean onlyMonthRecorded) {
+        modify(ONLY_MONTH_RECORDED, onlyMonthRecorded);
         return this;
     }
 

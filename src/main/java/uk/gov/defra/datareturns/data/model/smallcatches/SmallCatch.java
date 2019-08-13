@@ -97,4 +97,11 @@ public class SmallCatch extends AbstractBaseEntity<Long> implements HasSubmissio
      */
     @Column
     private boolean reportingExclude = false;
+
+    /**
+     * To allow FMT users to report on the default date
+     */
+    @Column
+    private boolean noMonthRecorded = false;
+
 }

@@ -1,6 +1,6 @@
 package uk.gov.defra.datareturns.data.model.grilse;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.univocity.parsers.annotations.Headers;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
@@ -11,7 +11,6 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.catchments.Catchment;
-import uk.gov.defra.datareturns.data.model.rivers.River;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -53,6 +52,7 @@ public class GrilseWeightGate extends AbstractBaseEntity<Short> {
      * The set of catchments which this gate represents
      */
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "gate")
+    @JsonIgnoreProperties("gate")
     private List<Catchment> catchments;
 
 }
