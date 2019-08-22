@@ -50,7 +50,6 @@ public class SmallCatchTests {
     public static SmallCatch createSmallCatch(final Submission submission, final Activity activity, final List<SmallCatchCount> counts,
                                               final int released) {
         final SmallCatch cat = new SmallCatch();
-        cat.setSubmission(submission);
         cat.setActivity(activity);
         cat.setMonth(Month.JANUARY);
         cat.setCounts(counts);
@@ -63,14 +62,6 @@ public class SmallCatchTests {
         final SmallCatch cat = createValidSmallCatch();
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).isEmpty();
-    }
-
-    @Test
-    public void testSmallCatchWithoutSubmissionFails() {
-        final SmallCatch cat = createValidSmallCatch();
-        cat.setSubmission(null);
-        final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
-        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_SUBMISSION_REQUIRED"));
     }
 
     @Test
@@ -93,7 +84,7 @@ public class SmallCatchTests {
     public void testSmallCatchWithCurrentMonthSucceeds() {
         final SmallCatch cat = createValidSmallCatch();
         final YearMonth thisMonth = YearMonth.from(LocalDate.now());
-        cat.getSubmission().setSeason((short) thisMonth.getYear());
+        cat.getActivity().getSubmission().setSeason((short) thisMonth.getYear());
         cat.setMonth(thisMonth.getMonth());
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(0);
@@ -103,7 +94,7 @@ public class SmallCatchTests {
     public void testSmallCatchWithFutureMonthFails() {
         final SmallCatch cat = createValidSmallCatch();
         final YearMonth nextMonth = YearMonth.from(LocalDate.now()).plusMonths(1);
-        cat.getSubmission().setSeason((short) nextMonth.getYear());
+        cat.getActivity().getSubmission().setSeason((short) nextMonth.getYear());
         cat.setMonth(nextMonth.getMonth());
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_MONTH_IN_FUTURE"));

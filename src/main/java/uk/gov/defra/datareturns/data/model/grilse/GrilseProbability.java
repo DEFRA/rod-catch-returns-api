@@ -2,7 +2,6 @@ package uk.gov.defra.datareturns.data.model.grilse;
 
 import com.univocity.parsers.annotations.Headers;
 import com.univocity.parsers.annotations.Parsed;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,7 +47,6 @@ public class GrilseProbability extends AbstractBaseEntity<Long> {
     @Column(name = "id")
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
-    @ApiModelProperty(accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Setter(AccessLevel.NONE)
     private Long id;
 

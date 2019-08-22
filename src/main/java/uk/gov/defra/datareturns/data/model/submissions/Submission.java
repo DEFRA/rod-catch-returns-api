@@ -1,14 +1,12 @@
 package uk.gov.defra.datareturns.data.model.submissions;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
-import uk.gov.defra.datareturns.data.model.catches.Catch;
-import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatch;
 import uk.gov.defra.datareturns.validation.submission.ValidSubmission;
 
 import javax.persistence.CascadeType;
@@ -39,6 +37,7 @@ import java.util.List;
 @Getter
 @Setter
 @ValidSubmission
+@ApiModel(value = "Submission", description = "Rod Catch Submission")
 public class Submission extends AbstractBaseEntity<Long> {
     /**
      * Database sequence name for this entity
@@ -52,7 +51,6 @@ public class Submission extends AbstractBaseEntity<Long> {
     @Column(name = "id")
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
-    @ApiModelProperty(accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Setter(AccessLevel.NONE)
     private Long id;
 
@@ -86,20 +84,6 @@ public class Submission extends AbstractBaseEntity<Long> {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
     @Valid
     private List<Activity> activities;
-
-    /**
-     * The significant catches recorded by the angler for the season (fish species, rivers, mass, etc)
-     */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
-    @Valid
-    private List<Catch> catches;
-
-    /**
-     * Small catches - summarised counts of catches by method, month and river
-     */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "submission")
-    @Valid
-    private List<SmallCatch> smallCatches;
 
     /**
      * Is this entry excluded from reporting

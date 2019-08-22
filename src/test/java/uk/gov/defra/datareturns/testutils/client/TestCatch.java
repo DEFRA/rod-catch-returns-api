@@ -11,7 +11,6 @@ import java.util.Map;
 @Getter
 public class TestCatch extends AbstractTestEntity {
     private final TestActivity activity;
-    public static final String SUBMISSION = "submission";
     public static final String ACTIVITY = "activity";
     public static final String DATE_CAUGHT = "dateCaught";
     public static final String SPECIES = "species";
@@ -22,7 +21,6 @@ public class TestCatch extends AbstractTestEntity {
 
 
     TestCatch(final TestActivity activity) {
-        modify(SUBMISSION, () -> activity.getSubmission().getUrl());
         modify(ACTIVITY, activity::getUrl);
         this.activity = activity;
     }

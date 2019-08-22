@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 @Getter
 public class TestSmallCatch extends AbstractTestEntity {
     private final TestActivity activity;
-    public static final String SUBMISSION = "submission";
     public static final String ACTIVITY = "activity";
     public static final String MONTH = "month";
     public static final String COUNTS = "counts";
@@ -21,7 +20,6 @@ public class TestSmallCatch extends AbstractTestEntity {
     public static final String REPORTING_EXCLUSION = "reportingExclude";
 
     TestSmallCatch(final TestActivity activity) {
-        modify(SUBMISSION, () -> activity.getSubmission().getUrl());
         modify(ACTIVITY, activity::getUrl);
         this.activity = activity;
     }

@@ -26,7 +26,6 @@ public class ServiceConfigurationIT {
         IntegrationTestUtils.getEntity("/profile").statusCode(200);
     }
 
-
     @Test
     public void testSwaggerJsonAvailable() {
         // reset rest assured base path as swagger is served from outside of the /api context
@@ -38,6 +37,6 @@ public class ServiceConfigurationIT {
     public void testSwaggerUiAvailable() {
         // reset rest assured base path as swagger is served from outside of the /api context
         RestAssured.basePath = "/";
-        IntegrationTestUtils.getEntity("/v2/api-docs").statusCode(200);
+        IntegrationTestUtils.getEntity("/swagger-ui.html").statusCode(200);
     }
 }

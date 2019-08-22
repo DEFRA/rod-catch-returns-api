@@ -1,7 +1,6 @@
 package uk.gov.defra.datareturns.data.model.regions;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,7 +40,6 @@ public class Region extends AbstractBaseEntity<Long> {
     @Column(name = "id")
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
-    @ApiModelProperty(accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Setter(AccessLevel.NONE)
     private Long id;
 

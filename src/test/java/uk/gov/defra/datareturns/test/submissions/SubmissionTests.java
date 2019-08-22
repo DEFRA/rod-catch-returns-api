@@ -147,9 +147,10 @@ public class SubmissionTests {
 
         final SmallCatch smallCatch1 = SmallCatchTests.createSmallCatch(sub, activity, counts, 0);
         final SmallCatch smallCatch2 = SmallCatchTests.createSmallCatch(sub, activity, counts, 0);
+        activity.setSmallCatches(Arrays.asList(smallCatch1, smallCatch2));
+
         sub.setActivities(Collections.singletonList(activity));
 
-        sub.setSmallCatches(Arrays.asList(smallCatch1, smallCatch2));
         final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
         Assertions.assertThat(violations).haveExactly(2, violationMessageMatching("SMALL_CATCH_DUPLICATE_FOUND"));
     }

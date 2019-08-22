@@ -41,7 +41,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
 
     @Override
     public void initialize(final ValidCatch constraintAnnotation) {
-        super.addChecks(this::checkSubmission, this::checkActivity, this::checkDate, this::checkSpecies,
+        super.addChecks(this::checkActivity, this::checkDate, this::checkSpecies,
                 this::checkMass, this::checkMassValue, this::checkMassLimits, this::checkMethod, this::checkMethodPermissions, this::checkReleased);
     }
 
@@ -67,9 +67,9 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
         if (catchEntry.getDateCaught() == null) {
             return handleError(context, "DATE_REQUIRED", PROPERTY_DATE_CAUGHT);
         }
-        if (catchEntry.getSubmission() != null) {
+        if (catchEntry.getActivity() != null && catchEntry.getActivity().getSubmission() != null) {
             final int yearCaught = DateUtils.toCalendar(catchEntry.getDateCaught()).get(Calendar.YEAR);
-            if (yearCaught != catchEntry.getSubmission().getSeason().intValue()) {
+            if (yearCaught != catchEntry.getActivity().getSubmission().getSeason().intValue()) {
                 return handleError(context, "YEAR_MISMATCH", PROPERTY_DATE_CAUGHT);
             }
         }

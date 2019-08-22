@@ -57,7 +57,6 @@ public class CatchTests {
     public static Catch createValidCatch(final Submission submission, final Activity activity, final Method method, final Species species,
                                          final BigDecimal kg, final boolean released) {
         final Catch cat = new Catch();
-        cat.setSubmission(submission);
         cat.setActivity(activity);
         cat.setDateCaught(new Date());
         cat.setSpecies(species);
@@ -85,13 +84,6 @@ public class CatchTests {
     }
 
     @Test
-    public void testCatchWithoutSubmissionFails() {
-        testCatch.setSubmission(null);
-        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
-        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_SUBMISSION_REQUIRED"));
-    }
-
-    @Test
     public void testCatchWithoutDateFails() {
         testCatch.setDateCaught(null);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
@@ -101,7 +93,7 @@ public class CatchTests {
     @Test
     public void testCatchWithFutureDateFails() {
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
-        testCatch.getSubmission().setSeason((short) tomorrow.getYear());
+        testCatch.getActivity().getSubmission().setSeason((short) tomorrow.getYear());
         testCatch.setDateCaught(Date.from(tomorrow.atStartOfDay().toInstant(ZoneOffset.UTC)));
         final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_DATE_IN_FUTURE"));
@@ -182,6 +174,7 @@ public class CatchTests {
         final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_METHOD_REQUIRED"));
     }
+
     @Test
     public void testCatchWithoutReleasedFails() {
         testCatch.setReleased(null);

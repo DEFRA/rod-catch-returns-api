@@ -2,7 +2,6 @@ package uk.gov.defra.datareturns.validation;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import uk.gov.defra.datareturns.data.model.AbstractRestrictedEntity;
-import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
 import uk.gov.defra.datareturns.validation.util.ValidationUtil;
 
 import javax.validation.ConstraintValidator;
@@ -48,18 +47,6 @@ public abstract class AbstractConstraintValidator<A extends Annotation, T> imple
     @SuppressWarnings("varargs")
     protected final void addChecks(final CheckFunction<T>... checks) {
         this.checkFunctions.addAll(Arrays.asList(checks));
-    }
-
-
-    /**
-     * Checks that an object's reference to its submission is not null
-     *
-     * @param obj     the object to test
-     * @param context the validator context
-     * @return true if the object's reference to its submission is not null, false otherwise
-     */
-    public boolean checkSubmission(final HasSubmission obj, final ConstraintValidatorContext context) {
-        return obj.getSubmission() != null || handleError(context, "SUBMISSION_REQUIRED", "submission");
     }
 
     /**

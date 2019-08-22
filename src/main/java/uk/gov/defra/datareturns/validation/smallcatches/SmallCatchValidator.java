@@ -32,7 +32,7 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
     @Override
     public void initialize(final ValidSmallCatch constraintAnnotation) {
         super.addChecks(
-                this::checkSubmission, this::checkActivity, this::checkMonth,
+                this::checkActivity, this::checkMonth,
                 this::checkUniqueActivityAndMonth, this::checkCountsProvided, this::checkCountMethodDuplicates,
                 this::checkReleased, this::checkReleasedDoesNotExceedCounts);
     }
@@ -61,7 +61,7 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
         if (smallCatch.getMonth() == null) {
             valid = handleError(context, "MONTH_REQUIRED", PROPERTY_MONTH);
         } else if (smallCatch.getMonth().getValue() > Month.from(today).getValue()
-                && smallCatch.getSubmission().getSeason() >= today.getYear()) {
+                && smallCatch.getActivity().getSubmission().getSeason() >= today.getYear()) {
             valid = handleError(context, "MONTH_IN_FUTURE", PROPERTY_MONTH);
         }
         return valid;
@@ -87,10 +87,10 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
      */
     private boolean checkUniqueActivityAndMonth(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
         boolean valid = true;
-        if (smallCatch.getActivity() != null && smallCatch.getMonth() != null && smallCatch.getSubmission() != null
-                && smallCatch.getSubmission().getSmallCatches() != null) {
-            for (int i = 0; i < smallCatch.getSubmission().getSmallCatches().size(); i++) {
-                final SmallCatch other = smallCatch.getSubmission().getSmallCatches().get(i);
+        if (smallCatch.getActivity() != null && smallCatch.getMonth() != null && smallCatch.getActivity().getSubmission() != null
+                && smallCatch.getActivity().getSmallCatches() != null) {
+            for (int i = 0; i < smallCatch.getActivity().getSmallCatches().size(); i++) {
+                final SmallCatch other = smallCatch.getActivity().getSmallCatches().get(i);
                 if (smallCatch != other && smallCatch.getActivity().equals(other.getActivity()) && smallCatch.getMonth().equals(other.getMonth())) {
                     valid = handleError(context, "DUPLICATE_FOUND", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
                 }

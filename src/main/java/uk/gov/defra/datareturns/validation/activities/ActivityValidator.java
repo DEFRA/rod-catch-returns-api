@@ -25,6 +25,17 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
     }
 
     /**
+     * Checks the activity's reference to its submission is not null
+     *
+     * @param activity the activity to be validated
+     * @param context  the validator context
+     * @return true if the object's reference to its submission is not null, false otherwise
+     */
+    public boolean checkSubmission(final Activity activity, final ConstraintValidatorContext context) {
+        return activity.getSubmission() != null || handleError(context, "SUBMISSION_REQUIRED", "submission");
+    }
+
+    /**
      * Check river is provided
      *
      * @param activity the activity to be validated

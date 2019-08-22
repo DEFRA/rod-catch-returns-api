@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.activities;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +8,6 @@ import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.catches.Catch;
 import uk.gov.defra.datareturns.data.model.rivers.River;
 import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatch;
-import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.activities.ValidActivity;
 
@@ -24,10 +22,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.Valid;
 import java.util.List;
 
 /**
- * An {@link Activity} is used to record how long and angler has spent fishing on a given river.
+ * An {@link Activity} is used to record how long an angler has spent fishing on a given river.
  *
  * @author Sam Gardner-Dell
  */
@@ -39,7 +38,7 @@ import java.util.List;
 @Getter
 @Setter
 @ValidActivity
-public class Activity extends AbstractBaseEntity<Long> implements HasSubmission {
+public class Activity extends AbstractBaseEntity<Long> {
     /**
      * Database sequence name for this entity
      */
@@ -52,7 +51,6 @@ public class Activity extends AbstractBaseEntity<Long> implements HasSubmission 
     @Column(name = "id")
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
-    @ApiModelProperty(accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Setter(AccessLevel.NONE)
     private Long id;
 
@@ -84,13 +82,13 @@ public class Activity extends AbstractBaseEntity<Long> implements HasSubmission 
      * The significant catches recorded by the angler that are associated with this activity (fish species, rivers, mass, etc)
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
-    @Setter(AccessLevel.NONE)
+    @Valid
     private List<Catch> catches;
 
     /**
      * Small catches - summarised counts of catches by method, month and activity
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "activity")
-    @Setter(AccessLevel.NONE)
+    @Valid
     private List<SmallCatch> smallCatches;
 }

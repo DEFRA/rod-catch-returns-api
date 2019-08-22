@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.smallcatches;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,8 +8,6 @@ import org.hibernate.envers.NotAudited;
 import uk.gov.defra.datareturns.data.conversion.MonthConverter;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
-import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
-import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.smallcatches.ValidSmallCatch;
 
 import javax.persistence.CollectionTable;
@@ -31,19 +28,19 @@ import java.time.Month;
 import java.util.List;
 
 /**
- * Records an anglers small catches against an given {@link Submission} and {@link Activity}
+ * Records an anglers small catches against an {@link Activity}
  *
  * @author Sam Gardner-Dell
  */
 @Entity(name = "rcr_small_catch")
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "uniq_activity_and_month_per_submission", columnNames = {"submission_id", "activity_id", "month"})
+        @UniqueConstraint(name = "uniq_activity_and_month", columnNames = {"activity_id", "month"})
 })
 @Audited
 @Getter
 @Setter
 @ValidSmallCatch
-public class SmallCatch extends AbstractBaseEntity<Long> implements HasSubmission {
+public class SmallCatch extends AbstractBaseEntity<Long> {
     /**
      * Database sequence name for this entity
      */
@@ -56,14 +53,8 @@ public class SmallCatch extends AbstractBaseEntity<Long> implements HasSubmissio
     @Column(name = "id")
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
-    @ApiModelProperty(accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Setter(AccessLevel.NONE)
     private Long id;
-    /**
-     * The parent submission
-     */
-    @ManyToOne(optional = false)
-    private Submission submission;
 
     /**
      * The activity associated with this catch

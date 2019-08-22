@@ -1,7 +1,6 @@
 package uk.gov.defra.datareturns.data.model.method;
 
 import com.univocity.parsers.annotations.Parsed;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,7 +36,6 @@ public class Method extends AbstractRestrictedEntity<Long> {
     @Column(name = "id")
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
-    @ApiModelProperty(accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Setter(AccessLevel.NONE)
     @Parsed(field = "ID")
     private Long id;

@@ -1,7 +1,6 @@
 package uk.gov.defra.datareturns.data.model.catches;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,8 +9,6 @@ import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.method.Method;
 import uk.gov.defra.datareturns.data.model.species.Species;
-import uk.gov.defra.datareturns.data.model.submissions.HasSubmission;
-import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.validation.catches.ValidCatch;
 
 import javax.persistence.Column;
@@ -28,7 +25,7 @@ import javax.validation.Valid;
 import java.util.Date;
 
 /**
- * Records an anglers catches against an given {@link Submission} and {@link Activity}
+ * Records an anglers catches against an {@link Activity}
  *
  * @author Sam Gardner-Dell
  */
@@ -37,7 +34,7 @@ import java.util.Date;
 @Getter
 @Setter
 @ValidCatch
-public class Catch extends AbstractBaseEntity<Long> implements HasSubmission {
+public class Catch extends AbstractBaseEntity<Long> {
     /**
      * Database sequence name for this entity
      */
@@ -50,15 +47,8 @@ public class Catch extends AbstractBaseEntity<Long> implements HasSubmission {
     @Column(name = "id")
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
-    @ApiModelProperty(accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Setter(AccessLevel.NONE)
     private Long id;
-
-    /**
-     * The parent submission
-     */
-    @ManyToOne(optional = false)
-    private Submission submission;
 
     /**
      * The activity associated with this catch
