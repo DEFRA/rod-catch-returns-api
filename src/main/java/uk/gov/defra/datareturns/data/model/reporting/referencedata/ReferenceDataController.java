@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.reporting.referencedata;
 
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -39,19 +38,16 @@ public class ReferenceDataController implements ResourceProcessor<RepositoryLink
     private final MethodRepository methodRepository;
 
     @GetMapping(value = "/locations")
-    @ApiOperation(value = "Retrieve location information", produces = "text/csv")
     public void locations(final HttpServletResponse response) throws IOException {
         writeCsv(LocationEntry.class, locationEntryRepository.findAll(), response);
     }
 
     @GetMapping(value = "/species")
-    @ApiOperation(value = "Retrieve the species listing", produces = "text/csv")
     public void species(final HttpServletResponse response) throws IOException {
         writeCsv(Species.class, speciesRepository.findAll(), response);
     }
 
     @GetMapping(value = "/methods")
-    @ApiOperation(value = "Retrieve the methods listing", produces = "text/csv")
     public void methods(final HttpServletResponse response) throws IOException {
         writeCsv(Method.class, methodRepository.findAll(), response);
     }

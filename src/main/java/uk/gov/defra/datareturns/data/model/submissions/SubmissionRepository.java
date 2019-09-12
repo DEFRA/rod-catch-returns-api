@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.submissions;
 
-import io.swagger.annotations.Api;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import uk.gov.defra.datareturns.data.BaseRepository;
@@ -15,7 +14,6 @@ import java.util.Set;
  *
  * @author Sam Gardner-Dell
  */
-@Api(description = "Repository for submission entities")
 @RepositoryRestResource
 public interface SubmissionRepository extends BaseRepository<Submission, Long> {
 

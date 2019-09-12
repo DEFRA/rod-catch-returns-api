@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.licences;
 
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -43,7 +42,6 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
      * @return a {@link ResponseEntity} containing the target {@link Licence} or a 404 status if not found
      */
     @GetMapping(value = "/{licence}")
-    @ApiOperation(value = "Retrieve a licence and its associated contact based on the given licence and postcode")
     public ResponseEntity<Licence> getLicence(@PathVariable("licence") final String licenceNumber,
                                               @RequestParam(value = "verification", required = false) final String verification) {
         ResponseEntity<Licence> responseEntity = new ResponseEntity<>(HttpStatus.FORBIDDEN);

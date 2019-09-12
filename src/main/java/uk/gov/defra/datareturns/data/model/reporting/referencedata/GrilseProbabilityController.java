@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.reporting.referencedata;
 
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +10,6 @@ import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,7 +58,6 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
     private final GrilseProbabilityRepository grilseProbabilityRepository;
 
     @GetMapping(value = "/{season}")
-    @ApiOperation(value = "Retrieve grilse probability data for the given season filter", produces = "text/csv")
     public void get(@PathVariable("season") final SeasonFilter season, final HttpServletResponse response) throws IOException {
         final Specification<GrilseProbability> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(GrilseProbability_.season));
         final List<GrilseProbability> entries = grilseProbabilityRepository.findAll(Specification.where(seasonSpec));
@@ -68,9 +65,6 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
     }
 
     @PostMapping(value = "/{season}")
-    @ApiOperation(value = "Store new grilse probability data for the given season",
-                  consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-                  produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ResponseEntity<Object> post(@PathVariable("season") final Short season,
                                        @RequestParam(value = "overwrite", required = false) final boolean overwrite,

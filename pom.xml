@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.DEFRA.data-returns-api-platform</groupId>
         <artifactId>api-parent</artifactId>
-        <version>6bf08a4ed3</version>
+        <version>f4f54f1fdb</version>
     </parent>
 
     <groupId>uk.gov.defra.datareturns</groupId>
@@ -42,13 +42,13 @@
         <dependency>
             <groupId>com.github.DEFRA.data-returns-api-platform</groupId>
             <artifactId>api-common</artifactId>
-            <version>6bf08a4ed3</version>
+            <version>f4f54f1fdb</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.DEFRA.data-returns-api-platform</groupId>
             <artifactId>api-common</artifactId>
-            <version>6bf08a4ed3</version>
+            <version>f4f54f1fdb</version>
             <type>test-jar</type>
             <classifier>testcommons</classifier>
             <scope>test</scope>
@@ -101,7 +101,7 @@
                     <dependency>
                         <groupId>com.github.DEFRA.data-returns-api-platform</groupId>
                         <artifactId>api-common</artifactId>
-                        <version>6bf08a4ed3</version>
+                        <version>f4f54f1fdb</version>
                     </dependency>
                 </dependencies>
             </plugin>

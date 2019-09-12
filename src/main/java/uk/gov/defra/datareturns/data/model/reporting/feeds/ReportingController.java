@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.reporting.feeds;
 
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -54,7 +53,6 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
     private final SmallCatchCountFeedRepository smallCatchCountFeedRepository;
 
     @GetMapping(value = "/submissions/{season}")
-    @ApiOperation(value = "Retrieve reporting summary data by contact for the given season", produces = "text/csv")
     public void submissions(@PathVariable("season") final SeasonFilter season, final HttpServletResponse response) throws IOException {
         final Specification<SubmissionFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(SubmissionFeed_.season));
         final Iterable<SubmissionFeed> submissions = submissionFeedRepository.findAll(seasonSpec);
@@ -62,7 +60,6 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
     }
 
     @GetMapping(value = "/activities/{season}")
-    @ApiOperation(value = "Retrieve full large catch data for the given filters", produces = "text/csv")
     public void activities(@PathVariable("season") final SeasonFilter season, final HttpServletResponse response) throws IOException {
         final Specification<ActivityFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(ActivityFeed_.season));
         final List<ActivityFeed> entries = activityFeedRepository.findAll(seasonSpec);
@@ -70,7 +67,6 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
     }
 
     @GetMapping(value = "/large-catches/{season}")
-    @ApiOperation(value = "Large catch reporting feed", produces = "text/csv")
     public void largeCatches(@PathVariable("season") final SeasonFilter season,
                              final HttpServletResponse response) throws IOException {
         final Specification<LargeCatchFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(LargeCatchFeed_.season));
@@ -79,7 +75,6 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
     }
 
     @GetMapping(value = "/small-catches/{season}")
-    @ApiOperation(value = "Catch submission data feed", produces = "text/csv")
     public void smallCatches(@PathVariable("season") final SeasonFilter season,
                              final HttpServletResponse response) throws IOException {
         final Specification<SmallCatchFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(SmallCatchFeed_.season));
@@ -88,7 +83,6 @@ public class ReportingController implements ResourceProcessor<RepositoryLinksRes
     }
 
     @GetMapping(value = "/small-catch-counts/{season}")
-    @ApiOperation(value = "Catch submission data feed", produces = "text/csv")
     public void smallCatchCounts(@PathVariable("season") final SeasonFilter season,
                                  final HttpServletResponse response) throws IOException {
         final Specification<SmallCatchCountFeed> seasonSpec = (root, query, cb) -> season.predicate(cb, root.get(SmallCatchCountFeed_.season));

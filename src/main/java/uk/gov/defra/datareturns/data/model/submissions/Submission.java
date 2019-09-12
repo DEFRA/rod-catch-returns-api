@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.submissions;
 
-import io.swagger.annotations.ApiModel;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,7 +36,6 @@ import java.util.List;
 @Getter
 @Setter
 @ValidSubmission
-@ApiModel(value = "Submission", description = "Rod Catch Submission")
 public class Submission extends AbstractBaseEntity<Long> {
     /**
      * Database sequence name for this entity
