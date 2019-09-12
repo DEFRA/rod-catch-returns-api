@@ -94,4 +94,16 @@ public class Catch extends AbstractBaseEntity<Long> {
      */
     @Column
     private boolean reportingExclude = false;
+
+    /**
+     * To allow FMT users to report on the default month
+     */
+    @Column
+    private boolean noDateRecorded = false;
+
+    /**
+     * To allow FMT users to report on the default dates
+     */
+    @Column
+    private boolean onlyMonthRecorded = false;
 }

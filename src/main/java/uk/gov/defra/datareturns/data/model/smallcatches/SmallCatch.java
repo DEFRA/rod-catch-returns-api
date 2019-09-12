@@ -88,4 +88,11 @@ public class SmallCatch extends AbstractBaseEntity<Long> {
      */
     @Column
     private boolean reportingExclude = false;
+
+    /**
+     * To allow FMT users to report on the default date
+     */
+    @Column
+    private boolean noMonthRecorded = false;
+
 }

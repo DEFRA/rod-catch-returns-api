@@ -18,6 +18,7 @@ public class TestSmallCatch extends AbstractTestEntity {
     public static final String COUNTS = "counts";
     public static final String RELEASED = "released";
     public static final String REPORTING_EXCLUSION = "reportingExclude";
+    public static final String NO_MONTH_RECORDED = "noMonthRecorded";
 
     TestSmallCatch(final TestActivity activity) {
         modify(ACTIVITY, activity::getUrl);
@@ -53,6 +54,11 @@ public class TestSmallCatch extends AbstractTestEntity {
 
     public final TestSmallCatch reportingExclude(final Boolean exclude) {
         modify(REPORTING_EXCLUSION, exclude);
+        return this;
+    }
+
+    public final TestSmallCatch noMonthRecorded(final Boolean noMonthRecorded) {
+        modify(NO_MONTH_RECORDED, noMonthRecorded);
         return this;
     }
 

@@ -15,6 +15,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -56,6 +58,13 @@ public class GrilseProbability extends AbstractBaseEntity<Long> {
     @Column(name = "season")
     @Parsed(field = "Season")
     private Short season;
+
+    /**
+     * The grilse weight gate that the probability relates to
+     */
+    @ManyToOne(targetEntity = GrilseWeightGate.class)
+    @JoinColumn(name = "gate_id")
+    private GrilseWeightGate grilseWeightGate;
 
     /**
      * The month (1-based index) this probability data relates to

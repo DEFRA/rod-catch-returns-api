@@ -65,6 +65,14 @@ public class SmallCatchTests {
     }
 
     @Test
+    public void testValidSmallCatchWithDefaultDateFlags() {
+        final SmallCatch cat = createValidSmallCatch();
+        cat.setNoMonthRecorded(true);
+        final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).isEmpty();
+    }
+
+    @Test
     public void testSmallCatchWithoutActivityFails() {
         final SmallCatch cat = createValidSmallCatch();
         cat.setActivity(null);
@@ -147,6 +155,17 @@ public class SmallCatchTests {
         cat.setReleased((short) (cat.getCounts().stream().mapToInt(c -> (int) c.getCount()).sum() + 1));
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
         Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_RELEASED_EXCEEDS_COUNTS"));
+    }
+
+    @Test
+    public void testSmallCatchSetNoMonthRecorded() {
+        final SmallCatch cat = createValidSmallCatch();
+        cat.setNoMonthRecorded(true);
+        final YearMonth thisMonth = YearMonth.from(LocalDate.now());
+        cat.getActivity().getSubmission().setSeason((short) thisMonth.getYear());
+        cat.setMonth(thisMonth.getMonth());
+        final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(0);
     }
 
     private SmallCatch createValidSmallCatch() {

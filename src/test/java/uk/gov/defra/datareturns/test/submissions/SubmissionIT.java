@@ -58,6 +58,8 @@ public class SubmissionIT {
                 .method("methods/1")
                 .species("species/1")
                 .mass(CatchMass.MeasurementType.METRIC, BigDecimal.ONE)
+                .noDateRecorded(false)
+                .onlyMonthRecorded(false)
                 .released(false);
         cat.create();
 
@@ -65,6 +67,7 @@ public class SubmissionIT {
         final TestSmallCatch sc = act.withSmallCatch()
                 .month(Month.JANUARY)
                 .counts(TestSmallCatch.Count.of("methods/1", 2))
+                .noMonthRecorded(false)
                 .released(1);
         sc.create();
 
@@ -91,10 +94,13 @@ public class SubmissionIT {
                 .method("methods/1")
                 .species("species/1")
                 .mass(CatchMass.MeasurementType.METRIC, BigDecimal.ONE)
+                .noDateRecorded(false)
+                .onlyMonthRecorded(false)
                 .released(false);
         final TestSmallCatch sc = act.withSmallCatch()
                 .month(Month.JANUARY)
                 .counts(TestSmallCatch.Count.of("methods/1", 2))
+                .noMonthRecorded(false)
                 .released(1);
         sub.create();
         act.create();
@@ -147,12 +153,15 @@ public class SubmissionIT {
                 .method("methods/1")
                 .species("species/1")
                 .mass(CatchMass.MeasurementType.METRIC, BigDecimal.ONE)
+                .noDateRecorded(false)
+                .onlyMonthRecorded(false)
                 .released(false);
         cat.create();
 
         // Add a small catch
         final TestSmallCatch sc = act.withSmallCatch()
                 .month(Month.JANUARY)
+                .noMonthRecorded(false)
                 .counts(TestSmallCatch.Count.of("methods/1", 2), TestSmallCatch.Count.of("methods/2", 2), TestSmallCatch.Count.of("methods/3", 1))
                 .released(1);
         sc.create();

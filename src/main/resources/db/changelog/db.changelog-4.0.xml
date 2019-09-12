@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="create-null-date-flags" author="Defra">
+        <addColumn tableName="rcr_small_catch">
+            <column name="no_month_recorded" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="rcr_catch">
+            <column name="only_month_recorded" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="no_date_recorded" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="rcr_small_catch_aud">
+            <column name="no_month_recorded" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+
+        <addColumn tableName="rcr_catch_aud">
+            <column name="only_month_recorded" type="boolean" defaultValueBoolean="false"/>
+            <column name="no_date_recorded" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="rcr_catch_aud" columnName="no_date_recorded" />
+            <dropColumn tableName="rcr_catch_aud" columnName="only_month_recorded" />
+            <dropColumn tableName="rcr_small_catch_aud" columnName="no_month_recorded" />
+            <dropColumn tableName="rcr_catch" columnName="no_date_recorded" />
+            <dropColumn tableName="rcr_catch" columnName="only_month_recorded" />
+            <dropColumn tableName="rcr_small_catch" columnName="no_month_recorded" />
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
+import uk.gov.defra.datareturns.data.model.grilse.GrilseWeightGate;
 import uk.gov.defra.datareturns.data.model.regions.Region;
 import uk.gov.defra.datareturns.data.model.rivers.River;
 
@@ -62,4 +63,11 @@ public class Catchment extends AbstractBaseEntity<Long> {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "catchment")
     @JsonIgnore
     private List<River> rivers;
+
+    /**
+     *
+     */
+    @ManyToOne
+    private GrilseWeightGate gate;
+
 }

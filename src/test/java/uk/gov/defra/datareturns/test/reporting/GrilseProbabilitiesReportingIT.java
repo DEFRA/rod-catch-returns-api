@@ -5,7 +5,6 @@ import io.restassured.response.ValidatableResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItems;
 import static uk.gov.defra.datareturns.test.reporting.ReportingIT.readCsvFromResponse;
 import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
 
@@ -31,6 +31,7 @@ import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.getEntity;
 @WithAdminUser
 @Slf4j
 public class GrilseProbabilitiesReportingIT {
+    public static final String GRILSE_PROBABILITIES_2018_1 = "reporting/reference/grilse-probabilities/2018/1";
     @Inject
     private GrilseProbabilityRepository grilseProbabilityRepository;
 
@@ -39,7 +40,7 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
         final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
@@ -84,13 +85,11 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/invalid-headers.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("status", Matchers.equalTo(400))
-                .body("error", Matchers.equalTo("Bad Request"))
-                .body("message", Matchers.equalTo("Unexpected header \"Unknown header\" in grilse probability data"));
+                .body("headerErrors.COLUMN_DISALLOWED", hasItems("Unknown header"));
     }
 
     @Test
@@ -98,14 +97,11 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/no-weight-heading.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("status", Matchers.equalTo(400))
-                .body("error", Matchers.equalTo("Bad Request"))
-                .body("message",
-                        Matchers.equalTo("Unexpected/incorrect headings found:  Must contain a weight heading and at least one month heading"));
+                .body("headerErrors.MISSING_REQUIRED", hasItems("WEIGHT"));
     }
 
     @Test
@@ -113,14 +109,11 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/no-month-headings.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("status", Matchers.equalTo(HttpStatus.BAD_REQUEST.value()))
-                .body("error", Matchers.equalTo("Bad Request"))
-                .body("message",
-                        Matchers.equalTo("Unexpected/incorrect headings found:  Must contain a weight heading and at least one month heading"));
+                .body("headerErrors.MISSING_REQUIRED", hasItems("<MONTH>"));
     }
 
     @Test
@@ -128,13 +121,11 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/duplicate-weight.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("status", Matchers.equalTo(HttpStatus.BAD_REQUEST.value()))
-                .body("error", Matchers.equalTo("Bad Request"))
-                .body("message", Matchers.equalTo("More than one row was found with the same weight value in the weight column"));
+                .body("errorsByColumnAndRowNumber.DUPLICATE.WEIGHT", hasItems(3, 4));
     }
 
     @Test
@@ -142,24 +133,115 @@ public class GrilseProbabilitiesReportingIT {
         grilseProbabilityRepository.deleteAll();
         final String csvData = IOUtils.resourceToString("/data/grilse/valid-grilse-data-69-datapoints.csv", StandardCharsets.UTF_8);
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
 
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018")
+                .when().post(GRILSE_PROBABILITIES_2018_1)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
-                .statusCode(HttpStatus.CONFLICT.value())
-                .body("status", Matchers.equalTo(HttpStatus.CONFLICT.value()))
-                .body("error", Matchers.equalTo("Conflict"))
-                .body("message", Matchers.equalTo("Existing data found for the season \"2018\" but overwrite parameter not set"));
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("generalErrors", hasItems("OVERWRITE_DISALLOWED"));
 
         given().contentType("text/csv").body(csvData)
-                .when().post("reporting/reference/grilse-probabilities/2018?overwrite=true")
+                .when().post(GRILSE_PROBABILITIES_2018_1 + "?overwrite=true")
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .statusCode(HttpStatus.CREATED.value());
+
+        // The gate source sets are independent
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018/2")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.CREATED.value());
+
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018/2")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("generalErrors", hasItems("OVERWRITE_DISALLOWED"));
+
+        given().contentType("text/csv").body(csvData)
+                .when().post("reporting/reference/grilse-probabilities/2018/2?overwrite=true")
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    public void testDuplicateHeaders() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/duplicate-headers.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post(GRILSE_PROBABILITIES_2018_1)
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("headerErrors.DUPLICATE_HEADERS", hasItems("June", "August"));
+    }
+
+    @Test
+    public void testWeightIsWhole() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/weight-not-whole-number.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post(GRILSE_PROBABILITIES_2018_1)
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("errorsByColumnAndRowNumber.NOT_WHOLE_NUMBER.WEIGHT", hasItems(2, 3));
+    }
+
+    @Test
+    public void testProbabilitiesNotBetweenZeroAndOne() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/probability-not-between-0-and-1.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post(GRILSE_PROBABILITIES_2018_1)
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("errorsByColumnAndRowNumber.INVALID_PROBABILITY.JUNE", hasItems(2, 3))
+                .body("errorsByColumnAndRowNumber.INVALID_PROBABILITY.SEPTEMBER", hasItems(4))
+                .body("errorsByColumnAndRowNumber.INVALID_PROBABILITY.DECEMBER", hasItems(3, 4));
+    }
+
+    @Test
+    public void wrongNumberOfDataOnRow() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/wrong-number-of-data-on-row.csv", StandardCharsets.UTF_8);
+        given().contentType("text/csv").body(csvData)
+                .when().post(GRILSE_PROBABILITIES_2018_1)
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("errorsByRow.ROW_HEADER_DISCREPANCY", hasItems(3, 4));
+    }
+
+    @Test
+    public void testMissingProbabilitiesTreatedAsZero() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/missing-probabilities-treated-as-zeros.csv", StandardCharsets.UTF_8);
+        final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
+                .when().post(GRILSE_PROBABILITIES_2018_1)
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    public void invalidCsv() throws IOException {
+        grilseProbabilityRepository.deleteAll();
+        final String csvData = IOUtils.resourceToString("/data/grilse/invalid-csv.csv", StandardCharsets.UTF_8);
+        final ValidatableResponse postResponse = given().contentType("text/csv").body(csvData)
+                .when().post(GRILSE_PROBABILITIES_2018_1)
+                .then()
+                .log().ifValidationFails(LogDetail.ALL)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("generalErrors", hasItems("INVALID_CSV"));
     }
 }
