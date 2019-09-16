@@ -100,8 +100,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
         final Optional<GrilseWeightGate> grilseWeightGate = grilseWeightGateRepository.findById(gate);
 
         if (!grilseWeightGate.isPresent()) {
-            return new ResponseEntity<>("Gate identifier '" + gate + "' not found: Must contain a known gate identifier",
-                    HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Gate identifier not found: Must contain a known gate identifier", HttpStatus.BAD_REQUEST);
         }
 
         final GrilseDataLoader loader = new GrilseDataLoader(inputStream);
