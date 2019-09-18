@@ -198,6 +198,22 @@ public class CatchTests {
     }
 
     @Test
+    public void testValidCatchWithOnlyMonthRecordedAndNoDateSetFails() {
+        testCatch.setOnlyMonthRecorded(true);
+        testCatch.setDateCaught(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_DEFAULT_DATE_REQUIRED"));
+    }
+
+    @Test
+    public void testValidCatchWithNoDateRecordedAndNoDateSetFails() {
+        testCatch.setNoDateRecorded(true);
+        testCatch.setDateCaught(null);
+        final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);
+        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("CATCH_DEFAULT_DATE_REQUIRED"));
+    }
+
+    @Test
     public void testValidCatchWithNoDateRecorded() {
         testCatch.setNoDateRecorded(true);
         final Set<ConstraintViolation<Catch>> violations = validator.validate(testCatch);

@@ -65,7 +65,11 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      */
     private boolean checkDate(final Catch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getDateCaught() == null) {
-            return handleError(context, "DATE_REQUIRED", PROPERTY_DATE_CAUGHT);
+            if (catchEntry.isNoDateRecorded() || catchEntry.isOnlyMonthRecorded()) {
+                return handleError(context, "DEFAULT_DATE_REQUIRED", PROPERTY_DATE_CAUGHT);
+            } else {
+                return handleError(context, "DATE_REQUIRED", PROPERTY_DATE_CAUGHT);
+            }
         }
         if (catchEntry.getActivity() != null && catchEntry.getActivity().getSubmission() != null) {
             final int yearCaught = DateUtils.toCalendar(catchEntry.getDateCaught()).get(Calendar.YEAR);

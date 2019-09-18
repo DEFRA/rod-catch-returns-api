@@ -168,6 +168,17 @@ public class SmallCatchTests {
         Assertions.assertThat(violations).hasSize(0);
     }
 
+    @Test
+    public void testSmallCatchSetNoMonthRecordedWithoutMonthFails() {
+        final SmallCatch cat = createValidSmallCatch();
+        cat.setNoMonthRecorded(true);
+        final YearMonth thisMonth = YearMonth.from(LocalDate.now());
+        cat.getActivity().getSubmission().setSeason((short) thisMonth.getYear());
+        cat.setMonth(null);
+        final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
+        Assertions.assertThat(violations).hasSize(1).haveAtLeastOne(violationMessageMatching("SMALL_CATCH_DEFAULT_MONTH_REQUIRED"));
+    }
+
     private SmallCatch createValidSmallCatch() {
         final Submission submission = SubmissionTests.createValidSubmission();
         final River river = riverRepository.getOne(RandomUtils.nextLong(1, 100));
