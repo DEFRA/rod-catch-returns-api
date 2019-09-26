@@ -37,7 +37,7 @@ public class ReferenceDataReportingIT {
     public void testLocationReferenceData() {
         final ValidatableResponse response = getEntity("/reporting/reference/locations");
         final CsvUtil.CsvReadResult<Object[]> result = readCsvFromResponse(response);
-        Assertions.assertThat(result.getHeaders()).containsExactly("ID", "River", "Catchment", "Region");
+        Assertions.assertThat(result.getHeaders()).containsExactly("ID", "River", "Catchment", "Region", "Gate");
         // Expect 1 location per available river (the hierarchy of region->catchment->river being flattened)
         Assertions.assertThat(result.getRows().size()).isEqualTo(riverRepository.count());
     }
