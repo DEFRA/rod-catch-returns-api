@@ -30,4 +30,7 @@ public class LocationEntry {
     @Basic
     @Parsed(field = "Region")
     private String regionName;
+    @Basic
+    @Parsed(field = "Gate")
+    private String grilseGateName;
 }
