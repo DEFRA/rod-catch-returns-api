@@ -59,7 +59,11 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
         final LocalDate today = LocalDate.now();
         boolean valid = true;
         if (smallCatch.getMonth() == null) {
-            valid = handleError(context, "MONTH_REQUIRED", PROPERTY_MONTH);
+            if (smallCatch.isNoMonthRecorded()) {
+                valid = handleError(context, "DEFAULT_MONTH_REQUIRED", PROPERTY_MONTH);
+            } else {
+                valid = handleError(context, "MONTH_REQUIRED", PROPERTY_MONTH);
+            }
         } else if (smallCatch.getMonth().getValue() > Month.from(today).getValue()
                 && smallCatch.getActivity().getSubmission().getSeason() >= today.getYear()) {
             valid = handleError(context, "MONTH_IN_FUTURE", PROPERTY_MONTH);
