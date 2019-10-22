@@ -4,6 +4,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import uk.gov.defra.datareturns.data.BaseRepository;
 
 @RepositoryRestResource
-public interface GrilseWeightGateRepository extends BaseRepository<GrilseWeightGate, Short> {
+public interface GrilseWeightGateRepository extends BaseRepository<GrilseWeightGate, Long> {
 
 }
