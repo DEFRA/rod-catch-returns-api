@@ -1,6 +1,5 @@
 package uk.gov.defra.datareturns.data.model.grilse;
 
-import com.univocity.parsers.annotations.Headers;
 import com.univocity.parsers.annotations.Parsed;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,7 +14,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -29,11 +27,10 @@ import java.math.BigDecimal;
  */
 @Entity(name = "rcr_grilse_probability")
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "uniq_grilse_probability_key", columnNames = {"season", "month", "mass_lbs"})
+        @UniqueConstraint(name = "uniq_grilse_probability_key", columnNames = {"season", "gate_id", "month", "mass_lbs"})
 })
 @Audited
 @Getter
-@Headers
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 public class GrilseProbability extends AbstractBaseEntity<Long> {
@@ -63,8 +60,7 @@ public class GrilseProbability extends AbstractBaseEntity<Long> {
      * The grilse weight gate that the probability relates to
      */
     @ManyToOne(targetEntity = GrilseWeightGate.class)
-    @JoinColumn(name = "gate_id")
-    private GrilseWeightGate grilseWeightGate;
+    private GrilseWeightGate gate;
 
     /**
      * The month (1-based index) this probability data relates to

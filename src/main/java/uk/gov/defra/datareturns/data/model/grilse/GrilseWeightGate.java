@@ -1,11 +1,8 @@
 package uk.gov.defra.datareturns.data.model.grilse;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.univocity.parsers.annotations.Headers;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 import uk.gov.defra.datareturns.data.model.AbstractBaseEntity;
@@ -24,11 +21,8 @@ import java.util.List;
 @Entity(name = "rcr_grilse_weight_gate")
 @Audited
 @Getter
-@Headers
-@NoArgsConstructor
-@AllArgsConstructor(staticName = "of")
-public class GrilseWeightGate extends AbstractBaseEntity<Short> {
-
+@Setter
+public class GrilseWeightGate extends AbstractBaseEntity<Long> {
     public static final String SEQUENCE = "rcr_grilse_weight_gate_id_seq";
 
     /**
@@ -39,7 +33,7 @@ public class GrilseWeightGate extends AbstractBaseEntity<Short> {
     @SequenceGenerator(name = SEQUENCE, sequenceName = SEQUENCE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SEQUENCE)
     @Setter(AccessLevel.NONE)
-    private Short id;
+    private Long id;
 
     /**
      * The gate name
@@ -52,5 +46,4 @@ public class GrilseWeightGate extends AbstractBaseEntity<Short> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "gate")
     @JsonIgnoreProperties("gate")
     private List<Catchment> catchments;
-
 }
