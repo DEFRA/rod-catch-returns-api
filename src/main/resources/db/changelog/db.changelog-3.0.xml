@@ -120,8 +120,8 @@
         </loadData>
 
         <sql>
-            update rcr_catchment set gate_id = tmp_grilse_gate.gate_id
-            from tmp_grilse_gate where id = tmp_grilse_gate.catchment_id
+            update rcr_catchment set gate_id = (select gate_id from tmp_grilse_gate where catchment_id = id)
+            where id IN (select catchment_id from tmp_grilse_gate)
         </sql>
         <dropTable tableName="tmp_grilse_gate"/>
 
