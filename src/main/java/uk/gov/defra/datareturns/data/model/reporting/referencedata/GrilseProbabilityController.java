@@ -117,7 +117,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
         @Getter
         private List<GrilseProbability> grilseProbabilities = null;
 
-        GrilseCsvParser(final InputStream stream, final Short season, final GrilseWeightGate grilseWeightGate) throws GrilseCsvException {
+        GrilseCsvParser(final InputStream stream, final Short season, final GrilseWeightGate grilseWeightGate) {
             this.data = read(stream);
             this.season = season;
             this.grilseWeightGate = grilseWeightGate;
@@ -193,16 +193,12 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
                     final Month month = entry.getKey();
                     final Integer fieldIndex = entry.getValue();
                     BigDecimal ratio = null;
-                    try {
-                        final String strVal = Objects.toString(rowData[fieldIndex], "0");
-                        final BigDecimal value = new BigDecimal(strVal);
-                        if (isValidWeightRatio(value)) {
-                            ratio = value;
-                        } else {
-                            errors.add(new GrilseCsvError(ErrorType.INVALID_PROBABILITY, rowNum, fieldIndex));
-                        }
-                    } catch (final NumberFormatException e) {
-                        errors.add(new GrilseCsvError(ErrorType.NOT_WHOLE_NUMBER, rowNum, fieldIndex));
+                    final String strVal = Objects.toString(rowData[fieldIndex], "0");
+                    final BigDecimal value = new BigDecimal(strVal);
+                    if (isValidWeightRatio(value)) {
+                        ratio = value;
+                    } else {
+                        errors.add(new GrilseCsvError(ErrorType.INVALID_PROBABILITY, rowNum, fieldIndex));
                     }
 
                     // Only add a grilse probability value if the probability is greater than zero (reporting assumes 0 for any missing data point)
@@ -229,7 +225,7 @@ public class GrilseProbabilityController implements ResourceProcessor<Repository
 
     @Getter
     static final class GrilseCsvException extends ResponseStatusException {
-        private final List<GrilseCsvError> errors;
+        private final transient List<GrilseCsvError> errors;
 
         GrilseCsvException(final HttpStatus status, final List<GrilseCsvError> errors) {
             super(status, "Invalid CSV data");

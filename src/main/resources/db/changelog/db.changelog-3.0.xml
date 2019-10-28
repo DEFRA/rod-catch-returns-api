@@ -77,14 +77,14 @@
     <changeSet id="update-schema: associate grilse data with a gate identifier" author="Defra">
         <addColumn tableName="rcr_grilse_probability">
             <column name="gate_id" type="bigint" value="1">
-                <constraints nullable="false"
-                             foreignKeyName="fk_grilse_probability__gate"
+                <constraints foreignKeyName="fk_grilse_probability__gate"
                              references="rcr_grilse_weight_gate(id)"/>
             </column>
         </addColumn>
         <addColumn tableName="rcr_grilse_probability_aud">
             <column name="gate_id" type="bigint" value="1"/>
         </addColumn>
+        <addNotNullConstraint tableName="rcr_grilse_probability" columnName="gate_id" columnDataType="bigint"/>
         <dropUniqueConstraint tableName="rcr_grilse_probability" constraintName="uniq_grilse_probability_key"/>
         <addUniqueConstraint tableName="rcr_grilse_probability" constraintName="uniq_grilse_probability_key"
                              columnNames="season, gate_id, month, mass_lbs"/>
