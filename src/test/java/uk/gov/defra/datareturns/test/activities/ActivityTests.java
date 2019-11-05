@@ -10,6 +10,7 @@ import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.rivers.River;
 import uk.gov.defra.datareturns.data.model.rivers.RiverRepository;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
+import uk.gov.defra.datareturns.data.model.submissions.SubmissionSource;
 import uk.gov.defra.datareturns.test.submissions.SubmissionTests;
 import uk.gov.defra.datareturns.testcommons.framework.ApiContextTest;
 import uk.gov.defra.datareturns.testutils.WithAdminUser;
@@ -99,10 +100,21 @@ public class ActivityTests {
     }
 
     @Test
-    public void testActivityWithNonPositiveDaysFails() {
-        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 0);
+    public void testActivityWithNonPositiveDaysFailsForWebUser() {
+        final Submission sub = SubmissionTests.createValidSubmission();
+        sub.setSource(SubmissionSource.WEB);
+        final Activity activity = createValidActivity(sub, getRandomRiver(), 0, 0);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_NOT_GREATER_THAN_ZERO"));
+    }
+
+    @Test
+    public void testActivityWithNonPositiveDaysIsValidForPaperReturns() {
+        final Submission sub = SubmissionTests.createValidSubmission();
+        sub.setSource(SubmissionSource.PAPER);
+        final Activity activity = createValidActivity(sub, getRandomRiver(), 0, 0);
+        final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
+        Assertions.assertThat(violations).isEmpty();
     }
 
     @Test

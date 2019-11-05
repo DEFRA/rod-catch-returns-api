@@ -13,5 +13,5 @@ import java.util.List;
  */
 @RepositoryRestResource
 public interface GrilseProbabilityRepository extends BaseRepository<GrilseProbability, Long> {
-    List<GrilseProbability> findBySeasonAndGrilseWeightGate(short season, GrilseWeightGate gate);
+    List<GrilseProbability> findBySeasonAndGate(short season, GrilseWeightGate gate);
 }

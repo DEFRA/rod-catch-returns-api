@@ -28,6 +28,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     private static final String PROPERTY_RELEASED = "released";
     private static final String PROPERTY_SPECIES = "species";
     private static final String PROPERTY_ACTIVITY = "activity";
+    private static final String PROPERTY_ONLY_MONTH = "onlyMonthRecorded";
 
     /**
      * Maximum possible mass of a salmon/sea trout (world record is about 48kg)
@@ -42,7 +43,8 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     @Override
     public void initialize(final ValidCatch constraintAnnotation) {
         super.addChecks(this::checkActivity, this::checkDate, this::checkSpecies,
-                this::checkMass, this::checkMassValue, this::checkMassLimits, this::checkMethod, this::checkMethodPermissions, this::checkReleased);
+                this::checkMass, this::checkMassValue, this::checkMassLimits, this::checkMethod,
+                this::checkMethodPermissions, this::checkReleased, this::checkDefaultDateFlagConflict);
     }
 
     /**
@@ -82,6 +84,20 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
         if (dateCaught.isAfter(LocalDate.now())) {
             return handleError(context, "DATE_IN_FUTURE", PROPERTY_DATE_CAUGHT);
         }
+        return true;
+    }
+
+    /**
+     * Check that the only month flag is not set when the no date recorded flag is set. It is superfluous
+     * @param catchEntry the {@link Catch} to be validated
+     * @param context    the validator context
+     * @return true if valid, false otherwise
+     */
+    private boolean checkDefaultDateFlagConflict(final Catch catchEntry, final ConstraintValidatorContext context) {
+        if (catchEntry.isNoDateRecorded() && catchEntry.isOnlyMonthRecorded()) {
+            return handleError(context, "NO_DATE_RECORDED_WITH_ONLY_MONTH_RECORDED", PROPERTY_ONLY_MONTH);
+        }
+
         return true;
     }
 

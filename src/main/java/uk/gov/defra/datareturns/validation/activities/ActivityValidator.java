@@ -3,9 +3,12 @@ package uk.gov.defra.datareturns.validation.activities;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
+import uk.gov.defra.datareturns.data.model.submissions.Submission;
+import uk.gov.defra.datareturns.data.model.submissions.SubmissionSource;
 import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
 import javax.validation.ConstraintValidatorContext;
+import java.util.Optional;
 
 /**
  * Validate an {@link Activity} object
@@ -79,7 +82,8 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
     }
 
     /**
-     * Check that the count of days spent on the river is within possible maximums
+     * Check that the count of days spent on the river is within possible maximums.
+     * Zero is permitted for the FMT user (Paper submissions)
      *
      * @param activity the activity to be validated
      * @param context  the validator context
@@ -87,9 +91,21 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
      */
     private boolean checkDays(final Activity activity, final ConstraintValidatorContext context) {
         boolean valid = checkDaysMandatoryRelease(activity, context) && checkDaysOther(activity, context);
-        if (valid && activity.getDaysFishedWithMandatoryRelease() < 1 && activity.getDaysFishedOther() < 1) {
-            valid = handleError(context, "DAYS_FISHED_NOT_GREATER_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
+
+        final Optional<Submission> sub = Optional.ofNullable(activity.getSubmission());
+
+        if (sub.isPresent()) {
+            if (valid && sub.get().getSource().equals(SubmissionSource.WEB)
+                    && activity.getDaysFishedWithMandatoryRelease() < 1 && activity.getDaysFishedOther() < 1) {
+                valid = handleError(context, "DAYS_FISHED_NOT_GREATER_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
+            }
+
+            if (valid && sub.get().getSource().equals(SubmissionSource.PAPER)
+                    && activity.getDaysFishedWithMandatoryRelease() < 0 && activity.getDaysFishedOther() < 0) {
+                valid = handleError(context, "DAYS_FISHED_LESS_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
+            }
         }
+
         return valid;
     }
 
