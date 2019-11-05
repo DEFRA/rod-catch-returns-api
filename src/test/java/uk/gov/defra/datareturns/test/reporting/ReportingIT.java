@@ -53,7 +53,8 @@ public class ReportingIT {
         final ValidatableResponse response = getEntity("/reporting/feeds/large-catches/" + Year.now().getValue());
         final CsvReadResult<Object[]> result = readCsvFromResponse(response);
         Assertions.assertThat(result.getHeaders())
-                .containsExactly("ID", "Activity ID", "Date", "Species ID", "Method ID", "Mass (kg)", "Released");
+                .containsExactly("ID", "Activity ID", "Date", "Species ID", "Method ID", "Mass (kg)", "Released",
+                        "Only Month Recorded", "No Date Recorded");
     }
 
 
@@ -61,7 +62,7 @@ public class ReportingIT {
     public void testSmallCatchesFeed() {
         final ValidatableResponse response = getEntity("/reporting/feeds/small-catches/" + Year.now().getValue());
         final CsvReadResult<Object[]> result = readCsvFromResponse(response);
-        Assertions.assertThat(result.getHeaders()).containsExactly("ID", "Activity ID", "Month", "Species ID", "Released");
+        Assertions.assertThat(result.getHeaders()).containsExactly("ID", "Activity ID", "Month", "Species ID", "Released", "No Month Recorded");
     }
 
     @Test

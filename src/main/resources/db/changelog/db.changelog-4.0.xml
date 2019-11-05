@@ -31,36 +31,36 @@
         <rollback>
             <dropColumn tableName="rcr_catch_aud" columnName="no_date_recorded" />
             <dropColumn tableName="rcr_catch_aud" columnName="only_month_recorded" />
-            <dropColumn tableName="rcr_small_catch_aud" columnName="no_month_recorded" />
             <dropColumn tableName="rcr_catch" columnName="no_date_recorded" />
             <dropColumn tableName="rcr_catch" columnName="only_month_recorded" />
+            <dropColumn tableName="rcr_small_catch_aud" columnName="no_month_recorded" />
             <dropColumn tableName="rcr_small_catch" columnName="no_month_recorded" />
         </rollback>
     </changeSet>
 
-    <!--
-    ****************************************************************
-    Alter the reporting location view to include the grilse
-    ****************************************************************
-    -->
-    <changeSet id="create-view: rcv_ref_locations" author="Defra">
-        <createView viewName="rcv_ref_locations" replaceIfExists="true">
+    <changeSet id="alter-view: rcv_feed_large_catches" author="Defra">
+        <createView viewName="rcv_feed_large_catches" replaceIfExists="true">
             <![CDATA[
-                select riv.id   as id,
-                       riv.name as name,
-                       ctm.name as catchment_name,
-                       reg.name as region_name,
-                       gwg.name as grilse_gate_name
-                from rcr_river riv
-                         inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
-                         inner join rcr_region reg on (ctm.region_id = reg.id)
-                         left join rcr_grilse_weight_gate gwg on ctm.gate_id = gwg.id
+                select sub.season      as season,
+                       cat.*
+                from rcr_catch cat
+                       inner join rcr_activity act on (cat.activity_id = act.id and not cat.reporting_exclude)
+                       inner join rcr_submission sub on (act.submission_id = sub.id and not sub.reporting_exclude);
             ]]>
         </createView>
+    </changeSet>
 
-        <rollback>
-            <dropView viewName="rcv_ref_locations"/>
-        </rollback>
+    <changeSet id="alter-view: rcv_feed_small_catches" author="Defra">
+        <createView viewName="rcv_feed_small_catches" replaceIfExists="true">
+            <![CDATA[
+                select sub.season     as season,
+                       2              as species_id,
+                       sc.*
+                from rcr_small_catch sc
+                       inner join rcr_activity act on (sc.activity_id = act.id and not sc.reporting_exclude)
+                       inner join rcr_submission sub on (not sub.reporting_exclude and act.submission_id = sub.id);
+            ]]>
+        </createView>
     </changeSet>
 
 </databaseChangeLog>

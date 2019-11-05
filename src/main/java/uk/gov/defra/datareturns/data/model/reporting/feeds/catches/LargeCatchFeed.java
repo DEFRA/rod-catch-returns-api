@@ -46,8 +46,14 @@ public class LargeCatchFeed {
     private Long methodId;
     @Basic
     @Parsed(field = "Mass (kg)")
-    private BigDecimal mass;
+    private BigDecimal massKg;
     @Basic
     @Parsed(field = "Released")
     private Boolean released;
+    @Basic
+    @Parsed(field = "Only Month Recorded")
+    private Boolean onlyMonthRecorded;
+    @Basic
+    @Parsed(field = "No Date Recorded")
+    private Boolean noDateRecorded;
 }

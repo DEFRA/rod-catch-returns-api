@@ -37,4 +37,7 @@ public class SmallCatchFeed {
     @Basic
     @Parsed(field = "Released")
     private Short released;
+    @Basic
+    @Parsed(field = "No Month Recorded")
+    private Boolean noMonthRecorded;
 }
