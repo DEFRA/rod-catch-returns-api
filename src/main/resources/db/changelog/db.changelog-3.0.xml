@@ -131,4 +131,25 @@
             <dropColumn tableName="rcr_catchment_aud" columnName="gate_id"/>
         </rollback>
     </changeSet>
+
+    <!--
+    ****************************************************************
+    Alter the reporting location view to include the grilse
+    ****************************************************************
+    -->
+    <changeSet id="create-view: rcv_ref_locations" author="Defra">
+        <createView viewName="rcv_ref_locations" replaceIfExists="true">
+            <![CDATA[
+                select riv.id   as id,
+                       riv.name as name,
+                       ctm.name as catchment_name,
+                       reg.name as region_name,
+                       gwg.name as grilse_gate_name
+                from rcr_river riv
+                       inner join rcr_catchment ctm on (riv.catchment_id = ctm.id)
+                       inner join rcr_region reg on (ctm.region_id = reg.id)
+                       left join rcr_grilse_weight_gate gwg on ctm.gate_id = gwg.id
+            ]]>
+        </createView>
+    </changeSet>
 </databaseChangeLog>

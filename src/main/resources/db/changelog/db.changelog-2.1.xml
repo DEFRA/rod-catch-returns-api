@@ -2,20 +2,42 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
     <!--
-        Change set to remove reference to rcr_submission from rcr_catch and rcr_small_catch as this can be inferred via rcr_activity
+        Reference data corrections
     -->
-    <changeSet id="alter-view: rcv_feed_large_catches" author="Defra">
+    <changeSet id="reference data corrections" author="DEFRA">
+        <sql>
+            <![CDATA[
+                update rcr_catchment set name = 'Conwy', last_modified = now(), version = now() where name = 'CoNorth Westy';
+                update rcr_catchment set name = 'Gannel', last_modified = now(), version = now() where name = 'GanNorth Eastl';
+                update rcr_catchment set name = 'Lliw Swansea', last_modified = now(), version = now() where name = 'Lliw South Westansea';
+                update rcr_catchment set name = 'Lune', last_modified = now(), version = now() where name = 'LuNorth East';
+                update rcr_catchment set name = 'Neath', last_modified = now(), version = now() where name = 'North Eastath';
+                update rcr_catchment set name = 'Nene', last_modified = now(), version = now() where name = 'North EastNorth East';
+                update rcr_catchment set name = 'Nevern', last_modified = now(), version = now() where name = 'North Eastvern';
+                update rcr_catchment set name = 'Rhymney', last_modified = now(), version = now() where name = 'RhymNorth Easty';
+                update rcr_catchment set name = 'Tyne', last_modified = now(), version = now() where name = 'TyNorth East';
+                update rcr_river set catchment_id = (select id from rcr_catchment where name = 'Ouse Yorkshire') where name = 'Don';
+                delete from rcr_catchment where name = 'Don';
+                update rcr_catchment set region_id = (select id from rcr_region where name = 'South West') where name = 'Avon Hants';
+                update rcr_catchment set region_id = (select id from rcr_region where name = 'South East (Southern)') where name = 'Avon Water Hants';
+                update rcr_catchment set name = 'Stour (South West)' where name = 'Stour Hants';
+                update rcr_river set catchment_id = (select id from rcr_catchment where name = 'Thames') where name ='Wandle';
+                delete from rcr_catchment where name = 'Wandle';
+            ]]>
+        </sql>
+    </changeSet>
+
+    <!-- Remove reference to submission from catch table and recreate dependent views -->
+    <changeSet id="alter-table: rcr_catch" author="Defra">
+        <dropView viewName="rcv_feed_large_catches"/>
+        <dropColumn tableName="rcr_catch" columnName="submission_id"/>
+        <dropColumn tableName="rcr_catch_aud" columnName="submission_id"/>
         <createView viewName="rcv_feed_large_catches" replaceIfExists="true">
             <![CDATA[
-                select cat.id          as id,
-                       sub.season      as season,
-                       cat.activity_id as activity_id,
-                       cat.date_caught as date_caught,
-                       cat.species_id  as species_id,
-                       cat.method_id   as method_id,
-                       cat.released    as released,
-                       cat.mass_kg     as mass
+                select sub.season      as season,
+                       cat.*
                 from rcr_catch cat
                        inner join rcr_activity act on (cat.activity_id = act.id and not cat.reporting_exclude)
                        inner join rcr_submission sub on (act.submission_id = sub.id and not sub.reporting_exclude);
@@ -23,53 +45,34 @@
         </createView>
     </changeSet>
 
-    <changeSet id="alter-table: rcr_catch" author="Defra">
-        <dropColumn tableName="rcr_catch" columnName="submission_id"/>
-    </changeSet>
-
-    <changeSet id="alter-table: rcr_catch_aud" author="Defra">
-        <dropColumn tableName="rcr_catch_aud" columnName="submission_id"/>
-    </changeSet>
-
-    <changeSet id="alter-view: rcv_feed_small_catches" author="Defra">
+    <!-- Remove reference to submission from small catch table and recreate dependent views -->
+    <changeSet id="alter-table: rcr_small_catch" author="Defra">
+        <dropView viewName="rcv_feed_small_catch_counts"/>
+        <dropView viewName="rcv_feed_small_catches"/>
+        <dropUniqueConstraint tableName="rcr_small_catch" constraintName="uniq_activity_and_month_per_submission"/>
+        <dropColumn tableName="rcr_small_catch" columnName="submission_id"/>
+        <dropColumn tableName="rcr_small_catch_aud" columnName="submission_id"/>
+        <addUniqueConstraint columnNames="activity_id, month" constraintName="uniq_activity_and_month" tableName="rcr_small_catch"/>
         <createView viewName="rcv_feed_small_catches" replaceIfExists="true">
             <![CDATA[
-                select sc.id          as id,
-                       sub.season     as season,
-                       sc.activity_id as activity_id,
-                       sc.month       as month,
+                select sub.season     as season,
                        2              as species_id,
-                       sc.released    as released
+                       sc.*
                 from rcr_small_catch sc
                        inner join rcr_activity act on (sc.activity_id = act.id and not sc.reporting_exclude)
                        inner join rcr_submission sub on (not sub.reporting_exclude and act.submission_id = sub.id);
             ]]>
         </createView>
-    </changeSet>
-
-    <changeSet id="alter-view: rcv_feed_small_catch_counts" author="Defra">
         <createView viewName="rcv_feed_small_catch_counts" replaceIfExists="true">
             <![CDATA[
                 select concat(sc.id, '_', counts.method_id) as id,
                        sub.season                           as season,
-                       counts.small_catch_id                as small_catch_id,
-                       counts.method_id                     as method_id,
-                       counts.count                         as count
+                       counts.*
                 from rcr_small_catch_counts counts
                        inner join rcr_small_catch sc on (counts.small_catch_id = sc.id)
                        inner join rcr_activity act on (sc.activity_id = act.id and not sc.reporting_exclude)
                        inner join rcr_submission sub on (not sub.reporting_exclude and act.submission_id = sub.id)
             ]]>
         </createView>
-    </changeSet>
-
-    <changeSet id="alter-table: rcr_small_catch" author="Defra">
-        <dropUniqueConstraint tableName="rcr_small_catch" constraintName="uniq_activity_and_month_per_submission"/>
-        <dropColumn tableName="rcr_small_catch" columnName="submission_id"/>
-        <addUniqueConstraint columnNames="activity_id, month" constraintName="uniq_activity_and_month" tableName="rcr_small_catch"/>
-    </changeSet>
-
-    <changeSet id="alter-table: rcr_small_catch_aud" author="Defra">
-        <dropColumn tableName="rcr_small_catch_aud" columnName="submission_id"/>
     </changeSet>
 </databaseChangeLog>

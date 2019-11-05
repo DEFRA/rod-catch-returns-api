@@ -17,7 +17,7 @@ public class ServiceConfigurationIT {
     @Test
     public void testCustomRepositoryConfiguration() {
         // Fires any mvc controllers which implement ResourceProcessor<RepositoryLinksResource> by loading the hal browser
-        IntegrationTestUtils.getEntity("/").statusCode(200).log().all();
+        IntegrationTestUtils.getEntity("/").statusCode(200);
     }
 
     @Test
