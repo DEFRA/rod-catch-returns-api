@@ -51,7 +51,7 @@ public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmis
     }
 
     /**
-     * Check that the season is provided and only allow submissions for the current or previous year
+     * Check that the season is provided and not in the future
      *
      * @param submission the {@link Submission} to be validated
      * @param context    the validator context
@@ -59,9 +59,7 @@ public class SubmissionValidator extends AbstractConstraintValidator<ValidSubmis
      */
     private boolean checkSubmissionSeason(final Submission submission, final ConstraintValidatorContext context) {
         final int currentSeason = Calendar.getInstance().get(Calendar.YEAR);
-        final int lastSeason = currentSeason - 1;
-        return (submission.getSeason() != null && submission.getSeason() <= currentSeason && submission.getSeason() >= lastSeason)
-                || handleError(context, "SEASON_INVALID", PROPERTY_SEASON);
+        return (submission.getSeason() != null && submission.getSeason() <= currentSeason) || handleError(context, "SEASON_INVALID", PROPERTY_SEASON);
     }
 
     @Override

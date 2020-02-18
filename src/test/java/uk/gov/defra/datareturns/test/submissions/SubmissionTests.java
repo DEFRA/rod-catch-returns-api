@@ -111,14 +111,6 @@ public class SubmissionTests {
     }
 
     @Test
-    public void testSubmissionYearTwoSeasonsPriorFails() {
-        final Submission sub = createValidSubmission();
-        sub.setSeason(getYear(-2));
-        final Set<ConstraintViolation<Submission>> violations = validator.validate(sub);
-        Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("SUBMISSION_SEASON_INVALID"));
-    }
-
-    @Test
     public void testSubmissionYearInFutureFails() {
         final Submission sub = createValidSubmission();
         sub.setSeason(getYear(1));
