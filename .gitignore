@@ -6,5 +6,6 @@
 /.settings/
 .project
 .classpath
+.factorypath
 .env
 **/log/*
