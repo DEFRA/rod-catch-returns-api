@@ -24,6 +24,47 @@ git clone ssh://git@ssh.github.com:443/DEFRA/rod-catch-returns-api
 - Java 11
 - (Optional) Maven 3.54 or greater (or use the supplied mvnw wrapper)
 
+### Installing Java 11 (on MacOS Catalina)
+To check your java version, do `java -version`. If you're not using v11, do:
+```bash
+sdk i java 11.0.2-open
+```
+Followed by
+```bash
+sdk default java 11.0.2-open
+```
+To default to Java 11.
+This presumes you have sdkman installed, see here if you don't: https://sdkman.io/install
+Then add this to your shell config file (e.g. `.zshrc`):
+```
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="~/.sdkman"
+[[ -s "~/.sdkman/bin/sdkman-init.sh" ]] && source "~/.sdkman/bin/sdkman-init.sh"
+```
+
+## Use with Visual Studio Code
+If you're working with Visual Studio Code, you'll need some additional extensions:
+- Lombok Annotations Support
+- Spring Boot Tools
+
+## Local Environment
+The launches/docker-stack/rcr-local-services-stack.yml config exists to provide local Postgres and Redis instances:
+```bash
+docker stack deploy -c launches/docker-stack/rcr-local-services-stack.yml rcr
+```
+Create a local .env file:
+```bash
+cp .env.example .env 
+```
+Then initialise the database:
+```bash
+launches/dbctl init
+```
+Finally, run the migrations:
+```bash
+launches/dbctl update
+```
+After this, you can launch in default profile rather than using the in-memory database
 
 ## Launching via the spring-boot maven plugin (development use)
 
@@ -35,6 +76,12 @@ launches/serverctl run
 Run with in-memory database for testing:
 ```bash
 launches/serverctl run --spring.profiles.active=h2
+```
+
+## Compilation
+```bash
+./mvnw clean
+./mvnw compile
 ```
 
 ## Verifying changes
