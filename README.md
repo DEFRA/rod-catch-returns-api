@@ -150,7 +150,7 @@ The new image will be installed into the local docker repository under drp/rcr_a
 
 ### App Config
 This is done in src/main/resources/application.yml, which is setup for local development. These settings are overridden by values in the rod-catch-returns-deployments repo in GitLab. 
-To overwright them locally, use an .env file in the root of the repo. Each setting can be overridden by following the nesting, but transforming each setting to uppercase and delimiting with an underscore. For example, to override this:
+To overwrite them locally, use an .env file in the root of the repo. Each setting can be overridden by following the nesting, but transforming each setting to uppercase and delimiting with an underscore. For example, to override this:
 ```yaml
 here:
   is:
