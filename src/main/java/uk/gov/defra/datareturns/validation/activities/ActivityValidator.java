@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
-import uk.gov.defra.datareturns.data.model.submissions.SubmissionSource;
 import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
 import javax.validation.ConstraintValidatorContext;
