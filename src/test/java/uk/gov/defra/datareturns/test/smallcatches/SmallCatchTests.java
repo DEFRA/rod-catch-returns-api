@@ -111,7 +111,6 @@ public class SmallCatchTests {
     @Test
     public void testSmallCatchWithFutureYearFails() {
         final SmallCatch cat = createValidSmallCatch();
-        cat.setNoMonthRecorded(true);
         final YearMonth yearMonth = YearMonth.from(LocalDate.now()).plusYears(1);
         cat.getActivity().getSubmission().setSeason((short) yearMonth.getYear());
         final Set<ConstraintViolation<SmallCatch>> violations = validator.validate(cat);
