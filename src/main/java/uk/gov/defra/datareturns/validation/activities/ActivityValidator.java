@@ -2,6 +2,7 @@ package uk.gov.defra.datareturns.validation.activities;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.submissions.Submission;
 import uk.gov.defra.datareturns.data.model.submissions.SubmissionSource;
@@ -9,6 +10,9 @@ import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
 import javax.validation.ConstraintValidatorContext;
 import java.util.Optional;
+
+import static uk.gov.defra.datareturns.config.SecurityConfiguration.RcrPermissionEvaluator.USE_INTERNAL;
+import static uk.gov.defra.datareturns.config.SecurityConfiguration.RcrPermissionEvaluator.hasAuthority;
 
 /**
  * Validate an {@link Activity} object
@@ -93,14 +97,14 @@ public class ActivityValidator extends AbstractConstraintValidator<ValidActivity
         boolean valid = checkDaysMandatoryRelease(activity, context) && checkDaysOther(activity, context);
 
         final Optional<Submission> sub = Optional.ofNullable(activity.getSubmission());
-
         if (sub.isPresent()) {
-            if (valid && sub.get().getSource().equals(SubmissionSource.WEB)
+            boolean isFMTOrAdmin = hasAuthority(SecurityContextHolder.getContext().getAuthentication(), USE_INTERNAL);
+            if (valid && !isFMTOrAdmin
                     && activity.getDaysFishedWithMandatoryRelease() < 1 && activity.getDaysFishedOther() < 1) {
                 valid = handleError(context, "DAYS_FISHED_NOT_GREATER_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
             }
 
-            if (valid && sub.get().getSource().equals(SubmissionSource.PAPER)
+            if (valid && isFMTOrAdmin
                     && activity.getDaysFishedWithMandatoryRelease() < 0 && activity.getDaysFishedOther() < 0) {
                 valid = handleError(context, "DAYS_FISHED_LESS_THAN_ZERO", ConstraintValidatorContext.ConstraintViolationBuilder::addBeanNode);
             }

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.defra.datareturns.data.model.activities.Activity;
 import uk.gov.defra.datareturns.data.model.rivers.River;
@@ -27,7 +28,6 @@ import static uk.gov.defra.datareturns.testutils.IntegrationTestUtils.violationM
  */
 @RunWith(SpringRunner.class)
 @ApiContextTest
-@WithAdminUser
 @Slf4j
 public class ActivityTests {
     @Inject
@@ -46,6 +46,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testValidActivity() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100, 100);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
@@ -53,6 +54,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testActivityWithoutSubmissionFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 5, 5);
         activity.setSubmission(null);
@@ -61,6 +63,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testActivityWithoutRiverFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 10, 10);
         activity.setRiver(null);
@@ -69,6 +72,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testActivityWithoutMandatoryReleaseDaysFishedFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 1, 1);
         activity.setDaysFishedWithMandatoryRelease(null);
@@ -78,6 +82,7 @@ public class ActivityTests {
 
 
     @Test
+    @WithAdminUser
     public void testActivityWithoutOtherDaysFishedFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 1, 1);
         activity.setDaysFishedOther(null);
@@ -86,6 +91,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testActivityWithNegativeDaysFishedWithMandatoryReleaseFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), -1, 1);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
@@ -93,6 +99,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testActivityWithNegativeDaysFishedOtherFails() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 1, -1);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
@@ -100,6 +107,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithMockUser
     public void testActivityWithNonPositiveDaysFailsForWebUser() {
         final Submission sub = SubmissionTests.createValidSubmission();
         sub.setSource(SubmissionSource.WEB);
@@ -109,6 +117,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testActivityWithNonPositiveDaysIsValidForPaperReturns() {
         final Submission sub = SubmissionTests.createValidSubmission();
         sub.setSource(SubmissionSource.PAPER);
@@ -118,6 +127,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testActivityWithMaxDaysWithMandatoryReleaseExceededNonLeapYear() {
         final Submission sub = SubmissionTests.createValidSubmission();
         sub.setSeason((short) 2018);
@@ -132,6 +142,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testActivityWithMaxDaysWithMandatoryReleaseExceededForLeapYear() {
         final Submission sub = SubmissionTests.createValidSubmission();
         sub.setSeason((short) 2020);
@@ -146,6 +157,7 @@ public class ActivityTests {
     }
 
     @Test
+    @WithAdminUser
     public void testActivityWithMaxDaysOtherExceeded() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 0, 198);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
