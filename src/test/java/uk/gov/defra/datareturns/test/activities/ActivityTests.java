@@ -47,7 +47,15 @@ public class ActivityTests {
 
     @Test
     @WithAdminUser
-    public void testValidActivity() {
+    public void testValidActivityAdminUser() {
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100, 100);
+        final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
+        Assertions.assertThat(violations).isEmpty();
+    }
+
+    @Test
+    @WithMockUser
+    public void testValidActivityWithWebUser() {
         final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100, 100);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
         Assertions.assertThat(violations).isEmpty();
@@ -108,12 +116,22 @@ public class ActivityTests {
 
     @Test
     @WithMockUser
-    public void testActivityWithNonPositiveDaysFailsForWebUser() {
+    public void testActivityWithZeroDaysFailsForWebUser() {
         final Submission sub = SubmissionTests.createValidSubmission();
         sub.setSource(SubmissionSource.WEB);
         final Activity activity = createValidActivity(sub, getRandomRiver(), 0, 0);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
         Assertions.assertThat(violations).haveExactly(1, violationMessageMatching("ACTIVITY_DAYS_FISHED_NOT_GREATER_THAN_ZERO"));
+    }
+
+    @Test
+    @WithAdminUser
+    public void testActivityWithZeroDaysSucceedsForAdminUser() {
+        final Submission sub = SubmissionTests.createValidSubmission();
+        sub.setSource(SubmissionSource.WEB);
+        final Activity activity = createValidActivity(sub, getRandomRiver(), 0, 0);
+        final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
+        Assertions.assertThat(violations).isEmpty();
     }
 
     @Test
