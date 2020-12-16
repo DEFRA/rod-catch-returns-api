@@ -9,3 +9,4 @@
 .factorypath
 .env
 **/log/*
+.DS_Store

@@ -9,8 +9,7 @@ import uk.gov.defra.datareturns.data.model.smallcatches.SmallCatchCount;
 import uk.gov.defra.datareturns.validation.AbstractConstraintValidator;
 
 import javax.validation.ConstraintValidatorContext;
-import java.time.LocalDate;
-import java.time.Month;
+import java.time.YearMonth;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,7 +55,6 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
      * @return true if valid, false otherwise
      */
     private boolean checkMonth(final SmallCatch smallCatch, final ConstraintValidatorContext context) {
-        final LocalDate today = LocalDate.now();
         boolean valid = true;
         if (smallCatch.getMonth() == null) {
             if (smallCatch.isNoMonthRecorded()) {
@@ -64,8 +62,9 @@ public class SmallCatchValidator extends AbstractConstraintValidator<ValidSmallC
             } else {
                 valid = handleError(context, "MONTH_REQUIRED", PROPERTY_MONTH);
             }
-        } else if (smallCatch.getMonth().getValue() > Month.from(today).getValue()
-                && smallCatch.getActivity().getSubmission().getSeason() >= today.getYear()) {
+        } else if (smallCatch.getActivity() != null && smallCatch.getActivity().getSubmission() != null
+                && smallCatch.getActivity().getSubmission().getSeason() != null
+                && YearMonth.of(smallCatch.getActivity().getSubmission().getSeason(), smallCatch.getMonth().getValue()).isAfter(YearMonth.now())) {
             valid = handleError(context, "MONTH_IN_FUTURE", PROPERTY_MONTH);
         }
         return valid;
