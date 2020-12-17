@@ -48,7 +48,7 @@ public class ActivityTests {
     @Test
     @WithAdminUser
     public void testValidActivityAdminUser() {
-        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100, -100);
+        final Activity activity = createValidActivity(SubmissionTests.createValidSubmission(), getRandomRiver(), 100, 100);
         final Set<ConstraintViolation<Activity>> violations = validator.validate(activity);
         Assertions.assertThat(violations).isEmpty();
     }
