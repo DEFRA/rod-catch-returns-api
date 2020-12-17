@@ -1,5 +1,5 @@
 # Rod Catch Returns API
-[![Build Status](https://travis-ci.org/DEFRA/rod-catch-returns-api.svg?branch=master)](https://travis-ci.org/DEFRA/rod-catch-returns-api)
+[![Build Status](https://github.com/defra/rod-catch-returns-api/workflows/build.yml/badge.svg)](https://github.com/defra/rod-catch-returns-api/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/5a286ee063b6b20e6129/maintainability)](https://codeclimate.com/github/DEFRA/rod-catch-returns-api/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/5a286ee063b6b20e6129/test_coverage)](https://codeclimate.com/github/DEFRA/rod-catch-returns-api/test_coverage)
 [![Licence](https://img.shields.io/badge/Licence-OGLv3-blue.svg)](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3)
