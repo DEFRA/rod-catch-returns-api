@@ -11,12 +11,10 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.config.DynamicsConfiguration;
+import uk.gov.defra.datareturns.data.model.licences.Contact;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.aad.TokenService;
-import uk.gov.defra.datareturns.services.crm.entity.CrmActivity;
-import uk.gov.defra.datareturns.services.crm.entity.CrmCall;
-import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
-import uk.gov.defra.datareturns.services.crm.entity.CrmRoles;
+import uk.gov.defra.datareturns.services.crm.entity.*;
 
 import javax.inject.Provider;
 import javax.validation.Validator;
@@ -71,6 +69,22 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     }
 
     @Override
+    public Optional<Licence> getLicence(final String fullLicenceNumber) {
+        String filter = "defra_permissions?$filter=defra_name eq '09100222-1WS3FHS-ACPD80'";
+        Object o = callCRMWithQueryString(dynamicsClientRestTemplate.get(), filter, Licence.class,null);
+        System.out.println(o.toString());
+        Optional<CrmResponseEntity> response = (Optional<CrmResponseEntity>) o;
+
+        Licence licence = new Licence();
+        licence.setLicenceNumber(response.get().getValue().get(0).getPermissionNumber());
+        final Contact contact = new Contact();
+        contact.setId(response.get().getValue().get(0).getContactId());
+        licence.setContact(contact);
+
+        return Optional.ofNullable(licence);
+    }
+
+    @Override
     public void createActivity(final String contactId, final short season) {
         final CrmActivity.CrmActivityQuery query = new CrmActivity.CrmActivityQuery(STARTED, contactId, season);
         callCRM(dynamicsClientRestTemplate.get(), query, null);
@@ -111,6 +125,32 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         Optional<B> result = Optional.empty();
         if (response != null && validator.validate(response).isEmpty()) {
             result = Optional.ofNullable(response.getBaseEntity());
+        }
+        return result;
+    }
+
+    /**
+     * Generic CRM call method - uses the spring rest template
+     *
+     * @param  - the instance of the CRM query
+     * @param <T>      - The type of the returned entity
+     * @return - The returned entity object from the CRM
+     */
+    private <T> Object callCRMWithQueryString(final RestTemplate restTemplate, final String query, final Class<T> responseEntity, final String token) {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        if (token != null) {
+            headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        }
+        final HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+        final URI url = endpointConfiguration.getApiQueryEndpoint(query);
+        System.out.println(url.toString());
+        final Object response = restTemplate.getForObject(url, CrmResponseEntity.class);
+
+        Optional<?> result = Optional.empty();
+        System.out.println(response.toString());
+        if (response != null && validator.validate(response).isEmpty()) {
+            result = Optional.ofNullable(response);
         }
         return result;
     }

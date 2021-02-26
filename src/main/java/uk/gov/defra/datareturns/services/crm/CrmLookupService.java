@@ -23,6 +23,14 @@ public interface CrmLookupService {
     Optional<Licence> getLicence(final String licenceNumber, final String postcode);
 
     /**
+     * Retrieve the Licence and contact details using the full licence number
+     *
+     * @param fullLicenceNumber The full licence number
+     * @return Licence Returns a licence entity object
+     */
+    Optional<Licence> getLicence(final String fullLicenceNumber);
+
+    /**
      * Create an activity for a given contact and season and set status to started
      *
      * @param contactId The CRM contact id
