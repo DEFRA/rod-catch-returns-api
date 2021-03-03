@@ -76,12 +76,12 @@ public final class DynamicsMockServer {
 
             // get the last 6 digits of the licence number
             int lastIndex = query.lastIndexOf("'");
-            String last6DigitsOfLicenceNumber = query.substring(lastIndex-6,lastIndex);
+            String last6DigitsOfLicenceNumber = query.substring(lastIndex - 6, lastIndex);
 
             final DynamicsMockData.Entry entry = DynamicsMockData.get(last6DigitsOfLicenceNumber);
             CrmResponseEntity responseEntity = new CrmResponseEntity();
 
-            if(entry != null) {
+            if (entry != null) {
                 CrmLicenceResponse crmLicenceResponse = new CrmLicenceResponse();
                 crmLicenceResponse.setContactId(entry.getContactId());
                 crmLicenceResponse.setPermissionNumber(entry.getPermission());

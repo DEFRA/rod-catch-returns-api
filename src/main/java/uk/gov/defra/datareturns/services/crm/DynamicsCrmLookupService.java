@@ -4,7 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -14,7 +18,11 @@ import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.aad.TokenService;
-import uk.gov.defra.datareturns.services.crm.entity.*;
+import uk.gov.defra.datareturns.services.crm.entity.CrmActivity;
+import uk.gov.defra.datareturns.services.crm.entity.CrmCall;
+import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
+import uk.gov.defra.datareturns.services.crm.entity.CrmResponseEntity;
+import uk.gov.defra.datareturns.services.crm.entity.CrmRoles;
 
 import javax.inject.Provider;
 import javax.validation.Validator;
@@ -71,10 +79,11 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     @Override
     public Optional<Licence> getLicence(final String fullLicenceNumber) {
         String entity = "defra_permissions";
-        MultiValueMap<String , String> queryMap = new LinkedMultiValueMap<>();
-        queryMap.add("$filter", "defra_name eq '"+fullLicenceNumber+"'");
+        MultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
+        queryMap.add("$filter", "defra_name eq '" + fullLicenceNumber + "'");
 
-        Optional<CrmResponseEntity> response = callCRMWithQueryString(dynamicsClientRestTemplate.get(), entity, queryMap, CrmResponseEntity.class,null);
+        Optional<CrmResponseEntity> response = callCRMWithQueryString(
+                dynamicsClientRestTemplate.get(), entity, queryMap, CrmResponseEntity.class, null);
 
         Optional<Licence> result = Optional.empty();
         if (response.isPresent() && response.get().getValue() != null && !response.get().getValue().isEmpty()) {
@@ -140,7 +149,9 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * @param <T>      - The type of the returned entity
      * @return - The returned entity object from the CRM
      */
-    private <T> Optional<T> callCRMWithQueryString(final RestTemplate restTemplate, final String entity, final MultiValueMap<String , String> queryMap, final Class<T> responseType, final String token) {
+    private <T> Optional<T> callCRMWithQueryString(
+            final RestTemplate restTemplate, final String entity, final MultiValueMap<String, String> queryMap,
+            final Class<T> responseType, final String token) {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         if (token != null) {

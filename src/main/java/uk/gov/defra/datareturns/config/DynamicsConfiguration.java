@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -22,7 +21,6 @@ import uk.gov.defra.datareturns.services.crm.rest.IdentityRestTemplateErrorHandl
 
 import javax.validation.constraints.NotNull;
 import java.net.URI;
-import java.util.HashMap;
 
 /**
  * Configuration options for Microsoft Dynamics integration
@@ -140,7 +138,7 @@ public class DynamicsConfiguration {
          * @param queryMap a map representing the query
          * @return the request URI for the stored procedure
          */
-        public URI getApiQueryEndpoint(final String entity, final MultiValueMap<String , String> queryMap) {
+        public URI getApiQueryEndpoint(final String entity, final MultiValueMap<String, String> queryMap) {
             return UriComponentsBuilder.fromUri(getUrl()).path(getApiPath()).path("/").path(entity).queryParams(queryMap).build().toUri();
         }
     }
