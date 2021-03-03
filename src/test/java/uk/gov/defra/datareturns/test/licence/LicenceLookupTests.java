@@ -39,4 +39,16 @@ public class LicenceLookupTests {
         final Optional<Licence> licence = crmLookupService.getLicence("B9A72DD", "WA4 1HT");
         Assertions.assertThat(licence).isNotPresent();
     }
+
+    @Test
+    public void testFullLicenceLookupSucceeds() {
+        final Optional<Licence> licence = crmLookupService.getLicence("00081019-1WS3JP4-B7A718");
+        Assertions.assertThat(licence).isPresent();
+    }
+
+    @Test
+    public void testFullLicenceLookupFails() {
+        final Optional<Licence> licence = crmLookupService.getLicence("00081019");
+        Assertions.assertThat(licence).isNotPresent();
+    }
 }

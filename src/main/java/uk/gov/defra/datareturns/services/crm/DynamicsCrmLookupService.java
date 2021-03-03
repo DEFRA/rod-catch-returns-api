@@ -6,16 +6,22 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.config.DynamicsConfiguration;
+import uk.gov.defra.datareturns.data.model.licences.Contact;
 import uk.gov.defra.datareturns.data.model.licences.Licence;
 import uk.gov.defra.datareturns.services.aad.TokenService;
 import uk.gov.defra.datareturns.services.crm.entity.CrmActivity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmCall;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
+import uk.gov.defra.datareturns.services.crm.entity.CrmResponseEntity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmRoles;
 
 import javax.inject.Provider;
@@ -71,6 +77,27 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     }
 
     @Override
+    public Optional<Licence> getLicence(final String fullLicenceNumber) {
+        String entity = "defra_permissions";
+        MultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
+        queryMap.add("$filter", "defra_name eq '" + fullLicenceNumber + "'");
+
+        Optional<CrmResponseEntity> response = callCRMWithQueryString(
+                dynamicsClientRestTemplate.get(), entity, queryMap, CrmResponseEntity.class, null);
+
+        Optional<Licence> result = Optional.empty();
+        if (response.isPresent() && response.get().getValue() != null && !response.get().getValue().isEmpty()) {
+            Licence licence = new Licence();
+            licence.setLicenceNumber(response.get().getValue().get(0).getPermissionNumber());
+            final Contact contact = new Contact();
+            contact.setId(response.get().getValue().get(0).getContactId());
+            licence.setContact(contact);
+            result = Optional.ofNullable(licence);
+        }
+        return result;
+    }
+
+    @Override
     public void createActivity(final String contactId, final short season) {
         final CrmActivity.CrmActivityQuery query = new CrmActivity.CrmActivityQuery(STARTED, contactId, season);
         callCRM(dynamicsClientRestTemplate.get(), query, null);
@@ -111,6 +138,33 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         Optional<B> result = Optional.empty();
         if (response != null && validator.validate(response).isEmpty()) {
             result = Optional.ofNullable(response.getBaseEntity());
+        }
+        return result;
+    }
+
+    /**
+     * Generic CRM call method with query - uses the spring rest template
+     *
+     * @param queryMap - a map representing the query
+     * @param <T>  - The type of the returned entity
+     * @return - The returned entity object from the CRM
+     */
+    private <T> Optional<T> callCRMWithQueryString(
+            final RestTemplate restTemplate, final String entity, final MultiValueMap<String, String> queryMap,
+            final Class<T> responseType, final String token) {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        if (token != null) {
+            headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        }
+        final HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+        final URI url = endpointConfiguration.getApiQueryEndpoint(entity, queryMap);
+
+        final ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, responseType);
+
+        Optional<T> result = Optional.empty();
+        if (response.getBody() != null && validator.validate(response).isEmpty()) {
+            result = Optional.ofNullable(response.getBody());
         }
         return result;
     }

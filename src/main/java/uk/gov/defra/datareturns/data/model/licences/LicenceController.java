@@ -52,6 +52,22 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
         return responseEntity;
     }
 
+    /**
+     * Retrieve a licence and its associated contact based on the full licence number
+     *
+     * @param fullLicenceNumber the full licence number used to retrieve licence information
+     * @return a {@link ResponseEntity} containing the target {@link Licence} or a 404 status if not found
+     */
+    @GetMapping(value = "/full/{licence}")
+    public ResponseEntity<Licence> getLicence(@PathVariable("licence") final String fullLicenceNumber) {
+        ResponseEntity<Licence> responseEntity = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        final Optional<Licence> licence = lookupService.getLicence(fullLicenceNumber);
+        if (licence.isPresent()) {
+            responseEntity = new ResponseEntity<>(licence.get(), HttpStatus.OK);
+        }
+        return responseEntity;
+    }
+
     @Override
     public RepositoryLinksResource process(final RepositoryLinksResource resource) {
         final String base = ServletUriComponentsBuilder.fromCurrentRequest().toUriString();

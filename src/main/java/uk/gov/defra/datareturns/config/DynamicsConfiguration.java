@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
@@ -128,6 +129,17 @@ public class DynamicsConfiguration {
          */
         public URI getApiStoredProcedureEndpoint(final String storedProcedureName) {
             return UriComponentsBuilder.fromUri(getUrl()).path(getApiPath()).path("/").path(storedProcedureName).build().toUri();
+        }
+
+        /**
+         * Retrieve the URI for the given dynamics entity
+         *
+         * @param entity the entity to get
+         * @param queryMap a map representing the query
+         * @return the request URI for the stored procedure
+         */
+        public URI getApiQueryEndpoint(final String entity, final MultiValueMap<String, String> queryMap) {
+            return UriComponentsBuilder.fromUri(getUrl()).path(getApiPath()).path("/").path(entity).queryParams(queryMap).build().toUri();
         }
     }
 }
