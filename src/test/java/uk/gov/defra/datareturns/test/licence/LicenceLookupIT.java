@@ -52,4 +52,16 @@ public class LicenceLookupIT {
     public void testLicenceReadOnly() {
         createEntity("/licence/B7A718?verification=blah", "{}", r -> r.statusCode(HttpStatus.METHOD_NOT_ALLOWED.value()));
     }
+
+    @Test
+    public void testLFullicenceLookupB7A111() {
+        getEntity("/licence/full/00081019-1WS3JP4-B7A718")
+                .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    public void testFullLicenceLookupNotFound() {
+        getEntity("/licence/full/00081019").statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
 }
