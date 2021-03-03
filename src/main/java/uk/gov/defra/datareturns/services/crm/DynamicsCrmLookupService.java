@@ -143,10 +143,10 @@ public class DynamicsCrmLookupService implements CrmLookupService {
     }
 
     /**
-     * Generic CRM call method - uses the spring rest template
+     * Generic CRM call method with query - uses the spring rest template
      *
-     * @param  - the instance of the CRM query
-     * @param <T>      - The type of the returned entity
+     * @param queryMap - a map representing the query
+     * @param <T>  - The type of the returned entity
      * @return - The returned entity object from the CRM
      */
     private <T> Optional<T> callCRMWithQueryString(
