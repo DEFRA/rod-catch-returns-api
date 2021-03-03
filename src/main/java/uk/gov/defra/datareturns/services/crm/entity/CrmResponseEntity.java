@@ -5,10 +5,11 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @ToString
 public class CrmResponseEntity {
-    private ArrayList<CrmLicenceResponse> value;
+    private List<CrmLicenceResponse> value;
 }

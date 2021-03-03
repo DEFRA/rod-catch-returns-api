@@ -46,7 +46,6 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
                                               @RequestParam(value = "verification", required = false) final String verification) {
         ResponseEntity<Licence> responseEntity = new ResponseEntity<>(HttpStatus.FORBIDDEN);
         final Optional<Licence> licence = lookupService.getLicence(licenceNumber, verification);
-        System.out.println(licence);
         if (licence.isPresent()) {
             responseEntity = new ResponseEntity<>(licence.get(), HttpStatus.OK);
         }

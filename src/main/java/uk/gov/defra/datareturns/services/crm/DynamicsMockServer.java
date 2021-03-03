@@ -18,9 +18,12 @@ import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.services.aad.MockTokenServiceImpl;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
+import uk.gov.defra.datareturns.services.crm.entity.CrmLicenceResponse;
+import uk.gov.defra.datareturns.services.crm.entity.CrmResponseEntity;
 import uk.gov.defra.datareturns.services.crm.entity.CrmRoles;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,7 +51,7 @@ public final class DynamicsMockServer {
 
     private static void setupCrmMock(final MockRestServiceServer restServiceServer, final HttpMethod method, final String apiCallPath,
                                      final ResponseCreator responseCreator) {
-        restServiceServer.expect(ExpectedCount.manyTimes(), MockRestRequestMatchers.requestTo(Matchers.endsWith(apiCallPath)))
+        restServiceServer.expect(ExpectedCount.manyTimes(), MockRestRequestMatchers.requestTo(Matchers.containsString(apiCallPath)))
                 .andExpect(MockRestRequestMatchers.method(method))
                 .andRespond(responseCreator);
     }
@@ -64,6 +67,27 @@ public final class DynamicsMockServer {
                 responseBody.setPostcode(entry.getPostcode());
             }
             return respond(HttpStatus.OK, responseBody);
+        });
+    }
+
+    private static void setupGetContactByFullLicenceNumberMock(final MockRestServiceServer restServiceServer) {
+        setupCrmMock(restServiceServer, HttpMethod.GET, "/api/data/v9.0/defra_permissions?$filter", request -> {
+            String query = request.getURI().getQuery();
+
+            // get the last 6 digits of the licence number
+            int lastIndex = query.lastIndexOf("'");
+            String last6DigitsOfLicenceNumber = query.substring(lastIndex-6,lastIndex);
+
+            final DynamicsMockData.Entry entry = DynamicsMockData.get(last6DigitsOfLicenceNumber);
+            CrmResponseEntity responseEntity = new CrmResponseEntity();
+
+            if(entry != null) {
+                CrmLicenceResponse crmLicenceResponse = new CrmLicenceResponse();
+                crmLicenceResponse.setContactId(entry.getContactId());
+                crmLicenceResponse.setPermissionNumber(entry.getPermission());
+                responseEntity.setValue(Arrays.asList(crmLicenceResponse));
+            }
+            return respond(HttpStatus.OK, responseEntity);
         });
     }
 
@@ -109,6 +133,7 @@ public final class DynamicsMockServer {
         log.info("DynamicsMockServer injected for " + template.toString());
         final MockRestServiceServer restServiceServer = MockRestServiceServer.bindTo(template).ignoreExpectOrder(true).build();
         setupGetContactByLicenceNumberMock(restServiceServer);
+        setupGetContactByFullLicenceNumberMock(restServiceServer);
         setupCreateRCRActivityMock(restServiceServer);
         setupUpdateRCRActivityMock(restServiceServer);
         setupGetRcrRolesByUserMock(restServiceServer);

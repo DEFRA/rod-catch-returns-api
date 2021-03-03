@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.config.DynamicsConfiguration;
 import uk.gov.defra.datareturns.data.model.licences.Contact;
@@ -70,18 +70,22 @@ public class DynamicsCrmLookupService implements CrmLookupService {
 
     @Override
     public Optional<Licence> getLicence(final String fullLicenceNumber) {
-        String filter = "defra_permissions?$filter=defra_name eq '09100222-1WS3FHS-ACPD80'";
-        Object o = callCRMWithQueryString(dynamicsClientRestTemplate.get(), filter, Licence.class,null);
-        System.out.println(o.toString());
-        Optional<CrmResponseEntity> response = (Optional<CrmResponseEntity>) o;
+        String entity = "defra_permissions";
+        MultiValueMap<String , String> queryMap = new LinkedMultiValueMap<>();
+        queryMap.add("$filter", "defra_name eq '"+fullLicenceNumber+"'");
 
-        Licence licence = new Licence();
-        licence.setLicenceNumber(response.get().getValue().get(0).getPermissionNumber());
-        final Contact contact = new Contact();
-        contact.setId(response.get().getValue().get(0).getContactId());
-        licence.setContact(contact);
+        Optional<CrmResponseEntity> response = callCRMWithQueryString(dynamicsClientRestTemplate.get(), entity, queryMap, CrmResponseEntity.class,null);
 
-        return Optional.ofNullable(licence);
+        Optional<Licence> result = Optional.empty();
+        if (response.isPresent() && response.get().getValue() != null && !response.get().getValue().isEmpty()) {
+            Licence licence = new Licence();
+            licence.setLicenceNumber(response.get().getValue().get(0).getPermissionNumber());
+            final Contact contact = new Contact();
+            contact.setId(response.get().getValue().get(0).getContactId());
+            licence.setContact(contact);
+            result = Optional.ofNullable(licence);
+        }
+        return result;
     }
 
     @Override
@@ -136,21 +140,20 @@ public class DynamicsCrmLookupService implements CrmLookupService {
      * @param <T>      - The type of the returned entity
      * @return - The returned entity object from the CRM
      */
-    private <T> Object callCRMWithQueryString(final RestTemplate restTemplate, final String query, final Class<T> responseEntity, final String token) {
+    private <T> Optional<T> callCRMWithQueryString(final RestTemplate restTemplate, final String entity, final MultiValueMap<String , String> queryMap, final Class<T> responseType, final String token) {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         if (token != null) {
             headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         }
         final HttpEntity<?> requestEntity = new HttpEntity<>(headers);
-        final URI url = endpointConfiguration.getApiQueryEndpoint(query);
-        System.out.println(url.toString());
-        final Object response = restTemplate.getForObject(url, CrmResponseEntity.class);
+        final URI url = endpointConfiguration.getApiQueryEndpoint(entity, queryMap);
 
-        Optional<?> result = Optional.empty();
-        System.out.println(response.toString());
-        if (response != null && validator.validate(response).isEmpty()) {
-            result = Optional.ofNullable(response);
+        final ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, responseType);
+
+        Optional<T> result = Optional.empty();
+        if (response.getBody() != null && validator.validate(response).isEmpty()) {
+            result = Optional.ofNullable(response.getBody());
         }
         return result;
     }

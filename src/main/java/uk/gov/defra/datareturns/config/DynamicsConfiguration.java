@@ -134,17 +134,14 @@ public class DynamicsConfiguration {
         }
 
         /**
-         * Retrieve the URI for the given dynamics stored procedure
+         * Retrieve the URI for the given dynamics entity
          *
-         * @param query the query
+         * @param entity the entity to get
+         * @param queryMap a map representing the query
          * @return the request URI for the stored procedure
          */
-        public URI getApiQueryEndpoint(final String query) {
-            String endpoint = "defra_permissions";
-            MultiValueMap<String , String> map = new LinkedMultiValueMap<>();
-            map.add("$filter", "defra_name eq '09100222-1WS3FHS-ACPD80'");
-
-            return UriComponentsBuilder.fromUri(getUrl()).path(getApiPath()).path("/").path(endpoint).queryParams(map).build().toUri();
+        public URI getApiQueryEndpoint(final String entity, final MultiValueMap<String , String> queryMap) {
+            return UriComponentsBuilder.fromUri(getUrl()).path(getApiPath()).path("/").path(entity).queryParams(queryMap).build().toUri();
         }
     }
 }
