@@ -54,9 +54,25 @@ public class LicenceLookupIT {
     }
 
     @Test
-    public void testLFullicenceLookupB7A111() {
+    public void testLFullLicenceLookupB7A111() {
         getEntity("/licence/full/00081019-1WS3JP4-B7A718")
                 .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    public void testLFullLicenceLookup6HB123() {
+        getEntity("/licence/full/00081019-1WS3JP4-6HB123")
+                .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    public void testFullLicenceLookupNumberInvalidCharacters() {
+        getEntity("/licence/full/00081019`jas&^").statusCode(HttpStatus.NOT_FOUND.value());
+    }
+
+    @Test
+    public void testFullLicenceLookupLetterInvalidCharacters() {
+        getEntity("/licence/full/**SGHSG").statusCode(HttpStatus.NOT_FOUND.value());
     }
 
     @Test
