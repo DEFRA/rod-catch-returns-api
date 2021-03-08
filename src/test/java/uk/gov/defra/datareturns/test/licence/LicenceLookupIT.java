@@ -54,9 +54,14 @@ public class LicenceLookupIT {
     }
 
     @Test
-    public void testLFullicenceLookupB7A111() {
+    public void testLFullLicenceLookupB7A111() {
         getEntity("/licence/full/00081019-1WS3JP4-B7A718")
                 .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    public void testFullLicenceLookupInvalid() {
+        getEntity("/licence/full/00081019`jas&^").statusCode(HttpStatus.NOT_FOUND.value());
     }
 
     @Test

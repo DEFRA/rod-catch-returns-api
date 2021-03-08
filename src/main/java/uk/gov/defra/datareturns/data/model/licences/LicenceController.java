@@ -55,10 +55,10 @@ public class LicenceController implements ResourceProcessor<RepositoryLinksResou
     /**
      * Retrieve a licence and its associated contact based on the full licence number
      *
-     * @param fullLicenceNumber the full licence number used to retrieve licence information
+     * @param fullLicenceNumber the full licence number used to retrieve licence information (will only accept numbers, letters and dashes)
      * @return a {@link ResponseEntity} containing the target {@link Licence} or a 404 status if not found
      */
-    @GetMapping(value = "/full/{licence}")
+    @GetMapping(value = "/full/{licence:^[A-Za-z0-9_-]*$}")
     public ResponseEntity<Licence> getLicence(@PathVariable("licence") final String fullLicenceNumber) {
         ResponseEntity<Licence> responseEntity = new ResponseEntity<>(HttpStatus.FORBIDDEN);
         final Optional<Licence> licence = lookupService.getLicence(fullLicenceNumber);
