@@ -10,6 +10,6 @@ public class CrmLicenceResponse {
     @JsonAlias("defra_name")
     private String permissionNumber;
 
-    @JsonAlias("_defra_contactid_value")
-    private String contactId;
+    @JsonAlias("defra_ContactId")
+    private CrmContactResponse contact;
 }
