@@ -60,7 +60,7 @@ public class LicenceLookupIT {
                 .body("licenceNumber", Matchers.endsWith("B7A718"))
                 .body("contact", Matchers.notNullValue())
                 .body("contact.id", Matchers.equalTo("contact-identifier-718"))
-                .body("contact.fullName", Matchers.equalTo("Homer Simpson"));;
+                .body("contact.fullName", Matchers.equalTo("Homer Simpson"));
     }
 
     @Test
