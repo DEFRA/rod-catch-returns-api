@@ -56,7 +56,11 @@ public class LicenceLookupIT {
     @Test
     public void testLFullLicenceLookupB7A111() {
         getEntity("/licence/full/00081019-1WS3JP4-B7A718")
-                .statusCode(HttpStatus.OK.value());
+                .statusCode(HttpStatus.OK.value())
+                .body("licenceNumber", Matchers.endsWith("B7A718"))
+                .body("contact", Matchers.notNullValue())
+                .body("contact.id", Matchers.equalTo("contact-identifier-718"))
+                .body("contact.fullName", Matchers.equalTo("Homer Simpson"));
     }
 
     @Test

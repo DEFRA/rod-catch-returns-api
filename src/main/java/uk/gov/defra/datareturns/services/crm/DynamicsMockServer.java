@@ -17,6 +17,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.defra.datareturns.services.aad.MockTokenServiceImpl;
+import uk.gov.defra.datareturns.services.crm.entity.CrmContactResponse;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicence;
 import uk.gov.defra.datareturns.services.crm.entity.CrmLicenceResponse;
 import uk.gov.defra.datareturns.services.crm.entity.CrmResponseEntity;
@@ -82,8 +83,12 @@ public final class DynamicsMockServer {
             CrmResponseEntity responseEntity = new CrmResponseEntity();
 
             if (entry != null) {
+                CrmContactResponse crmContactResponse = new CrmContactResponse();
+                crmContactResponse.setContactId(entry.getContactId());
+                crmContactResponse.setFullName("Homer Simpson");
+
                 CrmLicenceResponse crmLicenceResponse = new CrmLicenceResponse();
-                crmLicenceResponse.setContactId(entry.getContactId());
+                crmLicenceResponse.setContact(crmContactResponse);
                 crmLicenceResponse.setPermissionNumber(entry.getPermission());
                 responseEntity.setValue(Arrays.asList(crmLicenceResponse));
             }

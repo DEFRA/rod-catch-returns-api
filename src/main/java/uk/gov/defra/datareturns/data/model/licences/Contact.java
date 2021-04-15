@@ -20,4 +20,9 @@ public class Contact {
      * the postcode associated with the contact
      */
     private String postcode;
+
+    /**
+     * the full name associated with the contact
+     */
+    private String fullName;
 }

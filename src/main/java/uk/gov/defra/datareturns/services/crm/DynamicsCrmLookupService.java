@@ -81,6 +81,8 @@ public class DynamicsCrmLookupService implements CrmLookupService {
         String entity = "defra_permissions";
         MultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
         queryMap.add("$filter", "defra_name eq '" + fullLicenceNumber + "'");
+        queryMap.add("$expand", "defra_ContactId");
+        queryMap.add("$select", "defra_name");
 
         Optional<CrmResponseEntity> response = callCRMWithQueryString(
                 dynamicsClientRestTemplate.get(), entity, queryMap, CrmResponseEntity.class, null);
@@ -90,7 +92,8 @@ public class DynamicsCrmLookupService implements CrmLookupService {
             Licence licence = new Licence();
             licence.setLicenceNumber(response.get().getValue().get(0).getPermissionNumber());
             final Contact contact = new Contact();
-            contact.setId(response.get().getValue().get(0).getContactId());
+            contact.setId(response.get().getValue().get(0).getContact().getContactId());
+            contact.setFullName(response.get().getValue().get(0).getContact().getFullName());
             licence.setContact(contact);
             result = Optional.ofNullable(licence);
         }
