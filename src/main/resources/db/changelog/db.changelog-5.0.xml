@@ -9,7 +9,7 @@
     <changeSet id="add river goyt to mersey catchment" author="Defra">
         <sql>
             <![CDATA[
-                insert into rcr_river(id,name,internal,catchment_id,created,last_modified,version) values (260,'Goyt',FALSE,84,now(),now(),now());
+                insert into rcr_river(name,internal,catchment_id,created,last_modified,version) values ('Goyt',FALSE,84,now(),now(),now());
             ]]>
         </sql>
     </changeSet>
