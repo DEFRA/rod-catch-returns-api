@@ -29,7 +29,10 @@ public class SeasonFilter extends AbstractPathVariableFilter<Short> {
             if (single != null) {
                 final int s = Integer.parseInt(single);
                 if (s < 1) {
-                    startYear = Year.now().minusYears(Math.abs(s)).getValue();
+                    // Temporary change while we continue to use Excel reports
+                    // Negative parameters adjusted to reduce data by 1 year
+                    final int adjustedYears = (s == 0) ? 0 : Math.abs(s) - 1;
+                    startYear = Year.now().minusYears(adjustedYears).getValue();
                     endYear = Year.now().getValue();
                 } else {
                     startYear = s;

@@ -26,7 +26,7 @@ public class SeasonFilterTests {
     @Test
     public void testNegativeRange() {
         final SeasonFilter filter = new SeasonFilter("-2");
-        Assertions.assertThat(filter.getStartYear()).isEqualTo(Year.now().getValue() - 2);
+        Assertions.assertThat(filter.getStartYear()).isEqualTo(Year.now().getValue() - 1);
         Assertions.assertThat(filter.getEndYear()).isEqualTo(Year.now().getValue());
     }
 
