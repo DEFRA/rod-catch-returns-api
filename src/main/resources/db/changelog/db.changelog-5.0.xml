@@ -50,8 +50,8 @@
                 UPDATE rcr_river set name = 'Unknown (North East)', last_modified = now(), version = now() WHERE name = 'Unknown NE';
                 UPDATE rcr_river set name = 'Unknown (North West)', last_modified = now(), version = now() WHERE name = 'Unknown NW';
                 UPDATE rcr_river set name = 'Unknown (Southern)', last_modified = now(), version = now() WHERE name = 'Unknown Southern';
-                UPDATE rcr_river set name = 'Unknown (South West)', last_modified = now(), version = now() WHERE name = 'Unknown SW';;
-                UPDATE rcr_river set name = 'Unknown (Thames)', last_modified = now(), version = now() WHERE name = 'Unknown Thames';;
+                UPDATE rcr_river set name = 'Unknown (South West)', last_modified = now(), version = now() WHERE name = 'Unknown SW';
+                UPDATE rcr_river set name = 'Unknown (Thames)', last_modified = now(), version = now() WHERE name = 'Unknown Thames';
                 UPDATE rcr_river set name = 'Unknown (Wales)', last_modified = now(), version = now() WHERE name = 'Unknown Wales';
             ]]>
         </sql>
