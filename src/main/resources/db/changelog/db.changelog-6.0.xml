@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <!--
+        add river Goyt to Mersey catchment
+    -->
+    <changeSet id="add river goyt to mersey catchment" author="Defra">
+        <sql>
+            <![CDATA[
+                insert into rcr_river(id, name, internal, catchment_id, created, last_modified, version) values (nextval('rcr_river_id_seq'), 'Goyt', FALSE, 84, now(), now(), now());
+            ]]>
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
