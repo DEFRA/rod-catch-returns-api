@@ -9,11 +9,25 @@
     <changeSet id="retrospectively add missing catchments" author="Defra">
         <sql>
             <![CDATA[
-                INSERT INTO rcr_catchment (id, name, region_id, created, last_modified, version, gate_id) VALUES (nextval('rcr_catchment_id_seq'), 'Menalhyl', (select id from rcr_region where name = 'South West'), now(), now(), now(), 1) ON CONFLICT DO NOTHING;
-                INSERT INTO rcr_catchment (id, name, region_id, created, last_modified, version, gate_id) VALUES (nextval('rcr_catchment_id_seq'), 'Par', (select id from rcr_region where name = 'South West'), now(), now(), now(), 1) ON CONFLICT DO NOTHING;
-                INSERT INTO rcr_catchment (id, name, region_id, created, last_modified, version, gate_id) VALUES (nextval('rcr_catchment_id_seq'), 'Strat and Neet', (select id from rcr_region where name = 'South West'), now(), now(), now(), 1) ON CONFLICT DO NOTHING;
-                INSERT INTO rcr_catchment (id, name, region_id, created, last_modified, version, gate_id) VALUES (nextval('rcr_catchment_id_seq'), 'Valency', (select id from rcr_region where name = 'South West'), now(), now(), now(), 1) ON CONFLICT DO NOTHING;
-                INSERT INTO rcr_catchment (id, name, region_id, created, last_modified, version, gate_id) VALUES (nextval('rcr_catchment_id_seq'), 'Wallington', (select id from rcr_region where name = 'South East (Southern)'), now(), now(), now(), 1) ON CONFLICT DO NOTHING;
+                INSERT INTO rcr_catchment(id, name, region_id, created, last_modified, version, gate_id)
+                SELECT nextval('rcr_catchment_id_seq'), 'Menalhyl', (select id from rcr_region where name = 'South West'), now(), now(), now(), 1
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_catchment WHERE name='Menalhyl');
+
+                INSERT INTO rcr_catchment(id, name, region_id, created, last_modified, version, gate_id)
+                SELECT nextval('rcr_catchment_id_seq'), 'Par', (select id from rcr_region where name = 'South West'), now(), now(), now(), 1
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_catchment WHERE name='Par');
+
+                INSERT INTO rcr_catchment(id, name, region_id, created, last_modified, version, gate_id)
+                SELECT nextval('rcr_catchment_id_seq'), 'Strat and Neet', (select id from rcr_region where name = 'South West'), now(), now(), now(), 1
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_catchment WHERE name='Strat and Neet');
+
+                INSERT INTO rcr_catchment(id, name, region_id, created, last_modified, version, gate_id)
+                SELECT nextval('rcr_catchment_id_seq'), 'Valency', (select id from rcr_region where name = 'South West'), now(), now(), now(), 1
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_catchment WHERE name='Valency');
+
+                INSERT INTO rcr_catchment(id, name, region_id, created, last_modified, version, gate_id)
+                SELECT nextval('rcr_catchment_id_seq'), 'Wallington', (select id from rcr_region where name = 'South East (Southern)'), now(), now(), now(), 1
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_catchment WHERE name='Wallington');
             ]]>
         </sql>
     </changeSet>
@@ -21,11 +35,25 @@
     <changeSet id="retrospectively add missing rivers" author="Defra">
         <sql>
             <![CDATA[
-                INSERT INTO rcr_river (id, name, internal, catchment_id, created, last_modified, version) VALUES (nextval('rcr_river_id_seq'), 'Menalhyl', false, (select id from rcr_catchment where name = 'Menalhyl'), now(), now(), now()) ON CONFLICT DO NOTHING;
-                INSERT INTO rcr_river (id, name, internal, catchment_id, created, last_modified, version) VALUES (nextval('rcr_river_id_seq'), 'Par', false, (select id from rcr_catchment where name = 'Par'), now(), now(), now()) ON CONFLICT DO NOTHING;
-                INSERT INTO rcr_river (id, name, internal, catchment_id, created, last_modified, version) VALUES (nextval('rcr_river_id_seq'), 'Strat and Neet', false, (select id from rcr_catchment where name = 'Strat and Neet'), now(), now(), now()) ON CONFLICT DO NOTHING;
-                INSERT INTO rcr_river (id, name, internal, catchment_id, created, last_modified, version) VALUES (nextval('rcr_river_id_seq'), 'Valency', false, (select id from rcr_catchment where name = 'Valency'), now(), now(), now()) ON CONFLICT DO NOTHING;
-                INSERT INTO rcr_river (id, name, internal, catchment_id, created, last_modified, version) VALUES (nextval('rcr_river_id_seq'), 'Wallington', false, (select id from rcr_catchment where name = 'Wallington'), now(), now(), now()) ON CONFLICT DO NOTHING;
+                INSERT INTO rcr_river(id, name, internal, catchment_id, created, last_modified, version)
+                SELECT nextval('rcr_river_id_seq'), 'Menalhyl', false, (select id from rcr_catchment where name = 'Menalhyl'), now(), now(), now()
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_river WHERE name='Menalhyl');
+
+                INSERT INTO rcr_river(id, name, internal, catchment_id, created, last_modified, version)
+                SELECT nextval('rcr_river_id_seq'), 'Par', false, (select id from rcr_catchment where name = 'Par'), now(), now(), now()
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_river WHERE name='Par');
+
+                INSERT INTO rcr_river(id, name, internal, catchment_id, created, last_modified, version)
+                SELECT nextval('rcr_river_id_seq'), 'Strat and Neet', false, (select id from rcr_catchment where name = 'Strat and Neet'), now(), now(), now()
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_river WHERE name='Strat and Neet');
+
+                INSERT INTO rcr_river(id, name, internal, catchment_id, created, last_modified, version)
+                SELECT nextval('rcr_river_id_seq'), 'Valency', false, (select id from rcr_catchment where name = 'Valency'), now(), now(), now()
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_river WHERE name='Valency');
+
+                INSERT INTO rcr_river(id, name, internal, catchment_id, created, last_modified, version)
+                SELECT nextval('rcr_river_id_seq'), 'Wallington', false, (select id from rcr_catchment where name = 'Wallington'), now(), now(), now()
+                WHERE NOT EXISTS (SELECT 1 FROM rcr_river WHERE name='Wallington');
             ]]>
         </sql>
     </changeSet>
