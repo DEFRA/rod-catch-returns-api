@@ -18,6 +18,7 @@ import uk.gov.defra.datareturns.services.crm.CrmLookupService;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Scope(BeanDefinition.SCOPE_SINGLETON)
@@ -36,6 +37,10 @@ public class ActiveDirectoryAuthentication implements ActiveDirectoryAuthenticat
         final String password = authentication.getCredentials().toString();
         try {
             final List<String> roles = crmLookupService.getAuthenticatedUserRoles(username, password);
+            System.out.println("CRM Roles");
+            roles.stream().forEach(element -> System.out.println(element));
+            System.out.println("Security Roles");
+            securityConfiguration.getRoleAuthorities().forEach((k, v) -> System.out.println((k + ":" + v)));
             final List<GrantedAuthority> authorities = roles.stream()
                     .flatMap(crmRole -> securityConfiguration.getRoleAuthorities().get(crmRole).stream())
                     .map(SimpleGrantedAuthority::new)
