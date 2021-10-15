@@ -37,10 +37,10 @@ public class ActiveDirectoryAuthentication implements ActiveDirectoryAuthenticat
         final String password = authentication.getCredentials().toString();
         try {
             final List<String> roles = crmLookupService.getAuthenticatedUserRoles(username, password);
-            System.out.println("CRM Roles");
-            roles.stream().forEach(element -> System.out.println(element));
-            System.out.println("Security Roles");
-            securityConfiguration.getRoleAuthorities().forEach((k, v) -> System.out.println((k + ":" + v)));
+            log.info("CRM Roles");
+            roles.stream().forEach(element -> log.info(element));
+            log.info("Security Roles");
+            securityConfiguration.getRoleAuthorities().forEach((k, v) -> log.info((k + ":" + v)));
             final List<GrantedAuthority> authorities = roles.stream()
                     .flatMap(crmRole -> securityConfiguration.getRoleAuthorities().get(crmRole).stream())
                     .map(SimpleGrantedAuthority::new)
