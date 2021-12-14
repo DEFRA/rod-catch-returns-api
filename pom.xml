@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.DEFRA.data-returns-api-platform</groupId>
         <artifactId>api-parent</artifactId>
-        <version>0f1042d529</version>
+        <version>c48bcb3c8b</version>
     </parent>
 
     <groupId>uk.gov.defra.datareturns</groupId>
