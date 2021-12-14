@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 ## 1.1.2 (2021-12-14)
-RCR Emergence Release
+RCR Emergency Release
 [Release notes](https://eaflood.atlassian.net/browse/IWTF-2633)
 
 ## 1.1.1 (2021-06-22)
