@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.3 (2022-01-10)
+RCR Emergency Release
+[Release notes](https://eaflood.atlassian.net/browse/IWTF-2724)
+
 ## 1.1.2 (2021-12-14)
 RCR Emergency Release
 [Release notes](https://eaflood.atlassian.net/browse/IWTF-2633)
