@@ -1,4 +1,4 @@
-@Library('defra-shared@master') _
+@Library('defra-shared@feature/iwtf-2874-s3-interface') _
 def arti = defraArtifactory()
 def s3
 
