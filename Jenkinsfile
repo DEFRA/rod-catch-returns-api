@@ -1,4 +1,4 @@
-@Library('defra-shared@feature/iwtf-2874-s3-interface') _
+@Library('defra-shared@master') _
 def arti = defraArtifactory()
 def s3
 
@@ -55,7 +55,7 @@ pipeline {
         stage('Upload distribution') {
             steps {
                 script {
-                    // arti.uploadArtifact("rcr-snapshots/api/", "rcr_api", BUILD_TAG, DIST_FILE)
+                    arti.uploadArtifact("rcr-snapshots/api/", "rcr_api", BUILD_TAG, DIST_FILE)
                     s3.uploadArtifact("rcr-snapshots/api/", "rcr_api", BUILD_TAG, DIST_FILE)
                 }
             }
