@@ -19,7 +19,7 @@ pipeline {
                             secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                         ]
                     ]) {
-                        s3 = defraS3('apsldnrcrsrv001')
+                        s3 = defraS3()
                     }
                 }
             }
