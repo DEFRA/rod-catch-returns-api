@@ -35,12 +35,13 @@ public class ActiveDirectoryAuthentication implements ActiveDirectoryAuthenticat
         final String username = authentication.getName();
         final String password = authentication.getCredentials().toString();
         try {
-            final List<String> roles = crmLookupService.getAuthenticatedUserRoles(username, password);
-            final List<GrantedAuthority> authorities = roles.stream()
-                    .flatMap(crmRole -> securityConfiguration.getRoleAuthorities().get(crmRole).stream())
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
-            return new UsernamePasswordAuthenticationToken(username, password, authorities);
+            throw new AuthenticationServiceException("Intentional error for testing");
+            // final List<String> roles = crmLookupService.getAuthenticatedUserRoles(username, password);
+            // final List<GrantedAuthority> authorities = roles.stream()
+                    // .flatMap(crmRole -> securityConfiguration.getRoleAuthorities().get(crmRole).stream())
+                    // .map(SimpleGrantedAuthority::new)
+                    // .collect(Collectors.toList());
+            // return new UsernamePasswordAuthenticationToken(username, password, authorities);
         } catch (final AuthenticationServiceException e) {
             log.error("Authentication service error", e);
             throw e;
