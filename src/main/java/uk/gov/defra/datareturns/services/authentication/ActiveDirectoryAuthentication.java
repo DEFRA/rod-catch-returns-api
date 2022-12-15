@@ -40,8 +40,8 @@ public class ActiveDirectoryAuthentication implements ActiveDirectoryAuthenticat
                     .flatMap(crmRole -> securityConfiguration.getRoleAuthorities().get(crmRole).stream())
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
+            new UsernamePasswordAuthenticationToken(username, password, authorities);
             throw new AuthenticationServiceException("Intentional error for testing");
-            // return new UsernamePasswordAuthenticationToken(username, password, authorities);
         } catch (final AuthenticationServiceException e) {
             log.error("Authentication service error", e);
             throw e;
