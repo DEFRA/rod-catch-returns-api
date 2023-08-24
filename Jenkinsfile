@@ -1,6 +1,6 @@
 @Library('defra-shared@master') _
 def arti = defraArtifactory()
-def s3
+def codeArtifact
 
 pipeline {
     agent any
@@ -13,13 +13,13 @@ pipeline {
                     STAGE_DIR = "${WORKSPACE}/target/dist"
                     withCredentials([
                         [
-                            $class: 'AmazonWebServicesCredentialsBinding', 
+                            $class: 'AmazonWebServicesCredentialsBinding',
                             credentialsId: 'aps-rcr-user',
                             accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                             secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                         ]
                     ]) {
-                        s3 = defraS3()
+                        codeArtifact = defraCodeArtifact()
                     }
                 }
             }
@@ -48,7 +48,7 @@ pipeline {
         stage('Archive distribution') {
             steps {
                 script {
-                    DIST_FILE = s3.createDistributionFile(STAGE_DIR, "rcr_api")
+                    DIST_FILE = codeArtifact.createDistributionFile(STAGE_DIR, "rcr_api")
                 }
             }
         }
@@ -56,7 +56,7 @@ pipeline {
             steps {
                 script {
                     arti.uploadArtifact("rcr-snapshots/api/", "rcr_api", BUILD_TAG, DIST_FILE)
-                    s3.uploadArtifact("rcr-snapshots/api/", "rcr_api", BUILD_TAG, DIST_FILE)
+                    codeArtifact.uploadArtifact("rcr-snapshots/api/", "rcr_api", BUILD_TAG, DIST_FILE)
                 }
             }
         }
