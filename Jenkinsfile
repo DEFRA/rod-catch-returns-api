@@ -1,4 +1,4 @@
-@Library('defra-shared@master') _
+@Library('defra-shared@iwtf-3523-codeartifact') _
 def arti = defraArtifactory()
 def codeArtifact
 
