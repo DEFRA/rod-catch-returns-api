@@ -1,5 +1,6 @@
 @Library('defra-shared@master') _
 def arti = defraArtifactory()
+def codeArtifact
 
 pipeline {
     agent any
@@ -10,6 +11,16 @@ pipeline {
                     BUILD_TAG = buildTag.updateJenkinsJob()
                     JAR_FILENAME = "rcr_api-${BUILD_TAG}.jar"
                     STAGE_DIR = "${WORKSPACE}/target/dist"
+                    withCredentials([
+                        [
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'aps-rcr-user',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                    ]) {
+                        codeArtifact = defraCodeArtifact()
+                    }
                 }
             }
         }
@@ -37,7 +48,7 @@ pipeline {
         stage('Archive distribution') {
             steps {
                 script {
-                    DIST_FILE = arti.createDistributionFile(STAGE_DIR, "rcr_api")
+                    DIST_FILE = codeArtifact.createDistributionFile(STAGE_DIR, "rcr_api")
                 }
             }
         }
@@ -45,6 +56,7 @@ pipeline {
             steps {
                 script {
                     arti.uploadArtifact("rcr-snapshots/api/", "rcr_api", BUILD_TAG, DIST_FILE)
+                    codeArtifact.uploadArtifact("rcr-snapshots/api/", "rcr_api", BUILD_TAG, DIST_FILE)
                 }
             }
         }
