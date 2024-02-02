@@ -22,6 +22,7 @@
         <spring-boot-plugin.jmx.port>9003</spring-boot-plugin.jmx.port>
         <univocity-parsers.version>2.8.3</univocity-parsers.version>
         <adal4j.version>1.6.4</adal4j.version>
+        <java.version>21</java.version>
     </properties>
 
     <repositories>
@@ -81,6 +82,13 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
