@@ -7,7 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.server.RepresentationModelProcessor;
+import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,7 +45,7 @@ import static uk.gov.defra.datareturns.util.CsvUtil.writeCsv;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/reporting/feeds")
-public class ReportingController implements RepresentationModelProcessor<RepositoryLinksResource> {
+public class ReportingController implements ResourceProcessor<RepositoryLinksResource> {
     private final SubmissionFeedRepository submissionFeedRepository;
     private final ActivityFeedRepository activityFeedRepository;
     private final LargeCatchFeedRepository largeCatchFeedRepository;

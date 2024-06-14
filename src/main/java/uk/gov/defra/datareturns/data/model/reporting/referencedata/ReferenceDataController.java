@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.server.RepresentationModelProcessor;
+import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -32,7 +32,7 @@ import static uk.gov.defra.datareturns.util.CsvUtil.writeCsv;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/reporting/reference")
-public class ReferenceDataController implements RepresentationModelProcessor<RepositoryLinksResource> {
+public class ReferenceDataController implements ResourceProcessor<RepositoryLinksResource> {
     private final LocationEntryRepository locationEntryRepository;
     private final SpeciesRepository speciesRepository;
     private final MethodRepository methodRepository;

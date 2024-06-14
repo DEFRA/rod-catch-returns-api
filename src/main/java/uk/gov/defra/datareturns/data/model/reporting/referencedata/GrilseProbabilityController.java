@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.server.RepresentationModelProcessor;
+import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,7 +57,7 @@ import static uk.gov.defra.datareturns.util.CsvUtil.writeCsv;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/reporting/reference/grilse-probabilities")
-public class GrilseProbabilityController implements RepresentationModelProcessor<RepositoryLinksResource> {
+public class GrilseProbabilityController implements ResourceProcessor<RepositoryLinksResource> {
     private final GrilseProbabilityRepository grilseProbabilityRepository;
 
     @GetMapping(value = "/{season}")

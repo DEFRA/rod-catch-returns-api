@@ -16,7 +16,7 @@ import uk.gov.defra.datareturns.testutils.IntegrationTestUtils;
 public class ServiceConfigurationIT {
     @Test
     public void testCustomRepositoryConfiguration() {
-        // Fires any mvc controllers which implement RepresentationModelProcessor<RepositoryLinksResource> by loading the hal browser
+        // Fires any mvc controllers which implement ResourceProcessor<RepositoryLinksResource> by loading the hal browser
         IntegrationTestUtils.getEntity("/").statusCode(200);
     }
 
