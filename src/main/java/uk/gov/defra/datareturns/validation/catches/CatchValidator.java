@@ -59,8 +59,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     }
 
     /**
-     * Check date caught is provided and valid with respect to the the submission
-     * year and the current date
+     * Check date caught is provided and valid with respect to the the submission year and the current date
      *
      * @param catchEntry the {@link Catch} to be validated
      * @param context    the validator context
@@ -90,8 +89,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     }
 
     /**
-     * Check that the only month flag is not set when the no date recorded flag is
-     * set. It is superfluous
+     * Check that the only month flag is not set when the no date recorded flag is set. It is superfluous
      * 
      * @param catchEntry the {@link Catch} to be validated
      * @param context    the validator context
