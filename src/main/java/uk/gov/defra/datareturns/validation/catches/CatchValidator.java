@@ -22,12 +22,12 @@ import java.util.Calendar;
 @RequiredArgsConstructor
 @Slf4j
 public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catch> {
+    private static final String PROPERTY_ACTIVITY = "activity";
     private static final String PROPERTY_DATE_CAUGHT = "dateCaught";
     private static final String PROPERTY_MASS = "mass";
     private static final String PROPERTY_METHOD = "method";
     private static final String PROPERTY_RELEASED = "released";
     private static final String PROPERTY_SPECIES = "species";
-    private static final String PROPERTY_ACTIVITY = "activity";
     private static final String PROPERTY_ONLY_MONTH = "onlyMonthRecorded";
 
     /**
@@ -59,7 +59,8 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     }
 
     /**
-     * Check date caught is provided and valid with respect to the the submission year and the current date
+     * Check date caught is provided and valid with respect to the the submission
+     * year and the current date
      *
      * @param catchEntry the {@link Catch} to be validated
      * @param context    the validator context
@@ -80,7 +81,8 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
             }
         }
 
-        final LocalDate dateCaught = Instant.ofEpochMilli(catchEntry.getDateCaught().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+        final LocalDate dateCaught = Instant.ofEpochMilli(catchEntry.getDateCaught().getTime())
+                .atZone(ZoneId.systemDefault()).toLocalDate();
         if (dateCaught.isAfter(LocalDate.now())) {
             return handleError(context, "DATE_IN_FUTURE", PROPERTY_DATE_CAUGHT);
         }
@@ -88,7 +90,9 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     }
 
     /**
-     * Check that the only month flag is not set when the no date recorded flag is set. It is superfluous
+     * Check that the only month flag is not set when the no date recorded flag is
+     * set. It is superfluous
+     * 
      * @param catchEntry the {@link Catch} to be validated
      * @param context    the validator context
      * @return true if valid, false otherwise
@@ -156,7 +160,8 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
      */
     private boolean checkMassLimits(final Catch catchEntry, final ConstraintValidatorContext context) {
         if (catchEntry.getMass() != null) {
-            // Ensure that the mass has been conciliated before attempting to validate based on the metric value
+            // Ensure that the mass has been conciliated before attempting to validate based
+            // on the metric value
             catchEntry.getMass().conciliateMass();
 
             if (catchEntry.getMass().getKg() != null) {
@@ -192,7 +197,6 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
         return checkRestrictedEntity(catchEntry.getMethod(), PROPERTY_METHOD, context);
     }
 
-
     /**
      * Check that the released property has been provided
      *
@@ -203,7 +207,6 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
     private boolean checkReleased(final Catch catchEntry, final ConstraintValidatorContext context) {
         return catchEntry.getReleased() != null || handleError(context, "RELEASED_REQUIRED", PROPERTY_RELEASED);
     }
-
 
     @Override
     public String getErrorPrefix() {
