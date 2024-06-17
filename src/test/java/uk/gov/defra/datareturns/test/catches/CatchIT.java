@@ -30,8 +30,8 @@ public class CatchIT {
     @Inject
     private SubmissionRepository submissionRepository;
 
-    private TestSubmission sub;
     private TestActivity act;
+    private TestSubmission sub;
 
     @Before
     public void setup() {
