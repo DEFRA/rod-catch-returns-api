@@ -90,7 +90,7 @@ public class CatchValidator extends AbstractConstraintValidator<ValidCatch, Catc
 
     /**
      * Check that the only month flag is not set when the no date recorded flag is set. It is superfluous
-     * 
+     *
      * @param catchEntry the {@link Catch} to be validated
      * @param context    the validator context
      * @return true if valid, false otherwise
