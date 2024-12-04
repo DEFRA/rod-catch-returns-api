@@ -20,7 +20,7 @@
     <properties>
         <start-class>uk.gov.defra.datareturns.RcrApi</start-class>
         <spring-boot-plugin.jmx.port>9003</spring-boot-plugin.jmx.port>
-        <univocity-parsers.version>2.8.3</univocity-parsers.version>
+        <univocity-parsers.version>2.9.1</univocity-parsers.version>
         <adal4j.version>1.6.4</adal4j.version>
     </properties>
 
