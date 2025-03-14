@@ -27,6 +27,9 @@
                 delete from rcr_catchment where name = 'Wandle';
             ]]>
         </sql>
+        <rollback>
+
+        </rollback>
     </changeSet>
 
     <!-- Remove reference to submission from catch table and recreate dependent views -->
