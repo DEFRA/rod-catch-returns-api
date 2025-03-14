@@ -75,14 +75,14 @@
             ]]>
         </createView>
         <rollback>
-            <addUniqueConstraint columnNames="activity_id, month, submission_id" constraintName="uniq_activity_and_month_per_submission" tableName="rcr_small_catch"/>
+            <dropUniqueConstraint tableName="rcr_small_catch" constraintName="uniq_activity_and_month"/>
             <addColumn tableName="rcr_small_catch">
                 <column name="submission_id" type="bigint"/>
             </addColumn>
             <addColumn tableName="rcr_small_catch_aud">
                 <column name="submission_id" type="bigint"/>
             </addColumn>
-            <dropUniqueConstraint tableName="rcr_small_catch" constraintName="uniq_activity_and_month"/>
+            <addUniqueConstraint columnNames="activity_id, month, submission_id" constraintName="uniq_activity_and_month_per_submission" tableName="rcr_small_catch"/>
 
             <createView viewName="rcv_feed_small_catches" replaceIfExists="true">
                 <![CDATA[
