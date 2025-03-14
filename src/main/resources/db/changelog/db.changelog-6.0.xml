@@ -13,9 +13,11 @@
             ]]>
         </sql>
         <rollback>
-            <![CDATA[
-                delete FROM rcr_river WHERE name = 'Goyt';
-            ]]>
+            <sql>
+                <![CDATA[
+                    DELETE FROM rcr_river where name='Goyt' AND catchment_id = 84
+                ]]>
+            </sql>
         </rollback>
     </changeSet>
 
