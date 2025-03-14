@@ -13,6 +13,7 @@
             ]]>
         </sql>
         <rollback>
+            <!-- We are not rolling back the river insert as an activity might be using it -->
         </rollback>
     </changeSet>
 

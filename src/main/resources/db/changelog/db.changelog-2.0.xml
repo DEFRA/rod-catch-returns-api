@@ -96,7 +96,7 @@
         </createView>
 
         <rollback>
-
+            <!-- Not rolling back the view -->
         </rollback>
     </changeSet>
 

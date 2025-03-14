@@ -28,6 +28,7 @@
             ]]>
         </sql>
         <rollback>
+            <!-- We are not rolling back the updates as another table might be using it -->
         </rollback>
     </changeSet>
 
@@ -46,12 +47,14 @@
             ]]>
         </createView>
         <rollback>
+            <!-- Add columns back in-->
             <addColumn tableName="rcr_catch">
                 <column name="submission_id" type="bigint"/>
             </addColumn>
             <addColumn tableName="rcr_catch_aud">
                 <column name="submission_id" type="bigint"/>
             </addColumn>
+            <!-- Revert view to previous -->
             <createView viewName="rcv_feed_large_catches" replaceIfExists="true">
                 <![CDATA[
                 select cat.id          as id,
@@ -99,6 +102,7 @@
             ]]>
         </createView>
         <rollback>
+            <!-- Add columns back in-->
             <dropUniqueConstraint tableName="rcr_small_catch" constraintName="uniq_activity_and_month"/>
             <addColumn tableName="rcr_small_catch">
                 <column name="submission_id" type="bigint"/>
@@ -107,7 +111,7 @@
                 <column name="submission_id" type="bigint"/>
             </addColumn>
             <addUniqueConstraint columnNames="activity_id, month, submission_id" constraintName="uniq_activity_and_month_per_submission" tableName="rcr_small_catch"/>
-
+            <!-- Revert view to previous -->
             <createView viewName="rcv_feed_small_catches" replaceIfExists="true">
                 <![CDATA[
                     select sc.id          as id,
