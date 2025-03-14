@@ -43,6 +43,28 @@
                        inner join rcr_submission sub on (act.submission_id = sub.id and not sub.reporting_exclude);
             ]]>
         </createView>
+        <rollback>
+            <addColumn tableName="rcr_catch">
+                <column name="submission_id" type="bigint"/>
+            </addColumn>
+            <addColumn tableName="rcr_catch_aud">
+                <column name="submission_id" type="bigint"/>
+            </addColumn>
+            <createView viewName="rcv_feed_large_catches" replaceIfExists="true">
+                <![CDATA[
+                select cat.id          as id,
+                       sub.season      as season,
+                       cat.activity_id as activity_id,
+                       cat.date_caught as date_caught,
+                       cat.species_id  as species_id,
+                       cat.method_id   as method_id,
+                       cat.released    as released,
+                       cat.mass_kg     as mass
+                from rcr_catch cat
+                       inner join rcr_submission sub on (cat.submission_id = sub.id and not sub.reporting_exclude and not cat.reporting_exclude);
+            ]]>
+            </createView>
+        </rollback>
     </changeSet>
 
     <!-- Remove reference to submission from small catch table and recreate dependent views -->
