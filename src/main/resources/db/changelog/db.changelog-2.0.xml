@@ -94,6 +94,10 @@
                        inner join rcr_region reg on (ctm.region_id = reg.id);
             ]]>
         </createView>
+
+        <rollback>
+
+        </rollback>
     </changeSet>
 
     <changeSet id="create-view: rcv_feed_submissions" author="Defra">
