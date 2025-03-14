@@ -30,6 +30,8 @@
                 WHERE NOT EXISTS (SELECT 1 FROM rcr_catchment WHERE name='Wallington');
             ]]>
         </sql>
+        <rollback>
+        </rollback>
     </changeSet>
 
     <changeSet id="retrospectively add missing rivers" author="Defra">
@@ -56,6 +58,8 @@
                 WHERE NOT EXISTS (SELECT 1 FROM rcr_river WHERE name='Wallington');
             ]]>
         </sql>
+        <rollback>
+        </rollback>
     </changeSet>
 
     <changeSet id="retrospectively update rivers" author="Defra">
@@ -83,6 +87,8 @@
                 UPDATE rcr_river set name = 'Unknown (Wales)', last_modified = now(), version = now() WHERE name = 'Unknown Wales';
             ]]>
         </sql>
+        <rollback>
+        </rollback>
     </changeSet>
 
     <changeSet id="retrospectively update region" author="Defra">
@@ -91,6 +97,8 @@
                 UPDATE rcr_catchment set region_id = 9, last_modified = now(), version = now() where name = 'Unknown Eng and Wales';
             ]]>
         </sql>
+        <rollback>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
