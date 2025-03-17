@@ -12,6 +12,9 @@
                 insert into rcr_river(id, name, internal, catchment_id, created, last_modified, version) values (nextval('rcr_river_id_seq'), 'Goyt', FALSE, 84, now(), now(), now());
             ]]>
         </sql>
+        <rollback>
+            <!-- We are not rolling back the river insert as an activity might be using it -->
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
