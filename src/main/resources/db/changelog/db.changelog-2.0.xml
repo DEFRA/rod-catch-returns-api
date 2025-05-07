@@ -96,7 +96,7 @@
         </createView>
 
         <rollback>
-            <dropView viewName="rcv_ref_locations"/>
+            <!-- Not rolling back the view -->
         </rollback>
     </changeSet>
 

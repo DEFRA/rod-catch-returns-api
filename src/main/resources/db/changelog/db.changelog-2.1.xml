@@ -27,6 +27,9 @@
                 delete from rcr_catchment where name = 'Wandle';
             ]]>
         </sql>
+        <rollback>
+            <!-- We are not rolling back the updates as another table might be using it -->
+        </rollback>
     </changeSet>
 
     <!-- Remove reference to submission from catch table and recreate dependent views -->
@@ -43,6 +46,30 @@
                        inner join rcr_submission sub on (act.submission_id = sub.id and not sub.reporting_exclude);
             ]]>
         </createView>
+        <rollback>
+            <!-- Add columns back in-->
+            <addColumn tableName="rcr_catch">
+                <column name="submission_id" type="bigint"/>
+            </addColumn>
+            <addColumn tableName="rcr_catch_aud">
+                <column name="submission_id" type="bigint"/>
+            </addColumn>
+            <!-- Revert view to previous -->
+            <createView viewName="rcv_feed_large_catches" replaceIfExists="true">
+                <![CDATA[
+                select cat.id          as id,
+                       sub.season      as season,
+                       cat.activity_id as activity_id,
+                       cat.date_caught as date_caught,
+                       cat.species_id  as species_id,
+                       cat.method_id   as method_id,
+                       cat.released    as released,
+                       cat.mass_kg     as mass
+                from rcr_catch cat
+                       inner join rcr_submission sub on (cat.submission_id = sub.id and not sub.reporting_exclude and not cat.reporting_exclude);
+            ]]>
+            </createView>
+        </rollback>
     </changeSet>
 
     <!-- Remove reference to submission from small catch table and recreate dependent views -->
@@ -74,5 +101,41 @@
                        inner join rcr_submission sub on (not sub.reporting_exclude and act.submission_id = sub.id)
             ]]>
         </createView>
+        <rollback>
+            <!-- Add columns back in-->
+            <dropUniqueConstraint tableName="rcr_small_catch" constraintName="uniq_activity_and_month"/>
+            <addColumn tableName="rcr_small_catch">
+                <column name="submission_id" type="bigint"/>
+            </addColumn>
+            <addColumn tableName="rcr_small_catch_aud">
+                <column name="submission_id" type="bigint"/>
+            </addColumn>
+            <addUniqueConstraint columnNames="activity_id, month, submission_id" constraintName="uniq_activity_and_month_per_submission" tableName="rcr_small_catch"/>
+            <!-- Revert view to previous -->
+            <createView viewName="rcv_feed_small_catches" replaceIfExists="true">
+                <![CDATA[
+                    select sc.id          as id,
+                        sub.season     as season,
+                        sc.activity_id as activity_id,
+                        sc.month       as month,
+                        2              as species_id,
+                        sc.released    as released
+                    from rcr_small_catch sc
+                        inner join rcr_submission sub on (not sc.reporting_exclude and not sub.reporting_exclude and sc.submission_id = sub.id);
+                ]]>
+            </createView>
+            <createView viewName="rcv_feed_small_catch_counts" replaceIfExists="true">
+                <![CDATA[
+                    select concat(sc.id, '_', counts.method_id) as id,
+                        sub.season                           as season,
+                        counts.small_catch_id                as small_catch_id,
+                        counts.method_id                     as method_id,
+                        counts.count                         as count
+                    from rcr_small_catch_counts counts
+                        inner join rcr_small_catch sc on (counts.small_catch_id = sc.id)
+                        inner join rcr_submission sub on (not sc.reporting_exclude and not sub.reporting_exclude and sc.submission_id = sub.id)
+                ]]>
+            </createView>
+        </rollback>
     </changeSet>
 </databaseChangeLog>
