@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.4 (2025-06-10)
+RCR Release (Barney Neck)
+[Release notes](https://eaflood.atlassian.net/wiki/spaces/IWTF/pages/5707268713/10+06+2025+RCR+v1.12+Barney+Beck)
+
 ## 1.1.3 (2022-01-10)
 RCR Emergency Release
 [Release notes](https://eaflood.atlassian.net/browse/IWTF-2724)
