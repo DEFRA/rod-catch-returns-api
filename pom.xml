@@ -89,7 +89,6 @@
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.31.1</version>
                 <configuration>
                     <url>${env.SPRING_DATASOURCE_URL}</url>
                     <driver>${env.SPRING_DATASOURCE_DRIVER_CLASS_NAME}</driver>
